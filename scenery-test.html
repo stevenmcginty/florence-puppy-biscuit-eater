@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>PBEScenery visual test</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body { margin: 0; background: #2c3e50; font-family: sans-serif; }
+  canvas { display: block; margin: 0 auto; }
+</style>
+</head>
+<body>
+<canvas id="cv" width="1520" height="1120"></canvas>
+<script src="scenery.js"></script>
+<script>
+(function () {
+  var cv = document.getElementById('cv');
+  var ctx = cv.getContext('2d');
+  var W = cv.width, H = cv.height;
+  var S = window.PBEScenery;
+
+  var ZOOM = /zoom/.test(location.search);
+
+  var BREEDS = [
+    { name: 'golden',    b: { body:'#E8B04B', ear:'#C98E2E', belly:'#F6D89A', collar:'#E23A3A' } },
+    { name: 'beagle',    b: { body:'#B5762F', ear:'#5C3A1E', belly:'#F3E4C8', collar:'#2F6FD6', patch:true } },
+    { name: 'frenchie',  b: { id:'frenchie', body:'#9AA0A8', ear:'#6E747C', belly:'#E8E4DC', collar:'#2FB56B' } },
+    { name: 'poodle',    b: { id:'poodle', body:'#F0E6DA', ear:'#DACDBB', belly:'#FFFFFF', collar:'#FF7BAC' } },
+    { name: 'dalmatian', b: { body:'#F5F2EC', ear:'#2B2B2B', belly:'#FFFFFF', collar:'#E23A3A', spots:true } },
+    { name: 'husky',     b: { id:'husky', body:'#7C8894', ear:'#55606B', belly:'#EDF1F4', collar:'#7A4FD0' } }
+  ];
+
+  var PROP_TYPES = ['tree','pine','bush','flowerbed','fence','lamppost',
+                    'balloon','swingset','slide','seesaw','kennel','hydrant'];
+
+  function label(txt, x, y, size) {
+    ctx.fillStyle = '#FFF6DC';
+    ctx.font = (size || 14) + 'px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(txt, x, y);
+  }
+
+  function zoomFrame(now) {
+    var t = now / 1000;
+    ctx.fillStyle = '#79C94F';
+    ctx.fillRect(0, 0, W, H);
+    var states = [
+      { run: 1 }, { run: 1 }, { run: 1, jumpArc: null },
+      { run: 1, phase: true }, { run: 1, sick: true }, { run: 1, speed: true }
+    ];
+    var jl = (t * 0.8) % 1.8;
+    var jumpArc = jl < 1 ? jl : null;
+    states[2].jumpArc = jumpArc;
+    var tags = ['running', 'running', 'jumping', 'phase', 'sick', 'speed'];
+    for (var p = 0; p < 6; p++) {
+      var px = 260 + (p % 3) * 500;
+      var py = 480 + Math.floor(p / 3) * 520;
+      var yoff = (p === 2 && jumpArc !== null) ? -Math.sin(jumpArc * Math.PI) * 180 : 0;
+      ctx.fillStyle = 'rgba(58,42,30,0.18)';
+      ctx.beginPath();
+      ctx.ellipse(px, py - 6, 110, 28, 0, 0, Math.PI * 2);
+      ctx.fill();
+      S.drawPupRunner(ctx, BREEDS[p].b, px, py + yoff, 3.4, t + p * 0.37, states[p]);
+      label(BREEDS[p].name + ' (' + tags[p] + ')', px, py + 40, 22);
+    }
+    requestAnimationFrame(zoomFrame);
+  }
+
+  function frame(now) {
+    var t = now / 1000;
+    var horizon = 250;
+
+    // ---- ground -------------------------------------------------------------
+    ctx.fillStyle = '#79C94F';
+    ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = '#5BA83A';
+    ctx.fillRect(0, horizon, W, 14);
+
+    // simple path trapezoid for context (game engine draws the real one)
+    ctx.fillStyle = '#E3C58A';
+    ctx.beginPath();
+    ctx.moveTo(W/2 - 40, horizon);
+    ctx.lineTo(W/2 + 40, horizon);
+    ctx.lineTo(W/2 + 240, H);
+    ctx.lineTo(W/2 - 240, H);
+    ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#C9A45F';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+
+    // ---- sky ------------------------------------------------------------------
+    S.drawSky(ctx, W, H, horizon, t, 'normal');
+
+    // mood swatches
+    ctx.save(); ctx.translate(20, 262);
+    S.drawSky(ctx, 340, H, 92, t, 'rush'); ctx.restore();
+    ctx.save(); ctx.translate(380, 262);
+    S.drawSky(ctx, 340, H, 92, t, 'phase'); ctx.restore();
+    label('mood: rush', 190, 380);
+    label('mood: phase', 550, 380);
+
+    // ---- props at 3 scales -----------------------------------------------------
+    var scales = [0.35, 0.7, 1.1];
+    for (var i = 0; i < PROP_TYPES.length; i++) {
+      var col = i % 6, row = Math.floor(i / 6);
+      var cx = 75 + col * 240;
+      var cy = 560 + row * 210;
+      for (var k = 0; k < 3; k++) {
+        S.drawSideProp(ctx, PROP_TYPES[i], cx + k * 72 + (k===2?10:0), cy, scales[k], t);
+      }
+      label(PROP_TYPES[i], cx + 80, cy + 24);
+    }
+
+    // ---- pups -------------------------------------------------------------------
+    var states = [
+      { run: 1 },                                            // golden — running
+      { run: 1 },                                            // beagle — running
+      { run: 1, jumpArc: null },                             // frenchie — jumping (set below)
+      { run: 1, phase: true },                               // poodle — phase
+      { run: 1, sick: true },                                // dalmatian — sick
+      { run: 1, speed: true }                                // husky — speed
+    ];
+    var jl = (t * 0.8) % 1.8;
+    var jumpArc = jl < 1 ? jl : null;
+    states[2].jumpArc = jumpArc;
+
+    var tags = ['running', 'running', 'jumping', 'phase', 'sick', 'speed'];
+    for (var p = 0; p < 6; p++) {
+      var px = 150 + p * 245;
+      var py = 1075;
+      var yoff = 0;
+      if (p === 2 && jumpArc !== null) yoff = -Math.sin(jumpArc * Math.PI) * 55;
+      // shadow
+      ctx.fillStyle = 'rgba(58,42,30,0.18)';
+      ctx.beginPath();
+      ctx.ellipse(px, py - 2, 34 + yoff * 0.2, 9 + yoff * 0.05, 0, 0, Math.PI * 2);
+      ctx.fill();
+      S.drawPupRunner(ctx, BREEDS[p].b, px, py + yoff, 1, t + p * 0.37, states[p]);
+      if (S.drawFlorenceRunner && p === 0) {
+        var fside = 1;
+        var fx = px + 58;
+        var ends = S.leashEnds(px, py + yoff, 1, fx, py + yoff, 1.1, t, states[p]);
+        S.drawLeash(ctx, ends.x0, ends.y0, ends.x1, ends.y1, t, {scale: 1});
+        S.drawFlorenceRunner(ctx, fx, py + yoff, 1.1, t, Object.assign({side: fside}, states[p]));
+      }
+      label(BREEDS[p].name + ' (' + tags[p] + ')', px, py + 22, 15);
+    }
+    if (S.drawFlorenceSide) {
+      S.drawFlorenceSide(ctx, 1280, 1070, 2.4, t, {moving: true});
+      label('Florence side', 1280, 1110, 15);
+    }
+
+    // ---- confetti ------------------------------------------------------------------
+    S.drawConfettiBurst(ctx, 760, 880, (t % 1.4) / 1.4, 7);
+    label('confetti', 760, 940);
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(ZOOM ? zoomFrame : frame);
+})();
+</script>
+</body>
+</html>
