@@ -833,15 +833,21 @@
   }
 
   // ==========================================================================
-  // FLORENCE — 8-year-old, blond pigtails, pink dress. Same behind-camera as pup.
+  // THE KIDS — Florence, Luca and Pippa. All blond, peach-skinned eight-ish
+  // year olds; outfits and hairstyles tell them apart. Same behind-camera view
+  // as the pup.
   // ==========================================================================
-  var FLO_SKIN = '#F8C9A0';
-  var FLO_HAIR = '#F4D06A';
-  var FLO_DRESS = '#FF7BAC';
-  var FLO_BOW = '#9B5DE5';
-  var FLO_SHOE = '#E23A3A';
-  var FLO_SHOE_W = '#FFF6DC';
-  var FLO_SOCK = '#FFFFFF';
+  var KID_SHOE_W = '#FFF6DC';
+  var KID_SOCK = '#FFFFFF';
+
+  var KIDS = {
+    florence: { label: 'FLO',   hair: '#F4D06A', skin: '#F8C9A0', top: '#FF7BAC',
+                accent: '#9B5DE5', shoe: '#E23A3A', boy: false, buns: false },
+    luca:     { label: 'LUCA',  hair: '#EFC451', skin: '#F8C9A0', top: '#35A9F5',
+                accent: '#2FB56B', shorts: '#41707F', shoe: '#2FB56B', boy: true, buns: false },
+    pippa:    { label: 'PIPPA', hair: '#F7DA8A', skin: '#F8C9A0', top: '#FFE066',
+                accent: '#FF7BAC', shoe: '#9B5DE5', boy: false, buns: true }
+  };
 
   function rot2(x, y, a) {
     var c = Math.cos(a), s = Math.sin(a);
@@ -915,9 +921,10 @@
     ctx.restore();
   }
 
-  function drawFlorenceRunner(ctx, x, y, s, t, state) {
+  function drawKidRunner(ctx, kidId, x, y, s, t, state) {
     // Same camera as the pup: behind, slight 3/4 top-down. Stacked ellipses,
     // squat chibi, head far / hips near / shoes nearest.
+    var K = KIDS[kidId] || KIDS.florence;
     state = state || {};
     var m = runnerMotion(t, state);
     var side = state.side || 1;
@@ -976,75 +983,104 @@
     var fpl = tuck ? -46 : -42 - Math.max(-4, Math.min(4, -legL));
     var fpr = tuck ? -46 : -42 - Math.max(-4, Math.min(4, -legR));
     var fpx = tuck ? 18 : 20.5;
-    inkEll(ctx, -fpx, fpl, 4.6, 3.8, FLO_SKIN, 2.5, -0.3);
-    inkEll(ctx, fpx, fpr, 4.6, 3.8, FLO_SKIN, 2.5, 0.3);
+    inkEll(ctx, -fpx, fpl, 4.6, 3.8, K.skin, 2.5, -0.3);
+    inkEll(ctx, fpx, fpr, 4.6, 3.8, K.skin, 2.5, 0.3);
 
     var headY = -74;
-    inkEll(ctx, 0, headY, 18, 17.2, FLO_HAIR, 3);
-    inkEll(ctx, -13.5, headY + 3, 3.4, 4.2, FLO_SKIN, 2.2);
-    inkEll(ctx, 13.5, headY + 3, 3.4, 4.2, FLO_SKIN, 2.2);
-    fillEll(ctx, -6, headY - 7, 6, 5, FLO_HAIR, -0.2);
-    fillEll(ctx, 6, headY - 7, 6, 5, FLO_HAIR, 0.2);
-    fillEll(ctx, 0, headY - 10, 8, 5.5, FLO_HAIR);
+    inkEll(ctx, 0, headY, 18, 17.2, K.hair, 3);
+    inkEll(ctx, -13.5, headY + 3, 3.4, 4.2, K.skin, 2.2);
+    inkEll(ctx, 13.5, headY + 3, 3.4, 4.2, K.skin, 2.2);
+    fillEll(ctx, -6, headY - 7, 6, 5, K.hair, -0.2);
+    fillEll(ctx, 6, headY - 7, 6, 5, K.hair, 0.2);
+    fillEll(ctx, 0, headY - 10, 8, 5.5, K.hair);
     gloss(ctx, -6, headY - 8, 5, 2.6, 0.32);
 
-    var flop = run ? Math.sin(ph + 1.4) * 0.14 : Math.sin(t * 2 + 1) * 0.05;
-    if (jump !== null) flop = -tuck * 0.5;
-    var floppyAngle = sick ? 0.15 : (speed ? 0.4 : 0.72);
-    var floppyLen = speed ? 10 : 13;
-    for (var psd = -1; psd <= 1; psd += 2) {
-      ctx.save();
-      ctx.translate(psd * 14.5, headY - 4);
-      ctx.rotate(-psd * floppyAngle + flop * psd);
-      ell(ctx, 0, 12, 6.4, floppyLen, 0);
-      ctx.fillStyle = FLO_HAIR;
-      ctx.fill();
-      ctx.lineWidth = 3;
-      ctx.strokeStyle = INK;
-      ctx.stroke();
-      gloss(ctx, -2, 5, 2.4, 4, 0.28);
-      inkEll(ctx, -3.6, 1.2, 3.6, 2.8, FLO_BOW, 2, -0.4);
-      inkEll(ctx, 3.6, 1.2, 3.6, 2.8, FLO_BOW, 2, 0.4);
-      inkEll(ctx, 0, 1.4, 2.1, 2.1, '#FFE9A0', 1.7);
-      ctx.restore();
+    if (K.boy) {
+      // Luca: short crop — chunky tufts at the back, no pigtails
+      fillEll(ctx, -10, headY + 10, 5.5, 4, K.hair, 0.4);
+      fillEll(ctx, 10, headY + 10, 5.5, 4, K.hair, -0.4);
+      fillEll(ctx, 0, headY + 12, 7, 4.2, K.hair);
+    } else if (K.buns) {
+      // Pippa: two round buns with little bows
+      for (var pb = -1; pb <= 1; pb += 2) {
+        inkEll(ctx, pb * 15, headY - 9, 6.4, 6.4, K.hair, 2.6);
+        gloss(ctx, pb * 15 - 2, headY - 11, 2.4, 1.6, 0.35);
+        inkEll(ctx, pb * 15 - 2.5, headY - 15.5, 2.8, 2.2, K.accent, 1.8, -0.4);
+        inkEll(ctx, pb * 15 + 2.5, headY - 15.5, 2.8, 2.2, K.accent, 1.8, 0.4);
+      }
+    } else {
+      // Florence: swinging pigtails with bows
+      var flop = run ? Math.sin(ph + 1.4) * 0.14 : Math.sin(t * 2 + 1) * 0.05;
+      if (jump !== null) flop = -tuck * 0.5;
+      var floppyAngle = sick ? 0.15 : (speed ? 0.4 : 0.72);
+      var floppyLen = speed ? 10 : 13;
+      for (var psd = -1; psd <= 1; psd += 2) {
+        ctx.save();
+        ctx.translate(psd * 14.5, headY - 4);
+        ctx.rotate(-psd * floppyAngle + flop * psd);
+        ell(ctx, 0, 12, 6.4, floppyLen, 0);
+        ctx.fillStyle = K.hair;
+        ctx.fill();
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = INK;
+        ctx.stroke();
+        gloss(ctx, -2, 5, 2.4, 4, 0.28);
+        inkEll(ctx, -3.6, 1.2, 3.6, 2.8, K.accent, 2, -0.4);
+        inkEll(ctx, 3.6, 1.2, 3.6, 2.8, K.accent, 2, 0.4);
+        inkEll(ctx, 0, 1.4, 2.1, 2.1, '#FFE9A0', 1.7);
+        ctx.restore();
+      }
     }
 
-    inkEll(ctx, 0, -32, 23, 26, FLO_DRESS, 3);
+    inkEll(ctx, 0, -32, 23, 26, K.top, 3);
     gloss(ctx, -8, -46, 8, 4.2, 0.26);
+    if (K.boy) {
+      // shorts peeking under the t-shirt
+      inkEll(ctx, 0, -12, 19.5, 9.5, K.shorts, 2.6);
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, -16);
+      ctx.lineTo(0, -5);
+      ctx.stroke();
+    }
     ell(ctx, 0, -56.5, 13.2, 4.5, 0);
-    ctx.fillStyle = FLO_BOW;
+    ctx.fillStyle = K.accent;
     ctx.fill();
     ctx.lineWidth = 2.6;
     ctx.strokeStyle = INK;
     ctx.stroke();
-    inkEll(ctx, -6, -60, 6.2, 3.2, FLO_SHOE_W, 2.2, -0.12);
-    inkEll(ctx, 6, -60, 6.2, 3.2, FLO_SHOE_W, 2.2, 0.12);
-    ctx.save();
-    ctx.translate(0, -55.5);
-    ctx.fillStyle = '#FFE9A0';
-    ctx.beginPath();
-    ctx.arc(-1.5, -0.2, 1.6, 0, TWO_PI);
-    ctx.arc(1.5, -0.2, 1.6, 0, TWO_PI);
-    ctx.moveTo(-3, 0.3);
-    ctx.lineTo(0, 3.2);
-    ctx.lineTo(3, 0.3);
-    ctx.fill();
-    ctx.restore();
+    inkEll(ctx, -6, -60, 6.2, 3.2, KID_SHOE_W, 2.2, -0.12);
+    inkEll(ctx, 6, -60, 6.2, 3.2, KID_SHOE_W, 2.2, 0.12);
+    if (!K.boy) {
+      // tiny heart pendant
+      ctx.save();
+      ctx.translate(0, -55.5);
+      ctx.fillStyle = '#FFE9A0';
+      ctx.beginPath();
+      ctx.arc(-1.5, -0.2, 1.6, 0, TWO_PI);
+      ctx.arc(1.5, -0.2, 1.6, 0, TWO_PI);
+      ctx.moveTo(-3, 0.3);
+      ctx.lineTo(0, 3.2);
+      ctx.lineTo(3, 0.3);
+      ctx.fill();
+      ctx.restore();
+    }
 
     var hand = floHandLocal(m);
-    inkEll(ctx, hand.x, hand.y, 4.8, 4.2, FLO_SKIN, 2.4);
+    inkEll(ctx, hand.x, hand.y, 4.8, 4.2, K.skin, 2.4);
 
     var bl = tuck ? -13 - tuck * 3 : -6 + Math.max(-5, Math.min(5, legL));
     var br = tuck ? -13 - tuck * 3 : -6 + Math.max(-5, Math.min(5, legR));
     var bpx = tuck ? 10 : 13;
-    inkEll(ctx, -16, -19 + (bl + 6) * 0.35, 9, 11.5, FLO_SKIN, 2.8, 0.12);
-    inkEll(ctx, 16, -19 + (br + 6) * 0.35, 9, 11.5, FLO_SKIN, 2.8, -0.12);
-    fillEll(ctx, -bpx, bl - 3.2, 4.2, 2.2, FLO_SOCK);
-    fillEll(ctx, bpx, br - 3.2, 4.2, 2.2, FLO_SOCK);
-    inkEll(ctx, -bpx, bl, 7.6, 5.6, FLO_SHOE, 2.8);
-    inkEll(ctx, bpx, br, 7.6, 5.6, FLO_SHOE, 2.8);
-    fillEll(ctx, -bpx, bl + 1.6, 4.2, 1.7, FLO_SHOE_W);
-    fillEll(ctx, bpx, br + 1.6, 4.2, 1.7, FLO_SHOE_W);
+    inkEll(ctx, -16, -19 + (bl + 6) * 0.35, 9, 11.5, K.skin, 2.8, 0.12);
+    inkEll(ctx, 16, -19 + (br + 6) * 0.35, 9, 11.5, K.skin, 2.8, -0.12);
+    fillEll(ctx, -bpx, bl - 3.2, 4.2, 2.2, KID_SOCK);
+    fillEll(ctx, bpx, br - 3.2, 4.2, 2.2, KID_SOCK);
+    inkEll(ctx, -bpx, bl, 7.6, 5.6, K.shoe, 2.8);
+    inkEll(ctx, bpx, br, 7.6, 5.6, K.shoe, 2.8);
+    fillEll(ctx, -bpx, bl + 1.6, 4.2, 1.7, KID_SHOE_W);
+    fillEll(ctx, bpx, br + 1.6, 4.2, 1.7, KID_SHOE_W);
 
     if (sick) {
       ell(ctx, 0, -44, 30, 48, 0);
@@ -1064,8 +1100,9 @@
     return { handX: x + side * hp.x * s, handY: y + hp.y * s };
   }
 
-  function drawFlorenceSide(ctx, x, y, s, t, opts) {
+  function drawKidSide(ctx, kidId, x, y, s, t, opts) {
     // Same orientation as drawPupSide: horizontal runner, facing right.
+    var K = KIDS[kidId] || KIDS.florence;
     opts = opts || {};
     var moving = !!opts.moving;
     var walk = moving ? Math.sin(t * 14) * 1 : 0;
@@ -1079,44 +1116,56 @@
 
     var legSwing = moving ? Math.sin(ph) * 3 : 0;
 
-    ctx.strokeStyle = INK;
-    ctx.lineWidth = 7;
-    ctx.lineCap = 'round';
-    ctx.beginPath();
-    ctx.moveTo(-10, -8);
-    ctx.quadraticCurveTo(-18, -12 + wag * 5, -22, -16 + wag * 9);
-    ctx.stroke();
-    ctx.strokeStyle = FLO_HAIR;
-    ctx.lineWidth = 4.2;
-    ctx.stroke();
-    inkEll(ctx, -22, -16 + wag * 9, 4.2, 4.2, FLO_HAIR, 2.2);
-    inkEll(ctx, -12, -7, 3.2, 2.5, FLO_BOW, 1.8);
+    if (!K.boy && !K.buns) {
+      // Florence: flying ponytail with a bow at its base
+      ctx.strokeStyle = INK;
+      ctx.lineWidth = 7;
+      ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(-10, -8);
+      ctx.quadraticCurveTo(-18, -12 + wag * 5, -22, -16 + wag * 9);
+      ctx.stroke();
+      ctx.strokeStyle = K.hair;
+      ctx.lineWidth = 4.2;
+      ctx.stroke();
+      inkEll(ctx, -22, -16 + wag * 9, 4.2, 4.2, K.hair, 2.2);
+      inkEll(ctx, -12, -7, 3.2, 2.5, K.accent, 1.8);
+    } else if (K.buns) {
+      // Pippa: round bun bobbing at the back
+      inkEll(ctx, -12, -14 + wag * 2, 5.2, 5.2, K.hair, 2.2);
+      inkEll(ctx, -12, -19.5 + wag * 2, 2.6, 2, K.accent, 1.6);
+    }
 
     var lw = 4.2;
     [[-8, legSwing], [-2, -legSwing], [5, -legSwing], [10, legSwing]].forEach(function (pair) {
-      inkRR(ctx, pair[0] - lw / 2 + pair[1] * 0.3, 4, lw, 9, 2.4, FLO_SKIN, 2.2);
+      inkRR(ctx, pair[0] - lw / 2 + pair[1] * 0.3, 4, lw, 9, 2.4, K.skin, 2.2);
     });
-    inkEll(ctx, -8 + legSwing * 0.3, 13.2, 4.4, 2.6, FLO_SHOE, 2);
-    inkEll(ctx, 10 + legSwing * 0.3, 13.2, 4.4, 2.6, FLO_SHOE, 2);
-    fillEll(ctx, 11.2 + legSwing * 0.3, 12.8, 1.8, 1, FLO_SHOE_W);
+    inkEll(ctx, -8 + legSwing * 0.3, 13.2, 4.4, 2.6, K.shoe, 2);
+    inkEll(ctx, 10 + legSwing * 0.3, 13.2, 4.4, 2.6, K.shoe, 2);
+    fillEll(ctx, 11.2 + legSwing * 0.3, 12.8, 1.8, 1, KID_SHOE_W);
 
-    inkEll(ctx, -1, -2, 14.5, 10.5, FLO_DRESS, 2.8);
-    ell(ctx, 2, -6, 9, 2.4, -0.08);
-    ctx.fillStyle = FLO_BOW;
-    ctx.fill();
-    ctx.lineWidth = 2.2;
-    ctx.strokeStyle = INK;
-    ctx.stroke();
+    inkEll(ctx, -1, -2, 14.5, 10.5, K.top, 2.8);
+    if (K.boy) {
+      // shorts under the t-shirt
+      inkRR(ctx, -9, 2, 17, 7.5, 3, K.shorts, 2.2);
+    } else {
+      ell(ctx, 2, -6, 9, 2.4, -0.08);
+      ctx.fillStyle = K.accent;
+      ctx.fill();
+      ctx.lineWidth = 2.2;
+      ctx.strokeStyle = INK;
+      ctx.stroke();
+    }
 
-    inkEll(ctx, -6, 0, 2.4, 5.2, FLO_SKIN, 2, -0.5);
+    inkEll(ctx, -6, 0, 2.4, 5.2, K.skin, 2, -0.5);
 
-    inkEll(ctx, 13, -13, 10, 9.6, FLO_SKIN, 2.6);
+    inkEll(ctx, 13, -13, 10, 9.6, K.skin, 2.6);
     outlinedUnion(ctx, function (c) {
       c.beginPath();
       c.ellipse(10, -18.5, 8.4, 6.2, -0.35, 0, TWO_PI);
       c.ellipse(6.5, -14.5, 5.4, 6, 0.2, 0, TWO_PI);
-    }, FLO_HAIR, 2.2);
-    inkEll(ctx, 14.2, -20.6, 3.2, 2.8, FLO_HAIR, 1.9, 0.4);
+    }, K.hair, 2.2);
+    inkEll(ctx, 14.2, -20.6, 3.2, 2.8, K.hair, 1.9, 0.4);
     gloss(ctx, 8, -20, 3, 1.5, 0.4);
 
     fillEll(ctx, 17.6, -14.2, 1.7, 1.9, INK);
@@ -1128,14 +1177,22 @@
     ctx.arc(18.2, -10.6, 2.1, 0.15, 1.1);
     ctx.stroke();
 
-    inkEll(ctx, 14, -1 + (moving ? Math.sin(ph) * 0.6 : 0), 2.6, 5.4, FLO_SKIN, 2, 1.05);
-    inkEll(ctx, 18, 3.2, 3.2, 2.8, FLO_SKIN, 2);
+    inkEll(ctx, 14, -1 + (moving ? Math.sin(ph) * 0.6 : 0), 2.6, 5.4, K.skin, 2, 1.05);
+    inkEll(ctx, 18, 3.2, 3.2, 2.8, K.skin, 2);
 
     ctx.restore();
     return {
       handX: x + 18 * s,
       handY: y + walk * s * 0.5 + 3.2 * s
     };
+  }
+
+  // Back-compat wrappers: Florence is the default kid.
+  function drawFlorenceRunner(ctx, x, y, s, t, state) {
+    return drawKidRunner(ctx, 'florence', x, y, s, t, state);
+  }
+  function drawFlorenceSide(ctx, x, y, s, t, opts) {
+    return drawKidSide(ctx, 'florence', x, y, s, t, opts);
   }
 
   // ==========================================================================
@@ -1179,10 +1236,13 @@
     drawSky: drawSky,
     drawSideProp: drawSideProp,
     drawPupRunner: drawPupRunner,
+    drawKidRunner: drawKidRunner,
+    drawKidSide: drawKidSide,
     drawFlorenceRunner: drawFlorenceRunner,
     drawFlorenceSide: drawFlorenceSide,
     drawLeash: drawLeash,
     leashEnds: leashEnds,
-    drawConfettiBurst: drawConfettiBurst
+    drawConfettiBurst: drawConfettiBurst,
+    KIDS: KIDS
   };
 })();

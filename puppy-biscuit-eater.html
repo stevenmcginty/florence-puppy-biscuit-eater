@@ -155,11 +155,11 @@
   @keyframes pickpop{50%{transform:scale(1.06)}}
 
   /* ---------- name entry ---------- */
-  .nameslots{display:flex;gap:14px;margin:10px 0 16px}
+  .nameslots{display:flex;gap:9px;margin:10px 0 16px}
   .nameslot{
-    width:64px;height:76px;border-radius:16px;
+    width:52px;height:64px;border-radius:14px;
     background:var(--panel);border:3px solid #E7DDBD;
-    font-family:var(--display);font-size:44px;
+    font-family:var(--display);font-size:36px;
     display:flex;align-items:center;justify-content:center;
     box-shadow:0 4px 0 #d8cfae;
   }
@@ -212,6 +212,8 @@
     display:block;color:#fff;box-shadow:0 3px 0 rgba(58,42,30,.3);
     background:linear-gradient(90deg,#FF4D6D,#F5A93B,#FFD93D,#79C94F,#2FA8FF,#9B5DE5);
   }
+  #hud-power.magnet{display:block;background:#E23A3A;box-shadow:0 3px 0 #a02020}
+  #hud-power.twox{display:block;background:linear-gradient(#FFB84D,#F5A93B);box-shadow:0 3px 0 #C97F1B}
   #hud-power .pbarwrap{height:7px;background:rgba(0,0,0,.22);border-radius:99px;margin-top:4px;overflow:hidden}
   #hud-power .pbar{height:100%;background:#fff;border-radius:99px;width:100%}
 
@@ -334,11 +336,13 @@
   <!-- NAME ENTRY -->
   <div class="screen hidden" id="s-name">
     <h2>Name your puppy!</h2>
-    <p style="color:#fff;font-size:15px;margin-bottom:6px;text-shadow:0 1px 0 rgba(58,42,30,.3)">Exactly 3 letters — like MAX, LOU or PIP</p>
+    <p style="color:#fff;font-size:15px;margin-bottom:6px;text-shadow:0 1px 0 rgba(58,42,30,.3)">3 to 5 letters — like MAX, ROSIE or PIP</p>
     <div class="nameslots">
       <div class="nameslot" id="slot0"></div>
       <div class="nameslot" id="slot1"></div>
       <div class="nameslot" id="slot2"></div>
+      <div class="nameslot" id="slot3"></div>
+      <div class="nameslot" id="slot4"></div>
     </div>
     <div class="keys" id="keys"></div>
     <div class="btnrow">
@@ -347,17 +351,13 @@
     </div>
   </div>
 
-  <!-- ADD FLORENCE? -->
+  <!-- PICK YOUR RUNNER -->
   <div class="screen hidden" id="s-flo">
-    <h2>Add Florence?</h2>
-    <p style="color:#fff;font-size:16px;margin:0 18px 8px;text-shadow:0 1px 0 rgba(58,42,30,.3)">Should Florence run with <span id="flo-ask-name" style="font-family:var(--display)">your puppy</span>?</p>
-    <canvas id="flo-ask" width="420" height="180" style="width:min(78vw,300px);height:auto;display:block;filter:drop-shadow(0 6px 6px rgba(58,42,30,.25))"></canvas>
-    <button class="btn big" id="btn-flo-yes">Yes! Bring Florence</button>
-    <div class="btnrow">
-      <button class="btn ghost" id="btn-flo-no">Just the puppy</button>
-    </div>
+    <h2>Who holds the leash?</h2>
+    <div class="breedgrid" id="kidgrid"></div>
     <div class="btnrow">
       <button class="btn ghost" id="btn-flo-back">← Back</button>
+      <button class="btn big" id="btn-flo-go">Let's run!</button>
     </div>
   </div>
 
@@ -689,30 +689,55 @@ function show(id){
 
 // ---------- breed select ----------
 let chosenBreed = 0;
-let bringFlo = true;
 
-// Florence-ask preview (side view, same pose as title)
+// ---------- runner (leash-holder) select ----------
+const KIDMETA = {
+  florence: {name:'Florence', label:'FLO',   chip:'#FF7BAC', chipEdge:'#C44A78',
+             trait:'The game designer herself — steady & speedy', speed:1},
+  luca:     {name:'Luca',     label:'LUCA',  chip:'#35A9F5', chipEdge:'#1a7cc4',
+             trait:"Florence's pal — quick on his feet", speed:1},
+  pippa:    {name:'Pippa',    label:'PIPPA', chip:'#F5A93B', chipEdge:'#C97F1B',
+             trait:'Beginner mode — a nice gentle jog', speed:0.82},
+  solo:     {name:'Just the puppy', label:'', chip:'', chipEdge:'',
+             trait:'Off the leash — puppy runs solo!', speed:1},
+};
+let kidPick = 'florence';
+let bringFlo = true; // derived from kidPick at game start
+
 (function(){
-  const c=$('flo-ask'); if(!c) return;
-  const x=c.getContext('2d');
+  const grid=$('kidgrid'); if(!grid) return;
+  const order=['florence','luca','pippa','solo'];
+  order.forEach(id=>{
+    const k=KIDMETA[id];
+    const card=document.createElement('div');
+    card.className='breedcard'+(id===kidPick?' picked':'');
+    card.innerHTML=`<canvas width="176" height="144"></canvas>
+      <div class="bname">${k.name}</div>
+      <div class="btrait">${k.trait}</div>`;
+    grid.appendChild(card);
+    const cc=card.querySelector('canvas'), cx=cc.getContext('2d');
+    card._draw = t => {
+      cx.clearRect(0,0,176,144);
+      cx.fillStyle='rgba(58,42,30,.14)';
+      cx.beginPath(); cx.ellipse(88,116,40,8,0,0,7); cx.fill();
+      const moving = id===kidPick;
+      if(id==='solo'){
+        drawPupSide(cx, BREEDS[chosenBreed], 88, 96, 3.1, t, {moving});
+      } else if(window.PBEScenery && PBEScenery.drawKidSide){
+        PBEScenery.drawKidSide(cx, id, 88, 92, 2.9, t, {moving});
+      }
+    };
+    card.addEventListener('pointerdown',()=>{
+      kidPick=id; S.ui(); buzz(15);
+      [...grid.children].forEach((el,i)=>el.classList.toggle('picked',order[i]===id));
+    });
+  });
+  let start=performance.now();
   (function loop(now){
-    if(!$('s-flo').classList.contains('hidden')){
-      const t=now/1000;
-      x.clearRect(0,0,c.width,c.height);
-      x.fillStyle='rgba(58,42,30,.16)';
-      x.beginPath(); x.ellipse(130, 158, 36, 8, 0, 0, 7); x.fill();
-      x.beginPath(); x.ellipse(280, 158, 42, 9, 0, 0, 7); x.fill();
-      let hand={handX:190,handY:140};
-      if(window.PBEScenery && PBEScenery.drawFlorenceSide){
-        hand=PBEScenery.drawFlorenceSide(x, 130, 138, 3.6, t, {moving:true})||hand;
-      }
-      if(window.PBEScenery && PBEScenery.drawLeash){
-        PBEScenery.drawLeash(x, 262, 142+Math.sin(t*14)*2, hand.handX, hand.handY, t, {scale:1});
-      }
-      drawPupSide(x, BREEDS[chosenBreed], 278, 140, 3.7, t, {moving:true});
-    }
+    if(!$('s-flo').classList.contains('hidden'))
+      [...grid.children].forEach(el=>el._draw((now-start)/1000));
     requestAnimationFrame(loop);
-  })(performance.now());
+  })(start);
 })();
 (function(){
   const grid=$('breedgrid');
@@ -738,11 +763,12 @@ let bringFlo = true;
   })(start);
 })();
 
-// ---------- name entry ----------
-let pupName = ['','',''];
+// ---------- name entry (3 to 5 letters) ----------
+const NAMELEN = 5;
+let pupName = ['','','','',''];
 let slotIdx = 0;
 function renderSlots(){
-  for(let i=0;i<3;i++){
+  for(let i=0;i<NAMELEN;i++){
     $('slot'+i).textContent = pupName[i]||'';
     $('slot'+i).classList.toggle('active', i===slotIdx);
   }
@@ -753,7 +779,7 @@ function renderSlots(){
     const k=document.createElement('button');
     k.className='key'; k.textContent=L;
     k.addEventListener('pointerdown',()=>{
-      if(slotIdx<3){ pupName[slotIdx]=L; slotIdx=Math.min(slotIdx+1,3); S.ui(); buzz(10); renderSlots(); }
+      if(slotIdx<NAMELEN){ pupName[slotIdx]=L; slotIdx=Math.min(slotIdx+1,NAMELEN); S.ui(); buzz(10); renderSlots(); }
     });
     host.appendChild(k);
   });
@@ -763,7 +789,7 @@ function renderSlots(){
     slotIdx=Math.max(0,slotIdx-1); pupName[slotIdx]=''; S.ui(); renderSlots();
   });
   host.appendChild(del);
-  [0,1,2].forEach(i=>$('slot'+i).addEventListener('pointerdown',()=>{slotIdx=i;renderSlots();}));
+  [0,1,2,3,4].forEach(i=>$('slot'+i).addEventListener('pointerdown',()=>{slotIdx=i;renderSlots();}));
   renderSlots();
 })();
 
@@ -801,8 +827,8 @@ function startOverPals(){
       x.beginPath(); x.ellipse(100,132,36,8,0,0,7); x.fill();
       x.beginPath(); x.ellipse(230,134,40,8,0,0,7); x.fill();
       let hand={handX:150,handY:110};
-      if(window.PBEScenery && PBEScenery.drawFlorenceSide){
-        hand=PBEScenery.drawFlorenceSide(x, 88, 108, 3.35, t, {moving:true})||hand;
+      if(window.PBEScenery && PBEScenery.drawKidSide){
+        hand=PBEScenery.drawKidSide(x, kidPick, 88, 108, 3.35, t, {moving:true})||hand;
       }
       if(window.PBEScenery && PBEScenery.drawLeash){
         PBEScenery.drawLeash(x, 208, 116+Math.sin(t*14)*2, hand.handX, hand.handY, t, {scale:0.95});
@@ -820,8 +846,21 @@ function startOverPals(){
 
 // ---------- trophy (gold cup with pup face + name plinth) ----------
 function drawTrophy(c2,name){
-  const x=c2.getContext('2d'), cx=130;
+  const x=c2.getContext('2d');
   x.clearRect(0,0,260,230);
+  drawTrophyBody(x,name);
+}
+// draw the giant trophy in world space: cx,baseY = ground point, s = scale
+function drawTrophyWorld(x,cxw,baseY,s,name){
+  x.save();
+  x.translate(cxw,baseY);
+  x.scale(s,s);
+  x.translate(-130,-196);
+  drawTrophyBody(x,name);
+  x.restore();
+}
+function drawTrophyBody(x,name){
+  const cx=130;
   [[30,30,7],[225,45,5],[45,150,4],[215,160,6],[130,12,5]].forEach(([sx,sy,r],i)=>{
     drawStar(x,sx,sy,r,i%2?'#FFE9A8':'#FFFFFF',i);
   });
@@ -885,18 +924,29 @@ function laneW(){ return W*0.30; }
 
 let G=null;
 
+// jump physics: velocity + gravity so the pup can land ON things
+const JUMP_V=600, GRAV=1900, JUMP_H=94;
+// finale layout (z units past the moment the timer ends)
+const FIN={BR0:9, BR1:21, TRO:25.5, ELEV:40};
+
 function newGame(){
   const b=BREEDS[chosenBreed];
+  bringFlo = kidPick!=='solo';
+  const km=KIDMETA[kidPick]||KIDMETA.florence;
   G = {
     breed:b,
-    name:(pupName.join('')||'PUP'),
+    name:(pupName.filter(Boolean).join('')||'PUP'),
+    kid: bringFlo? kidPick : null,
     t:0, timeLeft:70, running:false, countdown:3.4,
     score:0, chain:0, chainT:0, rush:false, bannerT:0,
-    dist:0, baseSpeed:13*b.speed,
+    dist:0, baseSpeed:13*b.speed*km.speed,
     lane:0, laneTarget:0,
-    jumpT:-1, jumpH:0,           // jumpT 0..1 while airborne
+    jy:0, jvy:0, air:false,      // jump height (px) + velocity, gravity-based
     speedT:0, sickT:0, phaseT:0, stunT:0,
+    magT:0, twoxT:0,             // magnet + double-points power-ups
     boostT:0,                    // slide-pad mini boost
+    zone:null,                   // special level: 'star' | 'bonanza'
+    finale:false, finStart:0, celebT:-1, champion:false,
     items:[], props:[], parts:[], pops:[],
     nextItemZ:14, nextPropZ:2,
     lastTickSec:99, barkT:rand(4,8), lickCount:0,
@@ -908,7 +958,7 @@ function newGame(){
   show('GAME');
   $('hud').classList.add('on');
   $('hint').textContent = bringFlo
-    ? 'Florence holds the leash • Swipe ⬅➡ • Swipe ⬆ or tap to JUMP'
+    ? `${km.name} holds the leash • Swipe ⬅➡ • Swipe ⬆ or tap to JUMP`
     : 'Swipe ⬅➡ to change lane • Swipe ⬆ or tap to JUMP';
   $('hint').style.display='block';
   updateHUD();
@@ -939,43 +989,80 @@ function spawnChunk(){
   const hard = clamp(elapsed/40, 0, 1);
   const r = Math.random();
   const base = ZMAX+2;
+  const anyLane = ()=>[-1,0,1][Math.floor(rand(0,3))];
   let len = 8;
 
-  if(r<0.30){ // straight biscuit line
-    const lane = [-1,0,1][Math.floor(rand(0,3))];
+  // ---- special levels override the normal patterns ----
+  if(G.zone==='star'){ // gem showers everywhere
+    if(r<0.5){
+      const lane=anyLane();
+      for(let i=0;i<4;i++) pushItem(base+i*1.7, lane, 'gem');
+      len = 4*1.7+4;
+    } else {
+      const dir = Math.random()<0.5?1:-1;
+      [-dir,0,dir].forEach((ln,i)=>pushItem(base+i*1.8, ln, 'gem'));
+      pushItem(base+5.4, 0, 'std');
+      len = 10;
+    }
+    G.nextItemZ = len;
+    return;
+  }
+  if(G.zone==='bonanza'){ // wall-to-wall biscuit grids
+    for(let row=0;row<3;row++)
+      for(const ln of [-1,0,1])
+        if(Math.random()<0.8) pushItem(base+row*1.7, ln, 'std');
+    G.nextItemZ = 3*1.7+3.5;
+    return;
+  }
+
+  if(r<0.26){ // straight biscuit line
+    const lane = anyLane();
     const n = 4+Math.floor(rand(0,3));
     for(let i=0;i<n;i++) pushItem(base+i*1.5, lane, 'std');
     len = n*1.5+4;
-  } else if(r<0.50){ // zigzag across lanes
+  } else if(r<0.44){ // zigzag across lanes
     const dir = Math.random()<0.5?1:-1;
     const seq=[-dir,0,dir,0,-dir];
     seq.forEach((ln,i)=>pushItem(base+i*1.9, ln, 'std'));
     len = 5*1.9+4;
-  } else if(r<0.62){ // gem arc
+  } else if(r<0.54){ // gem arc
     pushItem(base, -1,'std'); pushItem(base+1.4, 0,'gem'); pushItem(base+2.8, 1,'std');
     len = 8;
-  } else if(r<0.74 && elapsed>6){ // bench gate: jump!
-    const lane=[-1,0,1][Math.floor(rand(0,3))];
+  } else if(r<0.64 && elapsed>6){ // bench gate: jump!
+    const lane=anyLane();
     pushItem(base, lane, 'bench');
     // reward arc over the bench
-    pushItem(base-1.2, lane, 'std'); pushItem(base, lane, 'std', {high:true}); pushItem(base+1.2, lane, 'std');
+    pushItem(base-1.2, lane, 'std'); pushItem(base, lane, 'std', {hy:60}); pushItem(base+1.2, lane, 'std');
     len = 9;
-  } else if(r<0.86 && elapsed>10){ // swing gate sweeping lanes
+  } else if(r<0.72 && elapsed>8){ // boardwalk platform: jump up & run along the top!
+    const lane=anyLane();
+    const h=64, plen=9;
+    pushItem(base, lane, 'plat', {len:plen, h});
+    for(let i=0;i<5;i++) pushItem(base+1.2+i*1.55, lane, 'std', {hy:h+12});
+    pushItem(base+plen*0.55, lane, 'gem', {hy:h+16});
+    // ground-level consolation trail in another lane
+    const alt = lane===0 ? (Math.random()<0.5?-1:1) : 0;
+    for(let i=0;i<3;i++) pushItem(base+2+i*2, alt, 'std');
+    len = plen+7;
+  } else if(r<0.80 && elapsed>10){ // swing gate sweeping lanes
     pushItem(base, 0, 'swing', {phase:rand(0,6), rate:rand(1.2,1.6)+hard*0.5});
-    pushItem(base+2.5, [-1,0,1][Math.floor(rand(0,3))], 'std');
+    pushItem(base+2.5, anyLane(), 'std');
     len = 10;
-  } else if(r<0.93){ // power bones: blue... then red bait (combo chance!)
-    const lane=[-1,0,1][Math.floor(rand(0,3))];
+  } else if(r<0.87){ // power bones: blue... then red bait (combo chance!)
+    const lane=anyLane();
     pushItem(base, lane, Math.random()<0.6?'blue':'red');
     if(Math.random()<0.55) pushItem(base+2.2, lane, Math.random()<0.5?'red':'blue');
     len = 9;
-  } else if(r<0.97){ // slide boost pad + spray
-    const lane=[-1,0,1][Math.floor(rand(0,3))];
+  } else if(r<0.92){ // slide boost pad + spray
+    const lane=anyLane();
     pushItem(base, lane, 'pad');
     for(let i=0;i<4;i++) pushItem(base+2+i*1.3, lane, 'std');
     len = 11;
+  } else if(r<0.965){ // special power-up: biscuit magnet or double points
+    pushItem(base, anyLane(), Math.random()<0.5?'magnet':'twox');
+    len = 8;
   } else { // rare rainbow bone!
-    pushItem(base, [-1,0,1][Math.floor(rand(0,3))], 'rainbow');
+    pushItem(base, anyLane(), 'rainbow');
     len = 8;
   }
   G.nextItemZ = len*lerp(1.0,0.75,hard); // chunks pack tighter over time
@@ -1017,14 +1104,46 @@ window.addEventListener('keydown',e=>{
 });
 
 function steer(dir){
-  if(!G.running || G.stunT>0) return;
+  if(!G.running || G.stunT>0 || G.celebT>=0) return;
   const nt = clamp(G.laneTarget+dir,-1,1);
   if(nt!==G.laneTarget){ G.laneTarget=nt; S.ui(); buzz(8); }
 }
 function jump(){
-  if(!G.running || G.stunT>0) return;
-  if(G.jumpT>=0) return; // already airborne
-  G.jumpT=0; S.jump(); S.bark(); buzz(12);
+  if(!G.running || G.stunT>0 || G.celebT>=0) return;
+  if(G.air) return; // already airborne
+  G.air=true; G.jvy=JUMP_V; S.jump(); S.bark(); buzz(12);
+}
+
+// current floor height under the player (0, a platform top, or the bridge arc)
+function floorAt(){
+  if(G.finale){
+    const d=G.dist-G.finStart;
+    if(d>FIN.BR0-0.2 && d<FIN.BR1+0.2){
+      const prog=clamp((d-FIN.BR0)/(FIN.BR1-FIN.BR0),0,1);
+      return Math.sin(prog*Math.PI)*FIN.ELEV;
+    }
+    return 0;
+  }
+  for(const it of G.items){
+    if(it.type!=='plat' || it.hit) continue;
+    if(Math.abs(it.lane-G.lane)>=0.6) continue;
+    if(G.dist>it.z-0.15 && G.dist<it.z+it.len+0.15) return it.h;
+  }
+  return 0;
+}
+
+// vertical physics: gravity, landing on platforms/bridge, running off edges
+function physStep(dt){
+  const floor=floorAt();
+  if(G.air){
+    G.jy += G.jvy*dt;
+    G.jvy -= GRAV*dt;
+    if(G.jvy<0 && G.jy<=floor){ G.jy=floor; G.jvy=0; G.air=false; S.land(); }
+    if(G.jy<0){ G.jy=0; G.jvy=0; G.air=false; }
+  } else {
+    if(floor < G.jy-4){ G.air=true; G.jvy=0; } // ran off a platform edge
+    else G.jy=floor;                            // follow ground / bridge arc
+  }
 }
 
 // ---------- scoring popups & particles ----------
@@ -1059,10 +1178,26 @@ function update(dt){
     return;
   }
 
+  // ---- finale: the trophy bridge ----
+  if(G.finale){ updateFinale(dt); return; }
+
   G.timeLeft-=dt;
   const sec=Math.ceil(G.timeLeft);
   if(sec<=5 && sec>=1 && sec!==G.lastTickSec){ G.lastTickSec=sec; S.tick(); }
-  if(G.timeLeft<=0){ endGame(); return; }
+  if(G.timeLeft<=0){ startFinale(); return; }
+
+  // ---- special levels ----
+  const elapsedZone=70-G.timeLeft;
+  const zone = (elapsedZone>=24&&elapsedZone<34)?'star'
+             : (elapsedZone>=44&&elapsedZone<54)?'bonanza' : null;
+  if(zone!==G.zone){
+    G.zone=zone;
+    if(zone){
+      $('banner').textContent = zone==='star' ? '⭐ STAR PARK! ⭐' : '🦴 BISCUIT BONANZA! 🦴';
+      $('banner').style.display='block'; G.bannerT=1.5;
+      S.gem(); buzz(30);
+    }
+  }
 
   // biscuit rush finale
   if(!G.rush && G.timeLeft<=12){
@@ -1084,6 +1219,8 @@ function update(dt){
   G.sickT=Math.max(0,G.sickT-dt);
   G.phaseT=Math.max(0,G.phaseT-dt);
   G.stunT=Math.max(0,G.stunT-dt);
+  G.magT=Math.max(0,G.magT-dt);
+  G.twoxT=Math.max(0,G.twoxT-dt);
   G.boostT=Math.max(0,G.boostT-dt);
   G.shake=Math.max(0,G.shake-dt*3);
   if(hadPhase && G.phaseT<=0) musicMood(G.rush?'rush':'normal');
@@ -1106,11 +1243,7 @@ function update(dt){
 
   // ---- lane / jump ----
   G.lane = lerp(G.lane, G.laneTarget, Math.min(1,10*dt));
-  if(G.jumpT>=0){
-    G.jumpT += dt/0.62;
-    if(G.jumpT>=1){ G.jumpT=-1; G.jumpH=0; S.land(); }
-    else G.jumpH = Math.sin(G.jumpT*Math.PI);
-  }
+  physStep(dt);
 
   // ---- spawn ahead ----
   G.nextItemZ-=speed*dt;
@@ -1119,28 +1252,43 @@ function update(dt){
   if(G.nextPropZ<=0){ spawnProp(ZMAX+2); G.nextPropZ=rand(2.2,3.8); }
 
   // ---- items: move (relative via dist), collide at player plane ----
-  const jumpPx = G.jumpH*92*UNIT;
+  const jumpPx = G.jy*UNIT;
   for(let i=G.items.length-1;i>=0;i--){
     const it=G.items[i];
     it.t+=dt;
     let rel = it.z - G.dist;
+    const pullable = (it.type==='std'||it.type==='gem');
     // beagle sniff-magnet: pull close standard biscuits into the pup's lane
     if(G.breed.magnet && it.type==='std' && rel<5 && rel>0 && Math.abs(it.lane-G.lane)<=1.4){
       it.lane = lerp(it.lane, G.lane, Math.min(1,5*dt));
     }
+    // magnet power-up: hoover biscuits in from every lane
+    if(G.magT>0 && pullable && rel<7 && rel>0){
+      it.lane = lerp(it.lane, G.lane, Math.min(1,6*dt));
+      if(it.hy && rel<2) it.hy = lerp(it.hy, G.jy, Math.min(1,6*dt));
+    }
     // phase mode gobbles everything nearby
-    if(G.phaseT>0 && (it.type==='std'||it.type==='gem') && rel<4 && rel>0){
+    if(G.phaseT>0 && pullable && rel<4 && rel>0){
       it.lane = lerp(it.lane, G.lane, Math.min(1,8*dt));
     }
-    if(rel < -2.5){ G.items.splice(i,1); continue; }
+    if(rel + (it.len||0) < -2.5){ G.items.splice(i,1); continue; }
     if(rel > 1 || rel < -1) continue;
 
     const laneHit = Math.abs(it.lane - G.lane) < 0.5;
     switch(it.type){
-      case 'std': case 'gem': case 'red': case 'blue': case 'rainbow':{
-        const itemH = it.high ? 60*UNIT : 0;
+      case 'std': case 'gem': case 'red': case 'blue': case 'rainbow': case 'magnet': case 'twox':{
+        const itemH = (it.hy||0)*UNIT;
         if(laneHit && Math.abs(jumpPx-itemH) < 55*UNIT && rel<0.6 && rel>-0.8){
           G.items.splice(i,1); eat(it);
+        }
+        break;
+      }
+      case 'plat':{
+        // smack into the front face if you don't jump up onto it
+        if(!it.hit && laneHit && rel<0.3 && rel>-0.4 && G.jy < it.h-10){
+          it.hit=true;
+          if(G.phaseT>0){ smash(it); }
+          else bonk();
         }
         break;
       }
@@ -1193,7 +1341,8 @@ function eat(it){
       if(G.sickT>0){ pop(sx,sy,'urp…','#5e8f3e'); return; }
       G.chain++; G.chainT=1.8;
       const mult = G.chain>=10?3 : G.chain>=5?2 : 1;
-      const pts = (G.rush?2:1)*mult;
+      let pts = (G.rush?2:1)*mult;
+      if(G.twoxT>0) pts*=2;
       G.score+=pts; S.munch(); buzz(12);
       G.lickCount++;
       if(G.lickCount%8===0) S.lick();
@@ -1201,12 +1350,26 @@ function eat(it){
       burst(sx,sy,'#F5A93B',6);
       break;
     }
-    case 'gem':
+    case 'gem':{
       if(G.sickT>0){ pop(sx,sy,'urp…','#5e8f3e'); return; }
       G.chain++; G.chainT=1.8;
-      G.score+=5; S.gem(); S.lick(); buzz(25);
-      pop(sx,sy,'GEM +5','#0E7490');
+      const gp = G.twoxT>0?10:5;
+      G.score+=gp; S.gem(); S.lick(); buzz(25);
+      pop(sx,sy,'GEM +'+gp,'#0E7490');
       burst(sx,sy,'#67E8F9',10,true);
+      break;
+    }
+    case 'magnet':
+      G.magT=6;
+      S.gem(); S.bark(); buzz([20,20,20]);
+      pop(sx,sy,'BISCUIT MAGNET!','#E23A3A');
+      burst(sx,sy,'#E23A3A',8,true);
+      break;
+    case 'twox':
+      G.twoxT=7;
+      S.gem(); buzz([20,20,20]);
+      pop(sx,sy,'DOUBLE POINTS!','#C97F1B');
+      burst(sx,sy,'#FFD93D',8,true);
       break;
     case 'red':
       if(G.phaseT>0) return;
@@ -1251,6 +1414,47 @@ function smash(it){
   burst(sx,sy,'#B57DF2',12,true);
 }
 
+// ---------- finale: run the trophy bridge, claim the giant cup ----------
+function startFinale(){
+  G.finale=true; G.timeLeft=0; G.running=true;
+  G.items.length=0;
+  G.zone=null;
+  G.phaseT=G.speedT=G.sickT=G.stunT=G.magT=G.twoxT=G.boostT=0;
+  G.finStart=G.dist; G.celebT=-1;
+  G.laneTarget=0;
+  $('banner').textContent='THE TROPHY BRIDGE!';
+  $('banner').style.display='block'; G.bannerT=2.2;
+  musicMood('rush'); S.gem(); buzz([30,30,30]);
+}
+function updateFinale(dt){
+  if(G.bannerT>0){
+    G.bannerT-=dt;
+    if(G.bannerT<=0 && G.celebT<0) $('banner').style.display='none';
+  }
+  if(G.celebT>=0){
+    G.celebT+=dt;
+    G.speed=0;
+    if(G.celebT>3.4){ endGame(); return; }
+  } else {
+    const speed=13;
+    G.speed=speed; G.dist+=speed*dt;
+    G.lane=lerp(G.lane,G.laneTarget,Math.min(1,10*dt));
+    physStep(dt);
+    if(G.dist-G.finStart>=FIN.TRO-1.7){
+      G.celebT=0; G.champion=true;
+      G.jy=0; G.jvy=0; G.air=false;
+      $('banner').textContent='CHAMPION!';
+      $('banner').style.display='block'; G.bannerT=3;
+      S.phase(); S.bark(); buzz([60,40,60]);
+    }
+  }
+  G.parts.forEach(p=>{p.life-=dt;p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=500*UNIT*dt;});
+  G.parts=G.parts.filter(p=>p.life>0);
+  G.pops.forEach(p=>{p.life-=dt;p.y-=50*UNIT*dt;});
+  G.pops=G.pops.filter(p=>p.life>0);
+  updateHUD();
+}
+
 // ---------- HUD ----------
 function updateHUD(){
   const sec=Math.max(0,Math.ceil(G.timeLeft));
@@ -1266,6 +1470,14 @@ function updateHUD(){
     pw.classList.add('phase');
     txt.textContent=`🌈 RAINBOW PHASE ${G.phaseT.toFixed(1)}s`;
     bar.style.width=(G.phaseT/G.breed.phase*100)+'%';
+  } else if(G.magT>0){
+    pw.classList.add('magnet');
+    txt.textContent=`🧲 BISCUIT MAGNET ${G.magT.toFixed(1)}s`;
+    bar.style.width=(G.magT/6*100)+'%';
+  } else if(G.twoxT>0){
+    pw.classList.add('twox');
+    txt.textContent=`✨ DOUBLE POINTS ${G.twoxT.toFixed(1)}s`;
+    bar.style.width=(G.twoxT/7*100)+'%';
   } else if(G.speedT>0){
     pw.classList.add('speed');
     txt.textContent=`⚡ LIGHTNING ZOOM ${G.speedT.toFixed(1)}s`;
@@ -1277,10 +1489,91 @@ function updateHUD(){
   }
 }
 
+// ---------- finale scenery: stream, bridge and the giant trophy ----------
+function renderFinaleWorld(t){
+  const d=G.dist-G.finStart;
+  const roadHalf=laneW()*1.55;
+
+  // sparkling stream the bridge crosses
+  const s0=FIN.BR0+1.0-d, s1=FIN.BR1-1.0-d;
+  if(s1>-1 && s0<ZMAX){
+    const zFar=clamp(s1,0,ZMAX), zNear=clamp(s0,-0.5,ZMAX);
+    const yTop=projY(zFar), yBot=projY(zNear);
+    if(yBot-yTop>0.5){
+      const gw=ctx.createLinearGradient(0,yTop,0,yBot);
+      gw.addColorStop(0,'#5FB8E8'); gw.addColorStop(1,'#8FD9F8');
+      ctx.fillStyle=gw;
+      ctx.fillRect(0,yTop,W,yBot-yTop);
+      ctx.fillStyle='rgba(255,255,255,.45)';
+      for(let i=0;i<8;i++){
+        const zz=s0+(s1-s0)*((i+0.3)/8);
+        if(zz<0||zz>ZMAX) continue;
+        const pp=persp(zz);
+        const xx=W/2+Math.sin(i*2.7+t*1.5)*roadHalf*2.1*pp;
+        ctx.beginPath(); ctx.ellipse(xx,projY(zz),8*pp,2.2*pp,0,0,7); ctx.fill();
+      }
+    }
+  }
+
+  // giant trophy waiting past the bridge
+  const trel=FIN.TRO-d;
+  if(trel>-0.4 && trel<ZMAX){
+    const zt=Math.max(trel,0.35);
+    const p=persp(zt);
+    drawTrophyWorld(ctx, W/2, projY(zt), p*UNIT*2.4, G.name);
+  }
+
+  // bridge deck, far slices first
+  const STEPS=18;
+  for(let i=STEPS-1;i>=0;i--){
+    const pr0=i/STEPS, pr1=(i+1)/STEPS;
+    const z0=FIN.BR0+pr0*(FIN.BR1-FIN.BR0)-d;
+    const z1=FIN.BR0+pr1*(FIN.BR1-FIN.BR0)-d;
+    if(z1<-0.5||z0>ZMAX) continue;
+    const e0=Math.sin(pr0*Math.PI)*FIN.ELEV, e1=Math.sin(pr1*Math.PI)*FIN.ELEV;
+    const zc0=Math.max(z0,-0.5), zc1=Math.max(z1,-0.5);
+    const p0=persp(zc0), p1=persp(zc1);
+    const y0=projY(zc0)-e0*p0*UNIT, y1=projY(zc1)-e1*p1*UNIT;
+    const w0=roadHalf*p0, w1=roadHalf*p1;
+    ctx.fillStyle=i%2?'#B67F3F':'#A9713A';
+    ctx.beginPath();
+    ctx.moveTo(W/2-w0,y0); ctx.lineTo(W/2+w0,y0);
+    ctx.lineTo(W/2+w1,y1); ctx.lineTo(W/2-w1,y1);
+    ctx.closePath(); ctx.fill();
+  }
+  // handrails + posts
+  [-1,1].forEach(side=>{
+    ctx.strokeStyle='#6E4520'; ctx.lineWidth=4.5*UNIT; ctx.lineCap='round';
+    ctx.beginPath();
+    let started=false;
+    for(let i=0;i<=STEPS;i++){
+      const pr=i/STEPS, z=FIN.BR0+pr*(FIN.BR1-FIN.BR0)-d;
+      if(z<-0.5||z>ZMAX) continue;
+      const p=persp(z), e=Math.sin(pr*Math.PI)*FIN.ELEV;
+      const xx=W/2+side*roadHalf*p, yy=projY(z)-(e+30)*p*UNIT;
+      if(started) ctx.lineTo(xx,yy); else {ctx.moveTo(xx,yy); started=true;}
+    }
+    ctx.stroke();
+    for(let i=0;i<=STEPS;i+=3){
+      const pr=i/STEPS, z=FIN.BR0+pr*(FIN.BR1-FIN.BR0)-d;
+      if(z<-0.5||z>ZMAX) continue;
+      const p=persp(z), e=Math.sin(pr*Math.PI)*FIN.ELEV;
+      const xx=W/2+side*roadHalf*p;
+      ctx.strokeStyle='#8B5A2B'; ctx.lineWidth=Math.max(2,4*p*UNIT);
+      ctx.beginPath();
+      ctx.moveTo(xx,projY(z)-e*p*UNIT);
+      ctx.lineTo(xx,projY(z)-(e+30)*p*UNIT);
+      ctx.stroke();
+    }
+  });
+}
+
 // ---------- render ----------
 function render(){
   const t=G.t;
-  const mood = G.phaseT>0?'phase':(G.rush?'rush':'normal');
+  const mood = G.phaseT>0?'phase'
+             : G.zone==='star'?'phase'
+             : (G.rush||G.zone==='bonanza'||G.finale)?'rush':'normal';
   const horizonY=H*HORIZON;
 
   ctx.save();
@@ -1356,10 +1649,14 @@ function render(){
     });
   }
 
+  // ---- finale scenery: stream, giant trophy, then the bridge ----
+  if(G.finale) renderFinaleWorld(t);
+
   // ---- depth-sorted world: props + items far -> near ----
   const world=[];
   for(const pr of G.props) world.push({kind:'prop', rel:pr.z-G.dist, o:pr});
-  for(const it of G.items) world.push({kind:'item', rel:it.z-G.dist, o:it});
+  // platforms sort by their FAR edge so goodies sitting on top draw after them
+  for(const it of G.items) world.push({kind:'item', rel:it.z+(it.len||0)-G.dist, o:it});
   world.sort((a,b)=>b.rel-a.rel);
 
   for(const w of world){
@@ -1382,13 +1679,13 @@ function render(){
     const x=W/2 + it.lane*laneW()*p;
     const bob=Math.sin(it.t*3)*4*p*UNIT;
     const r=17*p*UNIT*2;
+    const lift = -(it.hy||0)*p*UNIT;   // raised pickups (platform tops etc.)
     switch(it.type){
       case 'std':{
-        const hy = it.high? -60*p*UNIT : 0;
         // little ground shadow
         ctx.fillStyle='rgba(60,90,40,.18)';
-        ctx.beginPath(); ctx.ellipse(x,y,r*0.7,r*0.22,0,0,7); ctx.fill();
-        drawBone(ctx,x,y-22*p*UNIT+bob+hy,r,'#F5A93B','#C97F1B',{dots:true,rot:Math.sin(it.t*1.4)*0.12});
+        ctx.beginPath(); ctx.ellipse(x,y+lift,r*0.7,r*0.22,0,0,7); ctx.fill();
+        drawBone(ctx,x,y-22*p*UNIT+bob+lift,r,'#F5A93B','#C97F1B',{dots:true,rot:Math.sin(it.t*1.4)*0.12});
         break;
       }
       case 'red':
@@ -1402,8 +1699,95 @@ function render(){
         drawBone(ctx,x,y-22*p*UNIT+bob,r,'#35A9F5','#1565B8',{zap:p>0.25,rot:-0.15});
         break;
       case 'gem':
-        drawGem(ctx,x,y-26*p*UNIT+bob,r*0.8,it.t);
+        drawGem(ctx,x,y-26*p*UNIT+bob+lift,r*0.8,it.t);
         break;
+      case 'magnet':{
+        ctx.fillStyle='rgba(60,90,40,.18)';
+        ctx.beginPath(); ctx.ellipse(x,y,r*0.7,r*0.22,0,0,7); ctx.fill();
+        const my=y-26*p*UNIT+bob;
+        ctx.save();
+        ctx.translate(x,my);
+        ctx.scale(p*UNIT*2,p*UNIT*2);
+        ctx.rotate(Math.sin(it.t*2.4)*0.18);
+        ctx.lineCap='butt';
+        // horseshoe magnet
+        ctx.strokeStyle='#8E2020'; ctx.lineWidth=8.4;
+        ctx.beginPath(); ctx.arc(0,-1,7.5,Math.PI,0,false); ctx.stroke();
+        ctx.strokeStyle='#E23A3A'; ctx.lineWidth=6;
+        ctx.beginPath(); ctx.arc(0,-1,7.5,Math.PI,0,false); ctx.stroke();
+        [-7.5,7.5].forEach(mx=>{
+          ctx.fillStyle='#E23A3A'; ctx.strokeStyle='#8E2020'; ctx.lineWidth=1.6;
+          ctx.beginPath(); ctx.rect(mx-3,-1,6,7); ctx.fill(); ctx.stroke();
+          ctx.fillStyle='#EAF0F4';
+          ctx.beginPath(); ctx.rect(mx-3,4,6,4); ctx.fill(); ctx.stroke();
+        });
+        ctx.restore();
+        if(p>0.25){
+          drawStar(ctx,x-r*0.8,my-r*0.5,4*p*UNIT*2,'#FFD93D',it.t*2);
+          drawStar(ctx,x+r*0.8,my-r*0.3,3.4*p*UNIT*2,'#FFD93D',-it.t*1.7);
+        }
+        break;
+      }
+      case 'twox':{
+        ctx.fillStyle='rgba(60,90,40,.18)';
+        ctx.beginPath(); ctx.ellipse(x,y,r*0.7,r*0.22,0,0,7); ctx.fill();
+        const ty=y-26*p*UNIT+bob;
+        drawStar(ctx,x,ty,r*0.95,'#FFD93D',Math.sin(it.t*2)*0.25);
+        drawStar(ctx,x,ty,r*0.62,'#F5A93B',Math.sin(it.t*2)*0.25);
+        ctx.fillStyle='#7A4A00';
+        ctx.font=`800 ${Math.max(8,r*0.62)}px Trebuchet MS`;
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('x2',x,ty+r*0.05);
+        ctx.textBaseline='alphabetic';
+        break;
+      }
+      case 'plat':{
+        // boardwalk platform: jump on top and run along it
+        const rel0=it.z-G.dist, rel1=rel0+it.len;
+        const zA=clamp(rel0,-1.2,ZMAX), zB=clamp(rel1,-1.2,ZMAX);
+        if(zB<=zA) break;
+        const pA=persp(zA), pB=persp(zB);
+        const yA=projY(zA), yB=projY(zB);
+        const xA=W/2+it.lane*laneW()*pA, xB=W/2+it.lane*laneW()*pB;
+        const wA=laneW()*pA*0.46, wB=laneW()*pB*0.46;
+        const hA=it.h*pA*UNIT, hB=it.h*pB*UNIT;
+        ctx.lineJoin='round';
+        // near front face
+        ctx.fillStyle='#8A5A2E'; ctx.strokeStyle='#5E3A1B'; ctx.lineWidth=Math.max(1.5,2.6*pA*UNIT);
+        ctx.beginPath();
+        ctx.moveTo(xA-wA,yA); ctx.lineTo(xA+wA,yA);
+        ctx.lineTo(xA+wA,yA-hA); ctx.lineTo(xA-wA,yA-hA);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // side faces hint
+        ctx.fillStyle='#7A4E26';
+        ctx.beginPath();
+        ctx.moveTo(xA-wA,yA-hA); ctx.lineTo(xB-wB,yB-hB);
+        ctx.lineTo(xB-wB,yB); ctx.lineTo(xA-wA,yA);
+        ctx.closePath(); ctx.fill();
+        // top deck
+        ctx.fillStyle='#C9955C';
+        ctx.beginPath();
+        ctx.moveTo(xA-wA,yA-hA); ctx.lineTo(xA+wA,yA-hA);
+        ctx.lineTo(xB+wB,yB-hB); ctx.lineTo(xB-wB,yB-hB);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        // plank seams
+        ctx.strokeStyle='rgba(94,58,27,.55)'; ctx.lineWidth=Math.max(1,1.6*pA*UNIT);
+        for(let zz=Math.ceil(rel0+0.6); zz<rel1-0.3; zz+=1.4){
+          if(zz<zA||zz>zB) continue;
+          const pp=persp(zz), yy=projY(zz)-it.h*pp*UNIT;
+          const xx=W/2+it.lane*laneW()*pp, ww=laneW()*pp*0.46;
+          ctx.beginPath(); ctx.moveTo(xx-ww,yy); ctx.lineTo(xx+ww,yy); ctx.stroke();
+        }
+        // paw-print arrows on the front so kids know to jump up
+        if(pA>0.5 && !it.hit){
+          ctx.fillStyle='#FFE9A8';
+          const ax=xA, ay=yA-hA*0.5;
+          ctx.beginPath();
+          ctx.moveTo(ax-7*pA*UNIT,ay+5*pA*UNIT); ctx.lineTo(ax+7*pA*UNIT,ay+5*pA*UNIT); ctx.lineTo(ax,ay-7*pA*UNIT);
+          ctx.closePath(); ctx.fill();
+        }
+        break;
+      }
       case 'rainbow':{
         const rg=ctx.createLinearGradient(-r,-r,r,r);
         rg.addColorStop(0,'#FF4D6D'); rg.addColorStop(0.35,'#9B5DE5');
@@ -1469,23 +1853,29 @@ function render(){
 
   ctx.globalAlpha=1;
 
-  // ---- pup (+ Florence if she came along) ----
-  const px=projX(G.lane,0), py=projY(0) - G.jumpH*92*UNIT;
+  // ---- pup (+ leash-holder if they came along) ----
+  const jumpN = clamp(G.jy/JUMP_H, 0, 1);
+  // celebration hop at the trophy
+  const hop = G.celebT>=0 ? Math.abs(Math.sin(G.celebT*7))*36*UNIT : 0;
+  const px=projX(G.lane,0), py=projY(0) - G.jy*UNIT - hop;
   const pupS=1.15*UNIT, floS=1.18*UNIT;
   const withFlo = !!G.bringFlo;
   const floSide = G.lane>0.35 ? -1 : 1;
   const floX = px + floSide*62*UNIT;
   const floY = py;
-  const shScale=1-G.jumpH*0.35;
+  const shScale=1-jumpN*0.35;
+  // shadows sit on the current floor (ground, platform top, or bridge deck)
+  const floorPx = floorAt()*UNIT;
   ctx.fillStyle='rgba(40,80,30,.28)';
-  ctx.beginPath(); ctx.ellipse(projX(G.lane,0),projY(0)+6*UNIT,34*UNIT*shScale,10*UNIT*shScale,0,0,7); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(projX(G.lane,0),projY(0)+6*UNIT-floorPx,34*UNIT*shScale,10*UNIT*shScale,0,0,7); ctx.fill();
   if(withFlo){
-    ctx.beginPath(); ctx.ellipse(floX,projY(0)+6*UNIT,22*UNIT*shScale,8*UNIT*shScale,0,0,7); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(floX,projY(0)+6*UNIT-floorPx,22*UNIT*shScale,8*UNIT*shScale,0,0,7); ctx.fill();
   }
 
+  const airN = clamp(G.jy/JUMP_H,0,1);
   const state={
     run: G.running?1:0,
-    jumpArc: G.jumpT>=0? G.jumpT : null,
+    jumpArc: G.air ? (G.jvy>=0 ? Math.asin(airN)/Math.PI : 1-Math.asin(airN)/Math.PI) : null,
     lean: clamp(G.laneTarget-G.lane,-1,1),
     sick: G.sickT>0,
     speed: G.speedT>0 || G.boostT>0,
@@ -1501,12 +1891,12 @@ function render(){
     ctx.beginPath(); ctx.ellipse(px,py-30*UNIT,26*UNIT,30*UNIT,0,0,7); ctx.fill();
     ctx.beginPath(); ctx.arc(px,py-64*UNIT,20*UNIT,0,7); ctx.fill();
   }
-  if(withFlo && window.PBEScenery && PBEScenery.drawFlorenceRunner){
-    PBEScenery.drawFlorenceRunner(ctx, floX, floY, floS, t, state);
+  if(withFlo && window.PBEScenery && PBEScenery.drawKidRunner){
+    PBEScenery.drawKidRunner(ctx, G.kid, floX, floY, floS, t, state);
   }
   if(withFlo && window.PBEScenery && PBEScenery.drawLeash && PBEScenery.leashEnds){
     const ends=PBEScenery.leashEnds(px,py,pupS,floX,floY,floS,t,state);
-    PBEScenery.drawLeash(ctx, ends.x0, ends.y0, ends.x1, ends.y1, t, {jump:G.jumpH, scale:UNIT*1.15});
+    PBEScenery.drawLeash(ctx, ends.x0, ends.y0, ends.x1, ends.y1, t, {jump:jumpN, scale:UNIT*1.15});
   }
 
   ctx.font=`800 ${13*UNIT}px Trebuchet MS`;
@@ -1525,13 +1915,14 @@ function render(){
   ctx.fillText(G.name,nbx,ny+14*UNIT);
 
   if(withFlo){
+    const km=KIDMETA[G.kid]||KIDMETA.florence;
     ctx.font=`800 ${10*UNIT}px Trebuchet MS`;
-    const floChipW=ctx.measureText('FLO').width+12*UNIT;
+    const floChipW=ctx.measureText(km.label).width+12*UNIT;
     const fny=floY-122*UNIT;
-    ctx.fillStyle='#FF7BAC'; ctx.strokeStyle='#C44A78'; ctx.lineWidth=1.8*UNIT;
+    ctx.fillStyle=km.chip; ctx.strokeStyle=km.chipEdge; ctx.lineWidth=1.8*UNIT;
     ctx.beginPath(); ctx.roundRect(floX-floChipW/2,fny,floChipW,15*UNIT,7*UNIT); ctx.fill(); ctx.stroke();
     ctx.fillStyle='#fff';
-    ctx.fillText('FLO',floX,fny+11*UNIT);
+    ctx.fillText(km.label,floX,fny+11*UNIT);
   }
 
   // speed lines during zoom/phase
@@ -1567,6 +1958,14 @@ function render(){
     ctx.fillText(p.txt,p.x,p.y);
     ctx.globalAlpha=1;
   }
+
+  // celebration confetti at the trophy
+  if(G.celebT>=0 && window.PBEScenery && PBEScenery.drawConfettiBurst){
+    for(let k=0;k<3;k++){
+      const t01=(G.celebT*0.8+k*0.33)%1;
+      PBEScenery.drawConfettiBurst(ctx, W/2+(k-1)*90*UNIT, H*0.42+(k%2)*70*UNIT, t01, 7+k*13);
+    }
+  }
   ctx.restore();
 }
 
@@ -1582,13 +1981,16 @@ function endGame(){
   const isBest = list.length && list[0].score===G.score && list[0].name===G.name;
   drawTrophy($('over-trophy'), G.name);
   $('over-score').textContent=G.score;
-  $('over-name').textContent= (bringFlo?`Florence & `:'') + `${G.name} the ${G.breed.name.replace('The ','')}`;
-  startOverPals();
+  const kmName = bringFlo ? (KIDMETA[G.kid]||KIDMETA.florence).name : null;
+  $('over-name').textContent= (kmName?`${kmName} & `:'') + `${G.name} the ${G.breed.name.replace('The ','')}`;
   $('newbest').style.display = (isBest && G.score>0) ? 'inline-block' : 'none';
-  $('over-title').textContent = G.score>=60 ? 'PAWSOME!' : G.score>=30 ? 'Good puppy!' : "Time's up!";
+  $('over-title').textContent = G.champion
+    ? (G.score>=60 ? 'PAWSOME CHAMPION!' : 'CHAMPION!')
+    : (G.score>=60 ? 'PAWSOME!' : G.score>=30 ? 'Good puppy!' : "Time's up!");
   renderLB('over-lb', list);
   G=null;
   show('s-over');
+  startOverPals();
 }
 
 // ---------- main loop ----------
@@ -1608,18 +2010,21 @@ $('btn-breed-back').addEventListener('pointerdown',()=>{ S.ui(); show('s-title')
 $('btn-breed-next').addEventListener('pointerdown',()=>{ S.ui(); show('s-name'); renderSlots(); });
 $('btn-name-back').addEventListener('pointerdown',()=>{ S.ui(); show('s-breed'); });
 $('btn-name-go').addEventListener('pointerdown',()=>{
-  if(pupName.join('').length<3){
+  // squash any gaps, need at least 3 letters (max 5)
+  const typed=pupName.filter(Boolean);
+  if(typed.length<3){
     const defaults=['MAX','LOU','PIP','ZAP','SAM','BUD'];
     const d=defaults[Math.floor(Math.random()*defaults.length)];
-    for(let i=0;i<3;i++) if(!pupName[i]) pupName[i]=d[i];
-    renderSlots();
+    pupName=[d[0],d[1],d[2],'',''];
+  } else {
+    pupName=typed.concat(['','','','','']).slice(0,NAMELEN);
   }
-  $('flo-ask-name').textContent = pupName.join('');
+  slotIdx=Math.min(pupName.filter(Boolean).length,NAMELEN-1);
+  renderSlots();
   S.ui(); show('s-flo');
 });
 $('btn-flo-back').addEventListener('pointerdown',()=>{ S.ui(); show('s-name'); renderSlots(); });
-$('btn-flo-yes').addEventListener('pointerdown',()=>{ bringFlo=true; audioInit(); S.zoom(); newGame(); });
-$('btn-flo-no').addEventListener('pointerdown',()=>{ bringFlo=false; audioInit(); S.zoom(); newGame(); });
+$('btn-flo-go').addEventListener('pointerdown',()=>{ audioInit(); S.zoom(); newGame(); });
 $('btn-again').addEventListener('pointerdown',()=>{ S.ui(); newGame(); });
 $('btn-over-home').addEventListener('pointerdown',()=>{ S.ui(); show('s-title'); });
 $('btn-scores').addEventListener('pointerdown',()=>{ S.ui(); renderLB('scores-lb',getScores()); show('s-scores'); });
