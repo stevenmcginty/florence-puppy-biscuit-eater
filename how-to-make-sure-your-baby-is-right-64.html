@@ -1,0 +1,2159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#3A86FF">
+<title>How to Make Sure Your Baby is Right 64 — A 3D Game by Florence</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⭐</text></svg>">
+
+<!-- Three.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+<style>
+  :root {
+    --gold: #FFD166;
+    --gold-deep: #D48B00;
+    --coral: #FF5D73;
+    --coral-deep: #D9254C;
+    --mint: #06D6A0;
+    --mint-deep: #0F8B8D;
+    --sky: #4EA8DE;
+    --sky-deep: #0077B6;
+    --purple: #7209B7;
+    --purple-light: #9B5DE5;
+    --cream: #FFFDF7;
+    --ink: #1B263B;
+    --font-display: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Marker Felt', 'Nunito', 'Segoe UI', cursive, sans-serif;
+    --font-body: 'Trebuchet MS', 'Segoe UI', -apple-system, sans-serif;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #060B14;
+    font-family: var(--font-body);
+    color: var(--ink);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    position: fixed;
+    inset: 0;
+  }
+
+  #stage {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% 25%, #3A86FF 0%, #170B2E 70%, #03020A 100%);
+  }
+
+  #frame {
+    position: relative;
+    width: min(100vw, calc(100vh * 420 / 740), 480px);
+    aspect-ratio: 420 / 740;
+    height: auto;
+    max-height: 100vh;
+    background: #000;
+    overflow: hidden;
+    box-shadow: 0 0 0 100vmax rgba(3, 2, 10, 0.75), 0 20px 60px rgba(0,0,0,0.8);
+    border-radius: clamp(0px, 3vw, 26px);
+  }
+
+  #webgl-container {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    display: block;
+  }
+  #webgl-container canvas {
+    width: 100% !important;
+    height: 100% !important;
+    display: block;
+  }
+
+  /* N64 HUD */
+  #hud {
+    position: absolute;
+    top: max(8px, env(safe-area-inset-top));
+    left: 8px;
+    right: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    pointer-events: none;
+    z-index: 10;
+  }
+  #hud.on { display: flex; }
+
+  .hud-top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .n64-meter-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(13, 27, 42, 0.88);
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 2.5px solid #FFD166;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    pointer-events: auto;
+  }
+  .n64-pie-meter {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: conic-gradient(#06D6A0 0% 100%, #2B2D42 100% 100%);
+    border: 2px solid #FFF;
+    transition: background 0.2s ease;
+  }
+  .n64-pie-inner {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #FF5D73;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+  }
+
+  .n64-chip {
+    font-family: var(--font-display);
+    font-size: clamp(11px, 3.2vw, 14px);
+    font-weight: 900;
+    color: #FFF;
+    text-shadow: 0 2px 0 #000, 0 0 6px rgba(0,0,0,0.8);
+    display: flex;
+    align-items: center;
+    gap: 3px;
+  }
+  .n64-chip.star { color: #FFE66D; }
+  .n64-chip.coin { color: #FFD166; }
+  .n64-chip.red-coin { color: #FF4D6D; }
+
+  .hud-actions {
+    display: flex;
+    gap: 4px;
+    pointer-events: auto;
+  }
+  .icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 2px solid #FFD166;
+    background: rgba(255,255,255,0.95);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.3);
+    font-size: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .icon-btn:active { transform: translateY(2px); }
+
+  #course-banner {
+    align-self: center;
+    background: linear-gradient(90deg, rgba(230,57,70,0.92), rgba(114,9,183,0.92));
+    border: 2px solid #FFF;
+    border-radius: 12px;
+    padding: 4px 14px;
+    font-family: var(--font-display);
+    font-size: clamp(11px, 3vw, 13px);
+    font-weight: 800;
+    color: #FFF;
+    text-shadow: 0 1px 2px #000;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    letter-spacing: 0.05em;
+    text-align: center;
+  }
+
+  /* N64 Mobile Virtual Controls */
+  #touch-controls {
+    position: absolute;
+    inset: 0;
+    z-index: 15;
+    pointer-events: none;
+    display: none;
+  }
+  #touch-controls.on { display: block; }
+
+  /* Virtual Joystick Left */
+  #stick-zone {
+    position: absolute;
+    bottom: max(20px, env(safe-area-inset-bottom));
+    left: 14px;
+    width: 130px;
+    height: 130px;
+    pointer-events: auto;
+    touch-action: none;
+  }
+  #stick-base {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,255,255,0.2) 0%, rgba(20,20,30,0.6) 100%);
+    border: 3px solid rgba(255, 255, 255, 0.6);
+    box-shadow: inset 0 0 15px rgba(0,0,0,0.5), 0 6px 16px rgba(0,0,0,0.4);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  #stick-thumb {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #FFE08A 0%, #E63946 70%, #9B2226 100%);
+    border: 2px solid #FFF;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    transition: transform 0.05s ease-out;
+  }
+
+  /* Action Buttons Right */
+  #action-buttons {
+    position: absolute;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    right: 14px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+    pointer-events: auto;
+  }
+  .btn-cluster {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .n64-btn {
+    border: 3px solid #FFF;
+    border-radius: 50%;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.4), 0 8px 16px rgba(0,0,0,0.3);
+    color: #FFF;
+    font-family: var(--font-display);
+    font-weight: 900;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.5);
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+  }
+  .n64-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 rgba(0,0,0,0.4);
+  }
+  .n64-btn.btn-a {
+    width: 68px;
+    height: 68px;
+    background: radial-gradient(circle at 35% 35%, #06D6A0, #0F8B8D);
+    box-shadow: 0 6px 0 #076264, 0 8px 16px rgba(6,214,160,0.35);
+    font-size: 20px;
+  }
+  .n64-btn.btn-b {
+    width: 60px;
+    height: 60px;
+    background: radial-gradient(circle at 35% 35%, #FF5D73, #D9254C);
+    box-shadow: 0 6px 0 #8B0C27, 0 8px 16px rgba(255,93,115,0.35);
+    font-size: 18px;
+  }
+  .n64-btn.btn-z {
+    width: 52px;
+    height: 52px;
+    background: radial-gradient(circle at 35% 35%, #9B5DE5, #7209B7);
+    box-shadow: 0 5px 0 #460670, 0 8px 14px rgba(155,93,229,0.35);
+    font-size: 14px;
+  }
+  .n64-btn.btn-c {
+    width: 44px;
+    height: 44px;
+    background: radial-gradient(circle at 35% 35%, #FFD166, #FFB703);
+    box-shadow: 0 4px 0 #B57700;
+    color: #2C221E;
+    font-size: 13px;
+  }
+  .btn-sub {
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: -2px;
+    opacity: 0.9;
+  }
+
+  /* Screens & Overlays */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: max(14px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    text-align: center;
+    overflow-y: auto;
+    scrollbar-width: none;
+    z-index: 30;
+    background: linear-gradient(180deg, #1D3557 0%, #457B9D 40%, #A8DADC 100%);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+  .screen::-webkit-scrollbar { display: none; }
+  .screen.hidden {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Title Screen 64 */
+  .n64-logo-badge {
+    background: #E63946;
+    color: #FFF;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 900;
+    padding: 6px 18px;
+    border-radius: 999px;
+    box-shadow: 0 4px 0 #9B2226, 0 6px 12px rgba(0,0,0,0.3);
+    letter-spacing: 0.08em;
+    transform: rotate(-2deg);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  h1.n64-title {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 7vw, 36px);
+    line-height: 1.05;
+    color: #FFF;
+    text-shadow: 0 3px 0 #D48B00, 0 6px 0 #1D3557, 0 10px 20px rgba(0,0,0,0.6);
+    margin: 6px 0 2px;
+  }
+  h1.n64-title span.super {
+    color: #FFD166;
+    display: block;
+    font-size: 0.85em;
+    letter-spacing: 0.06em;
+  }
+
+  p.tagline {
+    font-family: var(--font-display);
+    font-size: clamp(12px, 3.4vw, 14px);
+    color: #1D3557;
+    background: rgba(255,255,255,0.94);
+    padding: 6px 14px;
+    border-radius: 14px;
+    margin: 4px 0 8px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+    font-weight: bold;
+  }
+
+  /* UI Buttons */
+  .btn {
+    font-family: var(--font-display);
+    font-size: clamp(15px, 4.5vw, 19px);
+    font-weight: 800;
+    color: #FFF;
+    background: linear-gradient(180deg, #FFB703, #FB8500);
+    border: 3px solid #FFF;
+    border-radius: 22px;
+    padding: 12px 26px;
+    box-shadow: 0 5px 0 #C96B00, 0 8px 16px rgba(0,0,0,0.3);
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    touch-action: manipulation;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #C96B00;
+  }
+  .btn.big {
+    font-size: clamp(18px, 5.5vw, 24px);
+    padding: 14px 38px;
+    background: linear-gradient(180deg, #FF5D73, #E63946);
+    box-shadow: 0 6px 0 #9B2226, 0 10px 20px rgba(230,57,70,0.4);
+  }
+  .btn.big:active {
+    transform: translateY(5px);
+    box-shadow: 0 1px 0 #9B2226;
+  }
+  .btn.teal {
+    background: linear-gradient(180deg, #06D6A0, #0F8B8D);
+    box-shadow: 0 5px 0 #064E50;
+  }
+  .btn.teal:active { box-shadow: 0 1px 0 #064E50; }
+  .btn.ghost {
+    background: #FFF;
+    color: var(--ink);
+    box-shadow: 0 4px 0 #CBD5E1;
+    font-size: clamp(13px, 3.6vw, 15px);
+    padding: 8px 18px;
+  }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  /* Baby Cards Grid */
+  .baby-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 440px;
+    margin: 6px 0;
+  }
+  .baby-card {
+    background: #FFF;
+    border: 3px solid #E2D5BE;
+    border-radius: 16px;
+    padding: 8px 4px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #D8C7A8;
+    text-align: center;
+    touch-action: manipulation;
+    transition: transform 0.1s ease;
+  }
+  .baby-card.selected {
+    background: linear-gradient(180deg, #FFF9E6, #FFEAA7);
+    border-color: #FF5D73;
+    box-shadow: 0 5px 0 #D9254C, 0 0 0 3px rgba(255,93,115,0.3);
+    transform: translateY(-3px);
+  }
+  .baby-card .emoji {
+    font-size: 32px;
+    line-height: 1;
+    display: block;
+    margin-bottom: 3px;
+  }
+  .baby-card .nm {
+    font-family: var(--font-display);
+    font-size: 12.5px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+  .baby-card .sub {
+    font-size: 9.5px;
+    color: #6A5B52;
+    line-height: 1.1;
+  }
+
+  /* 3D Course Select Painting Grid */
+  .course-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 440px;
+    margin: 8px 0;
+  }
+  .course-card {
+    background: #FFF;
+    border: 3px solid #FFD166;
+    border-radius: 18px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #D48B00, 0 6px 14px rgba(0,0,0,0.12);
+    touch-action: manipulation;
+    text-align: left;
+    transition: transform 0.1s ease;
+  }
+  .course-card:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #D48B00;
+  }
+  .course-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, #3A86FF, #0077B6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    border: 2px solid #FFF;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.2);
+  }
+  .course-info { flex: 1; }
+  .course-title {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--ink);
+    line-height: 1.2;
+  }
+  .course-desc {
+    font-size: 11px;
+    color: #6A5B52;
+    margin-top: 2px;
+  }
+  .course-stars {
+    font-family: var(--font-display);
+    font-size: 14px;
+    color: #FFB703;
+    font-weight: 800;
+  }
+
+  /* Popups, Star Message & Toast */
+  #star-fanfare-popup {
+    position: absolute;
+    top: 35%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: linear-gradient(180deg, #FFE599, #FFB703);
+    border: 5px solid #FFF;
+    border-radius: 24px;
+    padding: 16px 24px;
+    font-family: var(--font-display);
+    text-align: center;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5), 0 0 0 100vmax rgba(0,0,0,0.4);
+    z-index: 50;
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  #star-fanfare-popup.show {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  #toast {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    background: rgba(13, 27, 42, 0.95);
+    color: #FFF;
+    font-family: var(--font-display);
+    font-size: clamp(12px, 3.4vw, 14px);
+    font-weight: bold;
+    padding: 8px 14px;
+    border-radius: 16px;
+    border: 2px solid #FFD166;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+    z-index: 40;
+    display: none;
+    text-align: center;
+    pointer-events: none;
+  }
+  #toast.show { display: block; }
+
+  /* Certificate / Trophy Modal */
+  #cert-modal {
+    position: absolute;
+    inset: 12px;
+    background: #FFFDF7;
+    border: 6px solid #FFB703;
+    border-radius: 22px;
+    box-shadow: 0 12px 36px rgba(0,0,0,0.6);
+    z-index: 60;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    text-align: center;
+  }
+  #cert-modal.open { display: flex; }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="frame">
+    <!-- 3D WebGL Canvas Container -->
+    <div id="webgl-container"></div>
+
+    <!-- N64 In-Game HUD -->
+    <div id="hud">
+      <div class="hud-top-bar">
+        <div class="n64-meter-wrap">
+          <div class="n64-pie-meter" id="health-pie">
+            <div class="n64-pie-inner" id="health-face">👶</div>
+          </div>
+          <div class="n64-chip star" id="hud-stars">⭐ 0</div>
+          <div class="n64-chip coin" id="hud-coins">🟡 0</div>
+          <div class="n64-chip red-coin" id="hud-red-coins">🔴 0/8</div>
+        </div>
+        <div class="hud-actions">
+          <button class="icon-btn" id="btn-music" aria-label="Music">🎵</button>
+          <button class="icon-btn" id="btn-sound" aria-label="Sound">🔊</button>
+          <button class="icon-btn" id="btn-pause" aria-label="Pause">⏸️</button>
+        </div>
+      </div>
+      <div id="course-banner">COURSE 1: BOB-OMB BABY BLOCKS</div>
+    </div>
+
+    <!-- Mobile Virtual Controls -->
+    <div id="touch-controls">
+      <div id="stick-zone">
+        <div id="stick-base">
+          <div id="stick-thumb"></div>
+        </div>
+      </div>
+      <div id="action-buttons">
+        <div class="btn-cluster">
+          <div class="n64-btn btn-c" id="btn-touch-cam">
+            <span>📷</span>
+            <span class="btn-sub">Cam</span>
+          </div>
+          <div class="n64-btn btn-z" id="btn-touch-slide">
+            <span>Z</span>
+            <span class="btn-sub">Slide</span>
+          </div>
+        </div>
+        <div class="btn-cluster">
+          <div class="n64-btn btn-b" id="btn-touch-pound">
+            <span>B</span>
+            <span class="btn-sub">Pound</span>
+          </div>
+          <div class="n64-btn btn-a" id="btn-touch-jump">
+            <span>A</span>
+            <span class="btn-sub">Jump</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast"></div>
+
+    <!-- Star Fanfare Popup -->
+    <div id="star-fanfare-popup">
+      <div style="font-size:42px;">⭐</div>
+      <div style="font-size:20px;font-weight:900;color:#1D3557;margin:4px 0;" id="star-popup-title">YOU GOT A STAR!</div>
+      <div style="font-size:13px;color:#457B9D;font-weight:bold;" id="star-popup-sub">Star 1 Collected!</div>
+    </div>
+
+    <!-- Screen 1: Title Screen -->
+    <div id="s-title" class="screen">
+      <div style="margin-top:4px;">
+        <div class="n64-logo-badge">⭐ NINTENDO 64 EDITION ⭐</div>
+        <h1 class="n64-title">
+          <span class="super">SUPER BABY 64</span>
+          How to Make Sure<br>Your Baby is Right!
+        </h1>
+        <p class="tagline">A 3D Action Adventure by Florence</p>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.95);border:3px solid #FFD166;border-radius:20px;padding:12px;width:100%;max-width:440px;box-shadow:0 6px 0 #D48B00;">
+        <div style="font-family:var(--font-display);font-size:15px;font-weight:800;color:#1D3557;margin-bottom:6px;">
+          🎮 3D Moves &amp; Controls
+        </div>
+        <div style="font-size:12px;color:#2C221E;line-height:1.4;text-align:left;">
+          🏃 <b>Run &amp; Steer:</b> Left Thumbstick or WASD / Arrow Keys<br>
+          🦘 <b>Triple Jump:</b> Tap (A) or Space 3 times for mega backflips!<br>
+          💥 <b>Ground Pound:</b> Tap (B) or Shift in mid-air to stomp &amp; smash!<br>
+          ⚡ <b>Belly Slide Dash:</b> Tap (Z) or C while running for turbo crawl!<br>
+          ⭐ <b>Collect:</b> Gold Coins, 8 Red Coins &amp; Power Stars!
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:6px;">
+        <button class="btn big" id="btn-start">PRESS START! 🌟</button>
+      </div>
+      <div class="btn-row">
+        <a class="btn ghost" href="index.html" style="text-decoration:none;">← Florence's Games Hub</a>
+      </div>
+    </div>
+
+    <!-- Screen 2: Baby Select & Customizer -->
+    <div id="s-baby" class="screen hidden">
+      <div>
+        <div class="n64-logo-badge">👶 STEP 1: CHOOSE YOUR BABY 👶</div>
+        <h2 style="font-family:var(--font-display);color:#FFF;font-size:22px;margin:4px 0;text-shadow:0 2px 0 #000;">
+          Pick a Real Baby for 3D Adventure!
+        </h2>
+      </div>
+
+      <div class="baby-grid" id="baby-select-grid">
+        <!-- Injected via JS -->
+      </div>
+
+      <div style="background:rgba(255,255,255,0.95);border:3px solid #06D6A0;border-radius:16px;padding:8px 12px;width:100%;max-width:440px;">
+        <div style="font-size:12px;font-weight:bold;color:#1D3557;" id="selected-baby-desc">
+          Baby Bean — Found by the baked beans! All-rounder jump star.
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn teal big" id="btn-baby-confirm">Choose Baby &amp; Enter Courses! 🚀</button>
+      </div>
+    </div>
+
+    <!-- Screen 3: Course Painting Select (N64 Castle Style) -->
+    <div id="s-courses" class="screen hidden">
+      <div>
+        <div class="n64-logo-badge">🏰 COURSE PAINTINGS 🏰</div>
+        <h2 style="font-family:var(--font-display);color:#FFF;font-size:22px;margin:4px 0;text-shadow:0 2px 0 #000;">
+          Jump into a 3D World!
+        </h2>
+      </div>
+
+      <div class="course-grid" id="course-select-grid">
+        <!-- Injected via JS -->
+      </div>
+
+      <div class="btn-row">
+        <button class="btn ghost" id="btn-back-to-baby">← Change Baby</button>
+      </div>
+    </div>
+
+    <!-- Screen 4: Course Complete / Star Get Screen -->
+    <div id="s-complete" class="screen hidden">
+      <div>
+        <div class="n64-logo-badge">⭐ COURSE CLEARED! ⭐</div>
+        <h2 style="font-family:var(--font-display);color:#FFF;font-size:26px;margin:6px 0;text-shadow:0 2px 0 #000;">
+          YOU ARE A BABY MASTER!
+        </h2>
+      </div>
+
+      <div style="background:rgba(255,255,255,0.96);border:3px solid #FFD166;border-radius:20px;padding:16px;width:100%;max-width:440px;box-shadow:0 6px 0 #D48B00;">
+        <div style="font-size:54px;line-height:1;">🌟</div>
+        <div style="font-family:var(--font-display);font-size:20px;color:#1D3557;font-weight:900;margin:6px 0;" id="clear-course-title">
+          Bob-omb Baby Blocks
+        </div>
+        <div style="font-size:14px;color:#6A5B52;margin-bottom:10px;" id="clear-course-stats">
+          🟡 Coins: 45 | 🔴 Red Coins: 8/8 | ⭐ Stars: 2/2
+        </div>
+        <div style="font-size:12px;background:#FFF9E6;padding:8px;border-radius:12px;color:#D48B00;font-weight:bold;">
+          "Florence says: Your baby is growing strong and super happy!"
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn big" id="btn-next-course">Next Course! 🚀</button>
+        <button class="btn teal" id="btn-course-hub">Course Hub 🏰</button>
+      </div>
+    </div>
+
+    <!-- Screen 5: Grand Trophy & Certificate Modal -->
+    <div id="cert-modal">
+      <div style="font-family:var(--font-display);font-size:20px;color:#D48B00;font-weight:900;">
+        🌟 OFFICIAL SUPER BABY 64 MASTER 🌟
+      </div>
+      <div style="font-size:13px;color:#6A5B52;">Awarded by Florence (Game Designer &amp; Baby Expert)</div>
+
+      <div style="border:3px dashed #FFB703;padding:12px;border-radius:16px;width:100%;background:#FFFDF7;margin:8px 0;">
+        <div style="font-size:13px;color:#1D3557;">This Grand 3D N64 Trophy is presented to:</div>
+        <div id="cert-baby-name" style="font-family:var(--font-display);font-size:24px;color:#E63946;font-weight:900;margin:4px 0;">
+          Baby Bean &amp; Super Player
+        </div>
+        <div style="font-size:12px;line-height:1.4;color:#2C221E;">
+          For conquering all 5 low-poly 3D courses: bouncing across giant baby blocks, racing supermarket carts, splashing through bubble bath bays, soaring on rainbow mobiles, and winning the Grand Stroller Buggy Grand Prix!
+        </div>
+      </div>
+
+      <div style="display:flex;justify-content:space-around;width:100%;align-items:center;">
+        <div>
+          <div style="font-family:var(--font-display);font-size:16px;color:#0F8B8D;font-weight:900;">Florence</div>
+          <div style="font-size:10px;color:#6A5B52;">Chief Baby &amp; N64 Master</div>
+        </div>
+        <div style="font-size:42px;">🏆</div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn teal" id="btn-cert-close">Back to Game Hub ✕</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  /* ---------------- CONSTANTS & DATA ---------------- */
+  const VW = 420, VH = 740;
+
+  const BABIES = {
+    bean:   { id: 'bean',   name: 'Baby Bean',   sub: 'Found by baked beans', hairColor: 0xC47A2A, vestColor: 0x2EC4B6, cheekColor: 0xFF8FA3, speed: 1.0, jump: 1.0, desc: 'Balanced all-round super jumper!' },
+    pip:    { id: 'pip',    name: 'Baby Pip',    sub: 'Supermarket floor model', hairColor: 0x2B170B, vestColor: 0xFFD93D, cheekColor: 0xFF7A90, speed: 1.1, jump: 0.95, desc: 'Super snappy turns & fast sprint!' },
+    toast:  { id: 'toast',  name: 'Baby Toast',  sub: 'Warm & crumbly', hairColor: 0xF2C14E, vestColor: 0xFF8FAB, cheekColor: 0xFF6B8A, speed: 0.9, jump: 1.15, desc: 'Floaty high jumps in mid-air!' },
+    nugget: { id: 'nugget', name: 'Baby Nugget', sub: 'Speedy dino crawler', hairColor: 0xA0522D, vestColor: 0xFF7A00, cheekColor: 0xFFAA85, speed: 1.25, jump: 0.9, desc: 'Turbo crawler and speedy dasher!' },
+    sprout: { id: 'sprout', name: 'Baby Sprout', sub: 'Loves green onesies', hairColor: 0x4A7C20, vestColor: 0x70E000, cheekColor: 0xFF8FA3, speed: 1.0, jump: 1.05, desc: 'Mega ground pound power!' },
+    blossom:{ id: 'blossom',name: 'Baby Blossom',sub: 'Sweet flower curls', hairColor: 0x8338EC, vestColor: 0xFF006E, cheekColor: 0xFF99C8, speed: 1.05, jump: 1.0, desc: 'Coin magnet & flower power!' }
+  };
+
+  const COURSES = [
+    {
+      id: 1,
+      title: 'Bob-omb Baby Blocks',
+      subtitle: 'Nursery Toy Mountain',
+      desc: 'Climb wooden alphabet blocks, dodge bouncing rattles & claim the Summit Star!',
+      icon: '🧸',
+      theme: 'blocks',
+      skyColor: 0x80D8FF,
+      fogColor: 0xB3E5FC,
+      groundColor: 0x7CB342,
+      star1: 'Summit the Toy Block Mountain',
+      star2: 'Collect the 8 Red Coins'
+    },
+    {
+      id: 2,
+      title: 'Supermarket Speedway',
+      subtitle: 'The Real Baby Shop',
+      desc: 'Race down grocery conveyor belts, dodge shopping carts & reach the Till Star!',
+      icon: '🛒',
+      theme: 'market',
+      skyColor: 0xFFD166,
+      fogColor: 0xFFE8A3,
+      groundColor: 0x06D6A0,
+      star1: 'Speed Through Checkout Till',
+      star2: 'Find 8 Red Coins on High Shelves'
+    },
+    {
+      id: 3,
+      title: 'Bubble Bath Bay',
+      subtitle: 'Splash & Sponge Cove',
+      desc: 'Bounce on soap trampolines, jump giant rubber ducks & scale shampoo falls!',
+      icon: '🛁',
+      theme: 'bath',
+      skyColor: 0x4CC9F0,
+      fogColor: 0xBEE9E8,
+      groundColor: 0x3A86FF,
+      star1: 'Scale the Golden Duck Waterfall',
+      star2: 'Snag 8 Red Coins in Bubble Whirls'
+    },
+    {
+      id: 4,
+      title: 'Dummy Boutique & Skyway',
+      subtitle: 'Rainbow Mobile Kingdom',
+      desc: 'Soar across rainbow bridges, ride spinning baby mobiles & grab the Crown Star!',
+      icon: '🌈',
+      theme: 'sky',
+      skyColor: 0xC77DFF,
+      fogColor: 0xE0AAFF,
+      groundColor: 0x9B5DE5,
+      star1: 'Cross the Flying Mobile Bridges',
+      star2: '8 Red Coins on the Rainbow Clouds'
+    },
+    {
+      id: 5,
+      title: 'Buggy Stroller Grand Prix',
+      subtitle: 'The Grand Park Finale',
+      desc: 'Strap into the Super Baby Buggy! Steer through park ramps & claim the Golden Trophy!',
+      icon: '🏎️',
+      theme: 'kart',
+      skyColor: 0x06D6A0,
+      fogColor: 0x95D5B2,
+      groundColor: 0x52B788,
+      star1: 'Cross the Park Finish Line in 1st',
+      star2: '8 Red Coins along the Sidewalk'
+    }
+  ];
+
+  /* ---------------- STATE ---------------- */
+  const State = {
+    screen: 'title',
+    selectedBaby: 'bean',
+    currentCourse: 1,
+    starsUnlocked: 0,
+    coins: 0,
+    redCoins: 0,
+    health: 8,
+    maxHealth: 8,
+    sound: true,
+    music: true,
+    stick: { x: 0, y: 0, active: false },
+    keys: {},
+    audioReady: false,
+    savedStars: JSON.parse(localStorage.getItem('flo_baby64_stars') || '{}')
+  };
+
+  /* ---------------- AUDIO ENGINE (Procedural Web Audio N64 Chiptunes) ---------------- */
+  let actx = null;
+  let bgmTimer = null;
+  let bgmStep = 0;
+
+  function initAudio() {
+    if (actx) {
+      if (actx.state === 'suspended') actx.resume().catch(() => {});
+      return;
+    }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      actx = new AC();
+      State.audioReady = true;
+      if (State.music) startBgm();
+    } catch (e) { actx = null; }
+  }
+
+  function playTone(freq, dur, type, vol, slideFreq) {
+    if (!State.sound || !actx) return;
+    try {
+      const t = actx.currentTime;
+      const o = actx.createOscillator();
+      const g = actx.createGain();
+      o.type = type || 'triangle';
+      o.frequency.setValueAtTime(freq, t);
+      if (slideFreq) {
+        o.frequency.exponentialRampToValueAtTime(Math.max(20, slideFreq), t + (dur || 0.1));
+      }
+      g.gain.setValueAtTime(vol || 0.08, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + (dur || 0.12));
+      o.connect(g);
+      g.connect(actx.destination);
+      o.start(t);
+      o.stop(t + (dur || 0.12) + 0.02);
+    } catch (e) {}
+  }
+
+  function playSfx(name) {
+    if (!State.sound || !actx) return;
+    if (navigator.vibrate) {
+      try { navigator.vibrate(name === 'star' ? [40, 60, 40] : name === 'pound' ? 50 : 25); } catch (e) {}
+    }
+
+    if (name === 'jump1') {
+      playTone(400, 0.1, 'sine', 0.1, 750);
+    } else if (name === 'jump2') {
+      playTone(520, 0.12, 'sine', 0.1, 920);
+    } else if (name === 'jump3') { // Yahoo!
+      playTone(600, 0.08, 'sine', 0.12, 1050);
+      setTimeout(() => playTone(880, 0.18, 'triangle', 0.14, 1320), 70);
+    } else if (name === 'coin') {
+      playTone(987, 0.06, 'sine', 0.1);
+      setTimeout(() => playTone(1318, 0.12, 'sine', 0.1), 50);
+    } else if (name === 'redcoin') {
+      const scales = [523, 587, 659, 698, 784, 880, 987, 1046];
+      const note = scales[Math.min(State.redCoins, 7)];
+      playTone(note, 0.15, 'square', 0.09, note * 1.05);
+      setTimeout(() => playTone(note * 1.5, 0.18, 'sine', 0.1), 60);
+    } else if (name === 'pound') {
+      playTone(220, 0.08, 'sawtooth', 0.15, 60);
+      setTimeout(() => playTone(110, 0.2, 'triangle', 0.2, 30), 40);
+    } else if (name === 'slide') {
+      playTone(350, 0.15, 'triangle', 0.08, 600);
+    } else if (name === 'stomp') {
+      playTone(300, 0.08, 'square', 0.12, 120);
+      setTimeout(() => playTone(600, 0.1, 'sine', 0.1), 60);
+    } else if (name === 'spring') {
+      playTone(280, 0.22, 'sine', 0.14, 980);
+    } else if (name === 'hurt') {
+      playTone(180, 0.15, 'sawtooth', 0.12, 80);
+    } else if (name === 'star') {
+      const notes = [523, 659, 784, 1046, 1318, 1568];
+      notes.forEach((f, idx) => {
+        setTimeout(() => playTone(f, 0.2, 'triangle', 0.12), idx * 80);
+      });
+    }
+  }
+
+  /* N64 BGM Tunes */
+  const TUNE_BOBOMB = [
+    523.25, 0, 659.25, 0, 783.99, 659.25, 523.25, 659.25,
+    783.99, 0, 880.00, 783.99, 659.25, 523.25, 587.33, 0,
+    587.33, 0, 698.46, 0, 880.00, 698.46, 587.33, 698.46,
+    880.00, 0, 987.77, 880.00, 783.99, 659.25, 523.25, 0
+  ];
+  const TUNE_SLIDER = [
+    659.25, 659.25, 0, 659.25, 0, 523.25, 659.25, 0,
+    783.99, 0, 0, 0, 392.00, 0, 0, 0,
+    523.25, 0, 0, 392.00, 0, 0, 329.63, 0,
+    440.00, 0, 493.88, 0, 466.16, 440.00, 392.00, 0
+  ];
+
+  function startBgm() {
+    stopBgm();
+    if (!State.music || !actx) return;
+    bgmStep = 0;
+    const tune = State.currentCourse === 5 || State.currentCourse === 2 ? TUNE_SLIDER : TUNE_BOBOMB;
+    bgmTimer = setInterval(() => {
+      if (!State.music || !actx || actx.state !== 'running') return;
+      const t = actx.currentTime;
+      const mFreq = tune[bgmStep % tune.length];
+      if (mFreq > 0) {
+        const o = actx.createOscillator();
+        const g = actx.createGain();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(mFreq, t);
+        g.gain.setValueAtTime(0.022, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+        o.connect(g);
+        g.connect(actx.destination);
+        o.start(t);
+        o.stop(t + 0.17);
+      }
+      bgmStep++;
+    }, 175);
+  }
+
+  function stopBgm() {
+    if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+  }
+
+  /* ---------------- 3D WORLD & GRAPHICS ENGINE ---------------- */
+  let scene, camera, renderer;
+  let playerMesh, shadowMesh, headMesh, leftArm, rightArm, leftLeg, rightLeg, kartMesh;
+  let objects = [];
+  let coinsList = [];
+  let redCoinsList = [];
+  let enemiesList = [];
+  let starsList = [];
+  let particles3D = [];
+
+  // Player physics
+  const player = {
+    x: 0, y: 1.5, z: 0,
+    vx: 0, vy: 0, vz: 0,
+    rotY: 0,
+    targetRotY: 0,
+    onGround: false,
+    jumpCount: 0,
+    jumpTimer: 0,
+    isPounding: false,
+    isSliding: false,
+    slideTimer: 0,
+    invincibleTimer: 0,
+    animTime: 0,
+    isDriving: false
+  };
+
+  const camState = {
+    dist: 8.5,
+    height: 4.8,
+    angle: 0,
+    targetAngle: 0
+  };
+
+  function initThree() {
+    const container = document.getElementById('webgl-container');
+    const width = container.clientWidth || VW;
+    const height = container.clientHeight || VH;
+
+    scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x80D8FF);
+    scene.fog = new THREE.Fog(0x80D8FF, 15, 60);
+
+    camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 150);
+    camera.position.set(0, 6, 12);
+
+    renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+    renderer.setSize(width, height);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    container.appendChild(renderer.domElement);
+
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xFFFFFF, 0.75);
+    scene.add(ambientLight);
+
+    const sun = new THREE.DirectionalLight(0xFFF7D6, 0.85);
+    sun.position.set(20, 40, 20);
+    sun.castShadow = true;
+    sun.shadow.mapSize.width = 1024;
+    sun.shadow.mapSize.height = 1024;
+    sun.shadow.camera.near = 0.5;
+    sun.shadow.camera.far = 100;
+    const d = 25;
+    sun.shadow.camera.left = -d;
+    sun.shadow.camera.right = d;
+    sun.shadow.camera.top = d;
+    sun.shadow.camera.bottom = -d;
+    scene.add(sun);
+
+    buildPlayerMesh();
+
+    window.addEventListener('resize', onWindowResize);
+  }
+
+  function onWindowResize() {
+    const container = document.getElementById('webgl-container');
+    if (!container || !renderer || !camera) return;
+    const width = container.clientWidth || VW;
+    const height = container.clientHeight || VH;
+    camera.aspect = width / height;
+    camera.updateProjectionMatrix();
+    renderer.setSize(width, height);
+  }
+
+  /* ---------------- PROCEDURAL 3D BABY MODEL ---------------- */
+  function buildPlayerMesh() {
+    if (playerMesh) scene.remove(playerMesh);
+
+    const b = BABIES[State.selectedBaby] || BABIES.bean;
+    playerMesh = new THREE.Group();
+
+    // Shadow blob
+    const shadowGeo = new THREE.CircleGeometry(0.7, 16);
+    const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.35 });
+    shadowMesh = new THREE.Mesh(shadowGeo, shadowMat);
+    shadowMesh.rotation.x = -Math.PI / 2;
+    shadowMesh.position.y = 0.03;
+    scene.add(shadowMesh);
+
+    // Body (Vest / Onesie)
+    const bodyGeo = new THREE.BoxGeometry(0.85, 0.9, 0.7);
+    const bodyMat = new THREE.MeshLambertMaterial({ color: b.vestColor, flatShading: true });
+    const body = new THREE.Mesh(bodyGeo, bodyMat);
+    body.position.y = 0.65;
+    body.castShadow = true;
+    playerMesh.add(body);
+
+    // Nappy (Diaper)
+    const nappyGeo = new THREE.BoxGeometry(0.88, 0.45, 0.72);
+    const nappyMat = new THREE.MeshLambertMaterial({ color: 0xFFFFFF, flatShading: true });
+    const nappy = new THREE.Mesh(nappyGeo, nappyMat);
+    nappy.position.y = 0.4;
+    nappy.castShadow = true;
+    playerMesh.add(nappy);
+
+    // Head
+    const headGeo = new THREE.SphereGeometry(0.6, 12, 10);
+    const skinMat = new THREE.MeshLambertMaterial({ color: 0xFFD6B0, flatShading: true });
+    headMesh = new THREE.Mesh(headGeo, skinMat);
+    headMesh.position.y = 1.45;
+    headMesh.castShadow = true;
+    playerMesh.add(headMesh);
+
+    // Hair Tuft
+    const hairGeo = new THREE.ConeGeometry(0.25, 0.45, 6);
+    const hairMat = new THREE.MeshLambertMaterial({ color: b.hairColor, flatShading: true });
+    const hair = new THREE.Mesh(hairGeo, hairMat);
+    hair.position.set(0, 0.65, 0.1);
+    hair.rotation.x = 0.3;
+    headMesh.add(hair);
+
+    // Cheeks
+    const cheekMat = new THREE.MeshBasicMaterial({ color: b.cheekColor });
+    const cheekGeo = new THREE.SphereGeometry(0.12, 6, 6);
+    const leftCheek = new THREE.Mesh(cheekGeo, cheekMat);
+    leftCheek.position.set(-0.35, -0.05, 0.45);
+    headMesh.add(leftCheek);
+    const rightCheek = new THREE.Mesh(cheekGeo, cheekMat);
+    rightCheek.position.set(0.35, -0.05, 0.45);
+    headMesh.add(rightCheek);
+
+    // Eyes
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x1B263B });
+    const eyeGeo = new THREE.SphereGeometry(0.08, 6, 6);
+    const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+    leftEye.position.set(-0.2, 0.1, 0.52);
+    headMesh.add(leftEye);
+    const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+    rightEye.position.set(0.2, 0.1, 0.52);
+    headMesh.add(rightEye);
+
+    // Pacifier / Dummy in mouth
+    const dummyMat = new THREE.MeshLambertMaterial({ color: 0xFFD166, flatShading: true });
+    const dummyGeo = new THREE.CylinderGeometry(0.16, 0.16, 0.1, 8);
+    const dummy = new THREE.Mesh(dummyGeo, dummyMat);
+    dummy.rotation.x = Math.PI / 2;
+    dummy.position.set(0, -0.22, 0.58);
+    headMesh.add(dummy);
+
+    // Arms
+    const limbMat = new THREE.MeshLambertMaterial({ color: 0xFFD6B0, flatShading: true });
+    const armGeo = new THREE.BoxGeometry(0.25, 0.55, 0.25);
+    leftArm = new THREE.Mesh(armGeo, limbMat);
+    leftArm.position.set(-0.55, 0.7, 0);
+    playerMesh.add(leftArm);
+    rightArm = new THREE.Mesh(armGeo, limbMat);
+    rightArm.position.set(0.55, 0.7, 0);
+    playerMesh.add(rightArm);
+
+    // Legs
+    const legGeo = new THREE.BoxGeometry(0.28, 0.5, 0.28);
+    leftLeg = new THREE.Mesh(legGeo, limbMat);
+    leftLeg.position.set(-0.25, 0.18, 0);
+    playerMesh.add(leftLeg);
+    rightLeg = new THREE.Mesh(legGeo, limbMat);
+    rightLeg.position.set(0.25, 0.18, 0);
+    playerMesh.add(rightLeg);
+
+    // Buggy Kart (for Course 5)
+    const kartGroup = new THREE.Group();
+    const kartBodyGeo = new THREE.BoxGeometry(1.6, 0.5, 2.2);
+    const kartBodyMat = new THREE.MeshLambertMaterial({ color: 0xE63946, flatShading: true });
+    const kartBody = new THREE.Mesh(kartBodyGeo, kartBodyMat);
+    kartBody.position.y = 0.4;
+    kartGroup.add(kartBody);
+
+    const wheelGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.25, 12);
+    const wheelMat = new THREE.MeshLambertMaterial({ color: 0x222222, flatShading: true });
+    [[-0.85, 0.3, -0.7], [0.85, 0.3, -0.7], [-0.85, 0.3, 0.7], [0.85, 0.3, 0.7]].forEach(pos => {
+      const w = new THREE.Mesh(wheelGeo, wheelMat);
+      w.rotation.z = Math.PI / 2;
+      w.position.set(...pos);
+      kartGroup.add(w);
+    });
+    kartGroup.position.y = -0.2;
+    kartGroup.visible = false;
+    playerMesh.add(kartGroup);
+    kartMesh = kartGroup;
+
+    scene.add(playerMesh);
+  }
+
+  /* ---------------- 3D COURSE BUILDER ---------------- */
+  function clearScene() {
+    objects.forEach(obj => scene.remove(obj.mesh));
+    coinsList.forEach(c => scene.remove(c.mesh));
+    redCoinsList.forEach(rc => scene.remove(rc.mesh));
+    enemiesList.forEach(e => scene.remove(e.mesh));
+    starsList.forEach(s => scene.remove(s.group));
+    particles3D.forEach(p => scene.remove(p.mesh));
+
+    objects = [];
+    coinsList = [];
+    redCoinsList = [];
+    enemiesList = [];
+    starsList = [];
+    particles3D = [];
+  }
+
+  function addBlock(x, y, z, w, h, d, color, opt = {}) {
+    const geo = new THREE.BoxGeometry(w, h, d);
+    const mat = new THREE.MeshLambertMaterial({ color: color, flatShading: true });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(x, y + h / 2, z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    if (opt.rotY) mesh.rotation.y = opt.rotY;
+    scene.add(mesh);
+
+    const colObj = {
+      type: opt.type || 'solid',
+      mesh: mesh,
+      minX: x - w / 2, maxX: x + w / 2,
+      minY: y, maxY: y + h,
+      minZ: z - d / 2, maxZ: z + d / 2,
+      bounce: opt.bounce || 0,
+      speedPad: opt.speedPad || false
+    };
+    objects.push(colObj);
+    return mesh;
+  }
+
+  function addCoin(x, y, z, isRed = false) {
+    const geo = new THREE.CylinderGeometry(0.35, 0.35, 0.12, 10);
+    const mat = new THREE.MeshLambertMaterial({
+      color: isRed ? 0xFF3366 : 0xFFD166,
+      emissive: isRed ? 0x660022 : 0x664400,
+      flatShading: true
+    });
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.x = Math.PI / 2;
+    mesh.position.set(x, y + 0.5, z);
+    scene.add(mesh);
+
+    const item = { mesh, x, y: y + 0.5, z, collected: false, isRed };
+    if (isRed) redCoinsList.push(item);
+    else coinsList.push(item);
+  }
+
+  function addStar(x, y, z, starIndex, label) {
+    const group = new THREE.Group();
+    // Star shape constructed from 2 octahedrons
+    const starGeo = new THREE.OctahedronGeometry(0.7, 0);
+    const starMat = new THREE.MeshLambertMaterial({
+      color: 0xFFE66D,
+      emissive: 0x886600,
+      flatShading: true
+    });
+    const m1 = new THREE.Mesh(starGeo, starMat);
+    group.add(m1);
+
+    const starGeo2 = new THREE.OctahedronGeometry(0.7, 0);
+    const m2 = new THREE.Mesh(starGeo2, starMat);
+    m2.rotation.y = Math.PI / 4;
+    group.add(m2);
+
+    group.position.set(x, y + 1.2, z);
+    scene.add(group);
+
+    starsList.push({ group, x, y: y + 1.2, z, index: starIndex, label, collected: false });
+  }
+
+  function addEnemy(x, y, z) {
+    const group = new THREE.Group();
+    // Low-poly bouncing Rattle Monster
+    const bodyGeo = new THREE.SphereGeometry(0.55, 8, 8);
+    const bodyMat = new THREE.MeshLambertMaterial({ color: 0xFF5D73, flatShading: true });
+    const bMesh = new THREE.Mesh(bodyGeo, bodyMat);
+    bMesh.position.y = 0.55;
+    group.add(bMesh);
+
+    // Handle
+    const handleGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.6, 6);
+    const handleMat = new THREE.MeshLambertMaterial({ color: 0xFFD166, flatShading: true });
+    const hMesh = new THREE.Mesh(handleGeo, handleMat);
+    hMesh.position.y = 0.15;
+    group.add(hMesh);
+
+    // Eyes
+    const eyeMat = new THREE.MeshBasicMaterial({ color: 0x1B263B });
+    const eyeGeo = new THREE.SphereGeometry(0.1, 6, 6);
+    const e1 = new THREE.Mesh(eyeGeo, eyeMat);
+    e1.position.set(-0.2, 0.65, 0.45);
+    group.add(e1);
+    const e2 = new THREE.Mesh(eyeGeo, eyeMat);
+    e2.position.set(0.2, 0.65, 0.45);
+    group.add(e2);
+
+    group.position.set(x, y, z);
+    scene.add(group);
+
+    enemiesList.push({
+      mesh: group,
+      startX: x, startZ: z,
+      x: x, y: y, z: z,
+      dir: 1, range: 4.5, speed: 1.8,
+      alive: true
+    });
+  }
+
+  function loadCourse(courseId) {
+    clearScene();
+    const meta = COURSES.find(c => c.id === courseId) || COURSES[0];
+    State.currentCourse = courseId;
+    State.redCoins = 0;
+
+    scene.background.setHex(meta.skyColor);
+    scene.fog.color.setHex(meta.fogColor);
+
+    document.getElementById('course-banner').textContent = `COURSE ${meta.id}: ${meta.title.toUpperCase()}`;
+    updateHud();
+
+    // Reset player position
+    player.x = 0; player.y = 1.5; player.z = 0;
+    player.vx = 0; player.vy = 0; player.vz = 0;
+    player.rotY = 0; player.jumpCount = 0;
+    player.isDriving = (courseId === 5);
+    if (kartMesh) kartMesh.visible = player.isDriving;
+
+    // Course 1: Bob-omb Baby Blocks (Nursery Hills & Blocks)
+    if (courseId === 1) {
+      addBlock(0, 0, 0, 36, 1, 36, 0x7CB342);
+
+      // Block Stairs leading to Mountain
+      const blockColors = [0xFF5D73, 0xFFD166, 0x06D6A0, 0x3A86FF, 0x9B5DE5];
+      for (let i = 0; i < 7; i++) {
+        const h = 1.2 * (i + 1);
+        addBlock(0, 0, -6 - i * 3.5, 5, h, 3.5, blockColors[i % blockColors.length]);
+        addCoin(0, h, -6 - i * 3.5);
+      }
+
+      // Summit Mountain Top
+      addBlock(0, 0, -32, 12, 9.5, 12, 0xD48B00);
+      addStar(0, 9.5, -32, 1, meta.star1);
+
+      // Floating Play Platforms & Red Coins
+      const redPos = [
+        [-8, 2.5, -8], [8, 2.5, -8],
+        [-12, 4.5, -16], [12, 4.5, -16],
+        [-6, 6.5, -24], [6, 6.5, -24],
+        [-10, 8.5, -30], [10, 8.5, -30]
+      ];
+      redPos.forEach((pos, idx) => {
+        addBlock(pos[0], 0, pos[2], 3.5, pos[1], 3.5, blockColors[idx % blockColors.length]);
+        addCoin(pos[0], pos[1], pos[2], true);
+      });
+
+      // Bouncing spring pads
+      addBlock(-6, 0, 6, 2.5, 0.4, 2.5, 0xFF006E, { type: 'spring', bounce: 16 });
+      addBlock(6, 0, 6, 2.5, 0.4, 2.5, 0xFF006E, { type: 'spring', bounce: 16 });
+
+      // Enemies
+      addEnemy(-4, 1, -12);
+      addEnemy(4, 1, -18);
+      addEnemy(0, 9.5, -28);
+    }
+
+    // Course 2: Supermarket Speedway (Real Baby Shop)
+    else if (courseId === 2) {
+      addBlock(0, 0, -20, 20, 1, 80, 0xE2E8F0); // Supermarket floor
+
+      // Conveyor Belts & Aisles
+      for (let z = 10; z >= -50; z -= 12) {
+        addBlock(-6, 0, z, 4, 3.5, 8, 0x3A86FF); // Left Shelves
+        addBlock(6, 0, z, 4, 3.5, 8, 0x06D6A0);  // Right Shelves
+        addCoin(0, 1, z);
+      }
+
+      // Red Coins on Shelves
+      const redPos2 = [
+        [-6, 3.5, 10], [6, 3.5, 10],
+        [-6, 3.5, -2], [6, 3.5, -2],
+        [-6, 3.5, -14], [6, 3.5, -14],
+        [-6, 3.5, -26], [6, 3.5, -26]
+      ];
+      redPos2.forEach(pos => addCoin(pos[0], pos[1], pos[2], true));
+
+      // Till Scanner Checkout Arch
+      addBlock(0, 0, -55, 16, 5, 2, 0xFF5D73);
+      addStar(0, 1, -58, 1, meta.star1);
+
+      // Speed booster pads
+      addBlock(0, 0.1, 0, 3, 0.2, 5, 0xFFD166, { speedPad: true });
+      addBlock(0, 0.1, -25, 3, 0.2, 5, 0xFFD166, { speedPad: true });
+
+      addEnemy(-2, 1, -10);
+      addEnemy(2, 1, -30);
+    }
+
+    // Course 3: Bubble Bath Bay (Water Park & Ducks)
+    else if (courseId === 3) {
+      addBlock(0, 0, -20, 40, 1, 60, 0x48CAE4); // Bath Water
+
+      // Giant Rubber Duck Islands & Soap Stepping Stones
+      for (let i = 0; i < 6; i++) {
+        const x = Math.sin(i * 1.2) * 8;
+        const z = -i * 8;
+        addBlock(x, 0, z, 5, 1.8, 5, 0xFFD166); // Yellow Soap
+        addCoin(x, 1.8, z);
+      }
+
+      // Waterfall Summit
+      addBlock(0, 0, -48, 14, 7, 10, 0x0077B6);
+      addStar(0, 7, -48, 1, meta.star1);
+
+      // Red Coins in Bubble Whirls
+      const redPos3 = [
+        [-10, 1, 0], [10, 1, 0],
+        [-12, 2, -12], [12, 2, -12],
+        [-8, 3, -24], [8, 3, -24],
+        [-6, 4, -36], [6, 4, -36]
+      ];
+      redPos3.forEach(pos => {
+        addBlock(pos[0], 0, pos[2], 3, pos[1], 3, 0xFF8FAB);
+        addCoin(pos[0], pos[1], pos[2], true);
+      });
+
+      // Spring pads
+      addBlock(0, 0, -8, 3, 0.4, 3, 0x06D6A0, { type: 'spring', bounce: 15 });
+    }
+
+    // Course 4: Dummy Boutique & Rainbow Skyway
+    else if (courseId === 4) {
+      addBlock(0, 0, 0, 10, 1, 10, 0xFFFFFF); // Starting Cloud
+
+      // Rainbow Bridge Steps
+      const rainbow = [0xFF5D73, 0xFFB703, 0x06D6A0, 0x3A86FF, 0x9B5DE5];
+      for (let i = 0; i < 10; i++) {
+        const x = Math.sin(i * 0.7) * 7;
+        const z = -6 - i * 5;
+        const y = i * 0.8;
+        addBlock(x, 0, z, 4.5, y + 1, 4.5, rainbow[i % rainbow.length]);
+        addCoin(x, y + 1, z);
+      }
+
+      // Golden Mobile Sky Castle
+      addBlock(0, 0, -60, 14, 9, 14, 0xFFE66D);
+      addStar(0, 9, -60, 1, meta.star1);
+
+      // Red Coins on Cloud Pillars
+      const redPos4 = [
+        [-8, 3, -15], [8, 3, -15],
+        [-10, 5, -28], [10, 5, -28],
+        [-7, 6, -38], [7, 6, -38],
+        [-5, 7.5, -48], [5, 7.5, -48]
+      ];
+      redPos4.forEach(pos => {
+        addBlock(pos[0], 0, pos[2], 3.5, pos[1], 3.5, 0xE0AAFF);
+        addCoin(pos[0], pos[1], pos[2], true);
+      });
+    }
+
+    // Course 5: Buggy Stroller Grand Prix (Kart Driving Course)
+    else if (courseId === 5) {
+      // Park Racetrack Road
+      addBlock(0, 0, -40, 18, 1, 110, 0x333333); // Asphalt
+
+      // Side Curbs
+      addBlock(-9.5, 0, -40, 1.5, 1.3, 110, 0xE63946);
+      addBlock(9.5, 0, -40, 1.5, 1.3, 110, 0xFFFFFF);
+
+      // Boost Ramps along track
+      addBlock(0, 0.1, -10, 5, 0.3, 6, 0xFFB703, { speedPad: true });
+      addBlock(0, 0.1, -40, 5, 0.3, 6, 0xFFB703, { speedPad: true });
+      addBlock(0, 0.1, -70, 5, 0.3, 6, 0xFFB703, { speedPad: true });
+
+      // Track Coins & Red Coins
+      for (let z = 5; z >= -85; z -= 6) {
+        addCoin(Math.sin(z * 0.2) * 5, 1, z);
+      }
+      for (let i = 0; i < 8; i++) {
+        const rz = -i * 11;
+        const rx = (i % 2 === 0 ? -5 : 5);
+        addCoin(rx, 1, rz, true);
+      }
+
+      // Finish Line Podium & Trophy
+      addBlock(0, 0, -95, 18, 2, 8, 0xFFD166);
+      addStar(0, 2, -95, 1, 'Park Grand Prix 1st Place Trophy!');
+    }
+  }
+
+  /* ---------------- PARTICLES ---------------- */
+  function spawn3DParticles(x, y, z, color = 0xFFD166, count = 10) {
+    const geo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+    const mat = new THREE.MeshBasicMaterial({ color });
+    for (let i = 0; i < count; i++) {
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(x, y, z);
+      scene.add(mesh);
+      particles3D.push({
+        mesh,
+        vx: (Math.random() - 0.5) * 6,
+        vy: 2 + Math.random() * 5,
+        vz: (Math.random() - 0.5) * 6,
+        life: 0.6,
+        age: 0
+      });
+    }
+  }
+
+  /* ---------------- HUD & NOTIFICATIONS ---------------- */
+  function updateHud() {
+    document.getElementById('hud-coins').textContent = `🟡 ${State.coins}`;
+    document.getElementById('hud-red-coins').textContent = `🔴 ${State.redCoins}/8`;
+    document.getElementById('hud-stars').textContent = `⭐ ${State.starsUnlocked}`;
+
+    // Update 8-segment pie health meter
+    const pct = (State.health / State.maxHealth) * 100;
+    const pie = document.getElementById('health-pie');
+    if (pie) {
+      const col = State.health > 4 ? '#06D6A0' : State.health > 2 ? '#FFB703' : '#FF5D73';
+      pie.style.background = `conic-gradient(${col} 0% ${pct}%, #2B2D42 ${pct}% 100%)`;
+    }
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2600);
+  }
+
+  function showStarPopup(title, sub) {
+    const p = document.getElementById('star-fanfare-popup');
+    document.getElementById('star-popup-title').textContent = title;
+    document.getElementById('star-popup-sub').textContent = sub;
+    p.classList.add('show');
+    setTimeout(() => p.classList.remove('show'), 2800);
+  }
+
+  /* ---------------- SCREENS & UI NAVIGATION ---------------- */
+  function setScreen(id) {
+    ['s-title', 's-baby', 's-courses', 's-complete'].forEach(s => {
+      const el = document.getElementById(s);
+      if (el) el.classList.toggle('hidden', s !== id);
+    });
+
+    const isPlay = !id;
+    document.getElementById('hud').classList.toggle('on', isPlay);
+    document.getElementById('touch-controls').classList.toggle('on', isPlay);
+    State.screen = id || 'play';
+
+    if (isPlay) {
+      startBgm();
+    }
+  }
+
+  function renderBabySelection() {
+    const grid = document.getElementById('baby-select-grid');
+    grid.innerHTML = '';
+    const emojis = { bean: '👶', pip: '🍼', toast: '🍞', nugget: '🦖', sprout: '🌱', blossom: '🌸' };
+
+    Object.values(BABIES).forEach(b => {
+      const card = document.createElement('div');
+      card.className = `baby-card ${State.selectedBaby === b.id ? 'selected' : ''}`;
+      card.innerHTML = `
+        <span class="emoji">${emojis[b.id] || '👶'}</span>
+        <div class="nm">${b.name}</div>
+        <div class="sub">${b.sub}</div>
+      `;
+      card.onclick = () => {
+        State.selectedBaby = b.id;
+        document.querySelectorAll('.baby-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        document.getElementById('selected-baby-desc').textContent = `${b.name} — ${b.desc}`;
+        buildPlayerMesh();
+        playSfx('coin');
+      };
+      grid.appendChild(card);
+    });
+  }
+
+  function renderCourseSelection() {
+    const grid = document.getElementById('course-select-grid');
+    grid.innerHTML = '';
+
+    COURSES.forEach(c => {
+      const card = document.createElement('div');
+      const hasStar = State.savedStars[`course_${c.id}`];
+      card.className = 'course-card';
+      card.innerHTML = `
+        <div class="course-icon">${c.icon}</div>
+        <div class="course-info">
+          <div class="course-title">COURSE ${c.id}: ${c.title}</div>
+          <div class="course-desc">${c.desc}</div>
+        </div>
+        <div class="course-stars">${hasStar ? '⭐' : '⚪'}</div>
+      `;
+      card.onclick = () => {
+        playSfx('coin');
+        loadCourse(c.id);
+        setScreen(null); // Enter game!
+      };
+      grid.appendChild(card);
+    });
+  }
+
+  /* ---------------- INPUT & CONTROLS ---------------- */
+  function setupInputs() {
+    // Keyboard
+    window.addEventListener('keydown', e => {
+      State.keys[e.code] = true;
+      if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.code)) {
+        e.preventDefault();
+      }
+      if (e.code === 'Space') handleJump();
+      if (e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.code === 'KeyB') handleGroundPound();
+      if (e.code === 'KeyZ' || e.code === 'KeyC') handleSlide();
+    });
+
+    window.addEventListener('keyup', e => {
+      State.keys[e.code] = false;
+    });
+
+    // Touch Virtual Joystick
+    const stickZone = document.getElementById('stick-zone');
+    const stickThumb = document.getElementById('stick-thumb');
+
+    let touchId = null;
+
+    function handleStickTouch(e) {
+      const touch = Array.from(e.changedTouches).find(t => touchId === null || t.identifier === touchId);
+      if (!touch) return;
+
+      const rect = stickZone.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      let dx = touch.clientX - centerX;
+      let dy = touch.clientY - centerY;
+      const maxDist = 45;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+
+      if (dist > maxDist) {
+        dx = (dx / dist) * maxDist;
+        dy = (dy / dist) * maxDist;
+      }
+
+      stickThumb.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+      State.stick.x = dx / maxDist;
+      State.stick.y = dy / maxDist;
+      State.stick.active = true;
+    }
+
+    stickZone.addEventListener('touchstart', e => {
+      initAudio();
+      if (touchId === null && e.changedTouches.length > 0) {
+        touchId = e.changedTouches[0].identifier;
+        handleStickTouch(e);
+      }
+    }, { passive: false });
+
+    stickZone.addEventListener('touchmove', e => {
+      e.preventDefault();
+      handleStickTouch(e);
+    }, { passive: false });
+
+    function endStickTouch() {
+      touchId = null;
+      stickThumb.style.transform = 'translate(-50%, -50%)';
+      State.stick.x = 0;
+      State.stick.y = 0;
+      State.stick.active = false;
+    }
+    stickZone.addEventListener('touchend', endStickTouch);
+    stickZone.addEventListener('touchcancel', endStickTouch);
+
+    // Touch Action Buttons
+    const btnA = document.getElementById('btn-touch-jump');
+    btnA.addEventListener('touchstart', e => { e.preventDefault(); initAudio(); handleJump(); });
+
+    const btnB = document.getElementById('btn-touch-pound');
+    btnB.addEventListener('touchstart', e => { e.preventDefault(); initAudio(); handleGroundPound(); });
+
+    const btnZ = document.getElementById('btn-touch-slide');
+    btnZ.addEventListener('touchstart', e => { e.preventDefault(); initAudio(); handleSlide(); });
+
+    const btnC = document.getElementById('btn-touch-cam');
+    btnC.addEventListener('touchstart', e => {
+      e.preventDefault();
+      initAudio();
+      camState.targetAngle += Math.PI / 2;
+      playSfx('coin');
+    });
+
+    // UI Buttons
+    document.getElementById('btn-start').onclick = () => {
+      initAudio();
+      setScreen('s-baby');
+      renderBabySelection();
+    };
+
+    document.getElementById('btn-baby-confirm').onclick = () => {
+      playSfx('coin');
+      setScreen('s-courses');
+      renderCourseSelection();
+    };
+
+    document.getElementById('btn-back-to-baby').onclick = () => {
+      playSfx('coin');
+      setScreen('s-baby');
+    };
+
+    document.getElementById('btn-next-course').onclick = () => {
+      playSfx('coin');
+      const nextId = Math.min(5, State.currentCourse + 1);
+      loadCourse(nextId);
+      setScreen(null);
+    };
+
+    document.getElementById('btn-course-hub').onclick = () => {
+      playSfx('coin');
+      setScreen('s-courses');
+      renderCourseSelection();
+    };
+
+    document.getElementById('btn-pause').onclick = () => {
+      playSfx('coin');
+      setScreen('s-courses');
+      renderCourseSelection();
+    };
+
+    document.getElementById('btn-music').onclick = () => {
+      State.music = !State.music;
+      document.getElementById('btn-music').textContent = State.music ? '🎵' : '🔇';
+      if (State.music) startBgm(); else stopBgm();
+    };
+
+    document.getElementById('btn-sound').onclick = () => {
+      State.sound = !State.sound;
+      document.getElementById('btn-sound').textContent = State.sound ? '🔊' : '🔈';
+    };
+
+    document.getElementById('btn-cert-close').onclick = () => {
+      document.getElementById('cert-modal').classList.remove('open');
+      setScreen('s-courses');
+      renderCourseSelection();
+    };
+  }
+
+  /* ---------------- PLAYER ACTIONS ---------------- */
+  function handleJump() {
+    if (player.onGround) {
+      player.jumpCount = (player.jumpTimer > 0 && player.jumpCount < 2) ? player.jumpCount + 1 : 0;
+      player.jumpTimer = 0.5;
+
+      const babyStat = BABIES[State.selectedBaby] || BABIES.bean;
+      const jumpPowers = [10.5, 12.0, 14.5]; // 1, 2, 3 triple jump!
+      player.vy = jumpPowers[player.jumpCount] * babyStat.jump;
+      player.onGround = false;
+
+      if (player.jumpCount === 0) playSfx('jump1');
+      else if (player.jumpCount === 1) playSfx('jump2');
+      else {
+        playSfx('jump3');
+        spawn3DParticles(player.x, player.y, player.z, 0xFFE66D, 14);
+      }
+    }
+  }
+
+  function handleGroundPound() {
+    if (!player.onGround && !player.isPounding) {
+      player.isPounding = true;
+      player.vy = -18; // Blast down!
+      playSfx('pound');
+    }
+  }
+
+  function handleSlide() {
+    if (!player.isSliding) {
+      player.isSliding = true;
+      player.slideTimer = 0.8;
+      const speed = player.isDriving ? 22 : 15;
+      player.vx = -Math.sin(player.rotY) * speed;
+      player.vz = -Math.cos(player.rotY) * speed;
+      playSfx('slide');
+      spawn3DParticles(player.x, player.y, player.z, 0xFFFFFF, 8);
+    }
+  }
+
+  /* ---------------- MAIN GAME LOOP & PHYSICS ---------------- */
+  let lastTime = performance.now();
+
+  function gameLoop(now) {
+    requestAnimationFrame(gameLoop);
+    const dt = Math.min((now - lastTime) / 1000, 0.1);
+    lastTime = now;
+
+    if (State.screen === 'play') {
+      updatePhysics(dt);
+      updateCollectibles(dt);
+      updateEnemies(dt);
+      updateParticles(dt);
+      updateCamera(dt);
+    }
+
+    if (renderer && scene && camera) {
+      renderer.render(scene, camera);
+    }
+  }
+
+  function updatePhysics(dt) {
+    const babyStat = BABIES[State.selectedBaby] || BABIES.bean;
+    const baseSpeed = (player.isDriving ? 14 : 7.5) * babyStat.speed;
+
+    // Movement Input (Stick or Keys)
+    let moveX = State.stick.x;
+    let moveZ = State.stick.y;
+
+    if (State.keys['KeyA'] || State.keys['ArrowLeft']) moveX -= 1;
+    if (State.keys['KeyD'] || State.keys['ArrowRight']) moveX += 1;
+    if (State.keys['KeyW'] || State.keys['ArrowUp']) moveZ -= 1;
+    if (State.keys['KeyS'] || State.keys['ArrowDown']) moveZ += 1;
+
+    const inputLen = Math.sqrt(moveX * moveX + moveZ * moveZ);
+    if (inputLen > 0.1) {
+      const normX = moveX / Math.max(1, inputLen);
+      const normZ = moveZ / Math.max(1, inputLen);
+
+      // Align with camera orientation
+      const camYaw = camState.angle;
+      const worldX = normX * Math.cos(camYaw) + normZ * Math.sin(camYaw);
+      const worldZ = -normX * Math.sin(camYaw) + normZ * Math.cos(camYaw);
+
+      if (!player.isSliding) {
+        player.vx = worldX * baseSpeed;
+        player.vz = worldZ * baseSpeed;
+      }
+      player.targetRotY = Math.atan2(worldX, worldZ);
+    } else {
+      if (!player.isSliding) {
+        player.vx *= 0.8;
+        player.vz *= 0.8;
+      }
+    }
+
+    // Smooth rotation
+    player.rotY += (player.targetRotY - player.rotY) * 0.2;
+
+    // Gravity
+    player.vy -= 28 * dt;
+
+    // Position updates
+    player.x += player.vx * dt;
+    player.y += player.vy * dt;
+    player.z += player.vz * dt;
+
+    // Timers
+    if (player.jumpTimer > 0) player.jumpTimer -= dt;
+    if (player.slideTimer > 0) {
+      player.slideTimer -= dt;
+      if (player.slideTimer <= 0) player.isSliding = false;
+    }
+    if (player.invincibleTimer > 0) player.invincibleTimer -= dt;
+
+    // Platform Collisions (AABB Ground Detection)
+    player.onGround = false;
+    const playerRadius = 0.5;
+
+    objects.forEach(obj => {
+      const inX = player.x >= obj.minX - playerRadius && player.x <= obj.maxX + playerRadius;
+      const inZ = player.z >= obj.minZ - playerRadius && player.z <= obj.maxZ + playerRadius;
+
+      if (inX && inZ) {
+        // Landing on top
+        if (player.y >= obj.maxY - 0.5 && player.y <= obj.maxY + 0.8 && player.vy <= 0) {
+          player.y = obj.maxY;
+          player.vy = 0;
+          player.onGround = true;
+
+          // Ground pound land
+          if (player.isPounding) {
+            player.isPounding = false;
+            playSfx('pound');
+            spawn3DParticles(player.x, player.y, player.z, 0xFFD166, 16);
+          }
+
+          // Spring bounce
+          if (obj.bounce > 0) {
+            player.vy = obj.bounce;
+            player.onGround = false;
+            playSfx('spring');
+            spawn3DParticles(player.x, player.y, player.z, 0xFF006E, 12);
+          }
+
+          // Speed booster pad
+          if (obj.speedPad) {
+            player.vx *= 1.8;
+            player.vz *= 1.8;
+            playSfx('slide');
+            spawn3DParticles(player.x, player.y, player.z, 0xFFB703, 10);
+          }
+        }
+      }
+    });
+
+    // Fall into void (Reset / Respawn)
+    if (player.y < -12) {
+      player.x = 0; player.y = 3; player.z = 0;
+      player.vx = 0; player.vy = 0; player.vz = 0;
+      State.health = Math.max(1, State.health - 2);
+      playSfx('hurt');
+      updateHud();
+      showToast('Oof! Baby fell, respawning safely!');
+    }
+
+    // Update 3D Mesh position & animations
+    if (playerMesh) {
+      playerMesh.position.set(player.x, player.y, player.z);
+      playerMesh.rotation.y = player.rotY;
+
+      // Running limb swing
+      player.animTime += dt * (inputLen > 0.1 ? 12 : 3);
+      const swing = Math.sin(player.animTime) * (inputLen > 0.1 ? 0.6 : 0.05);
+
+      if (leftArm && rightArm && leftLeg && rightLeg) {
+        leftArm.rotation.x = swing;
+        rightArm.rotation.x = -swing;
+        leftLeg.rotation.x = -swing;
+        rightLeg.rotation.x = swing;
+      }
+
+      // Ground pound flip
+      if (player.isPounding) {
+        playerMesh.rotation.x = Math.PI;
+      } else {
+        playerMesh.rotation.x = 0;
+      }
+    }
+
+    // Shadow projection
+    if (shadowMesh) {
+      shadowMesh.position.set(player.x, player.y + 0.03, player.z);
+      const scale = Math.max(0.2, 1 - (player.y / 8));
+      shadowMesh.scale.set(scale, scale, scale);
+    }
+  }
+
+  let nowGlobal = 0;
+
+  function updateCollectibles(dt) {
+    nowGlobal += dt;
+
+    // Spin coins
+    coinsList.forEach(c => {
+      if (!c.collected) {
+        c.mesh.rotation.z += 3 * dt;
+        const dx = player.x - c.x;
+        const dy = player.y - c.y;
+        const dz = player.z - c.z;
+        if (dx * dx + dy * dy + dz * dz < 1.8) {
+          c.collected = true;
+          scene.remove(c.mesh);
+          State.coins++;
+          playSfx('coin');
+          spawn3DParticles(c.x, c.y, c.z, 0xFFD166, 8);
+          updateHud();
+        }
+      }
+    });
+
+    // Spin red coins
+    redCoinsList.forEach(rc => {
+      if (!rc.collected) {
+        rc.mesh.rotation.z += 4 * dt;
+        const dx = player.x - rc.x;
+        const dy = player.y - rc.y;
+        const dz = player.z - rc.z;
+        if (dx * dx + dy * dy + dz * dz < 2.0) {
+          rc.collected = true;
+          scene.remove(rc.mesh);
+          State.redCoins++;
+          playSfx('redcoin');
+          spawn3DParticles(rc.x, rc.y, rc.z, 0xFF3366, 12);
+          updateHud();
+          showToast(`🔴 Red Coin ${State.redCoins}/8!`);
+
+          // Unlocked secret Red Coin Star!
+          if (State.redCoins === 8) {
+            addStar(player.x, player.y + 2.5, player.z - 3, 2, 'Secret Red Coin Power Star!');
+            showStarPopup('RED COIN STAR APPEARED!', 'All 8 Red Coins Collected!');
+            playSfx('star');
+          }
+        }
+      }
+    });
+
+    // Spin stars & check collection
+    starsList.forEach(s => {
+      if (!s.collected) {
+        s.group.rotation.y += 2 * dt;
+        s.group.position.y = s.y + Math.sin(nowGlobal * 3) * 0.25;
+
+        const dx = player.x - s.x;
+        const dy = player.y - s.y;
+        const dz = player.z - s.z;
+        if (dx * dx + dy * dy + dz * dz < 2.8) {
+          s.collected = true;
+          scene.remove(s.group);
+          State.starsUnlocked++;
+          State.savedStars[`course_${State.currentCourse}`] = true;
+          localStorage.setItem('flo_baby64_stars', JSON.stringify(State.savedStars));
+
+          playSfx('star');
+          spawn3DParticles(s.x, s.y, s.z, 0xFFE66D, 30);
+          showStarPopup('YOU GOT A POWER STAR! ⭐', s.label);
+          updateHud();
+
+          setTimeout(() => {
+            // Course Complete Screen
+            document.getElementById('clear-course-title').textContent = COURSES[State.currentCourse - 1].title;
+            document.getElementById('clear-course-stats').textContent = `🟡 Coins: ${State.coins} | 🔴 Red Coins: ${State.redCoins}/8 | ⭐ Stars: ${State.starsUnlocked}`;
+            setScreen('s-complete');
+
+            // If beat all 5 courses, show Florence certificate!
+            if (State.currentCourse === 5) {
+              const b = BABIES[State.selectedBaby] || BABIES.bean;
+              document.getElementById('cert-baby-name').textContent = `${b.name} & Super Parent`;
+              document.getElementById('cert-modal').classList.add('open');
+            }
+          }, 2400);
+        }
+      }
+    });
+  }
+
+  function updateEnemies(dt) {
+    enemiesList.forEach(e => {
+      if (e.alive) {
+        e.x += e.dir * e.speed * dt;
+        if (Math.abs(e.x - e.startX) > e.range) {
+          e.dir *= -1;
+        }
+        e.mesh.position.set(e.x, e.y, e.z);
+
+        // Collision with player
+        const dx = player.x - e.x;
+        const dy = player.y - (e.y + 0.5);
+        const dz = player.z - e.z;
+        const distSq = dx * dx + dz * dz;
+
+        if (distSq < 1.4 && Math.abs(dy) < 1.2) {
+          // Stomping enemy from above
+          if (player.vy < -0.5 || player.isPounding) {
+            e.alive = false;
+            scene.remove(e.mesh);
+            player.vy = 9; // Bounce up!
+            playSfx('stomp');
+            spawn3DParticles(e.x, e.y, e.z, 0xFF5D73, 14);
+            State.coins += 3;
+            updateHud();
+          } else if (player.invincibleTimer <= 0) {
+            // Player gets hurt
+            State.health = Math.max(1, State.health - 1);
+            player.invincibleTimer = 1.2;
+            player.vy = 6;
+            player.vx = -player.vx * 0.8;
+            playSfx('hurt');
+            updateHud();
+            showToast('Ouch! Bounced by toy rattle!');
+          }
+        }
+      }
+    });
+  }
+
+  function updateParticles(dt) {
+    for (let i = particles3D.length - 1; i >= 0; i--) {
+      const p = particles3D[i];
+      p.age += dt;
+      if (p.age >= p.life) {
+        scene.remove(p.mesh);
+        particles3D.splice(i, 1);
+      } else {
+        p.vy -= 12 * dt;
+        p.mesh.position.x += p.vx * dt;
+        p.mesh.position.y += p.vy * dt;
+        p.mesh.position.z += p.vz * dt;
+        const sc = 1 - (p.age / p.life);
+        p.mesh.scale.set(sc, sc, sc);
+      }
+    }
+  }
+
+  function updateCamera(dt) {
+    if (!camera) return;
+
+    // Smooth camera rotation interpolation
+    camState.angle += (camState.targetAngle - camState.angle) * 0.1;
+
+    const camX = player.x + Math.sin(camState.angle) * camState.dist;
+    const camZ = player.z + Math.cos(camState.angle) * camState.dist;
+    const camY = player.y + camState.height;
+
+    camera.position.x += (camX - camera.position.x) * 0.12;
+    camera.position.y += (camY - camera.position.y) * 0.12;
+    camera.position.z += (camZ - camera.position.z) * 0.12;
+
+    camera.lookAt(player.x, player.y + 1.2, player.z);
+  }
+
+  /* ---------------- BOOTSTRAP ---------------- */
+  window.addEventListener('DOMContentLoaded', () => {
+    initThree();
+    setupInputs();
+    updateHud();
+    requestAnimationFrame(gameLoop);
+  });
+
+})();
+</script>
+</body>
+</html>
