@@ -1,0 +1,2427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#FF8FA3">
+<title>Train Your Baby To Do The Potty — Deluxe Edition (by Florence)</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚽</text></svg>">
+<style>
+  :root {
+    --gold: #FFB703;
+    --gold-deep: #D48B00;
+    --coral: #FF5D73;
+    --coral-deep: #D9254C;
+    --mint: #2EC4B6;
+    --mint-deep: #0F8B8D;
+    --purple: #7209B7;
+    --purple-light: #9B5DE5;
+    --pink-light: #FFB4D0;
+    --cream: #FFFDF7;
+    --ink: #2C221E;
+    --ink-soft: #6A5B52;
+    --font-display: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Marker Felt', 'Nunito', 'Segoe UI', cursive, sans-serif;
+    --font-body: 'Trebuchet MS', 'Segoe UI', -apple-system, sans-serif;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #25133A;
+    font-family: var(--font-body);
+    color: var(--ink);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    position: fixed;
+    inset: 0;
+  }
+  #stage {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% 25%, #FF8FAB 0%, #7B4BB3 55%, #1A0D2E 100%);
+  }
+  #frame {
+    position: relative;
+    width: min(100vw, calc(100vh * 420 / 740), 460px);
+    aspect-ratio: 420 / 740;
+    height: auto;
+    max-height: 100vh;
+    background: #FFE08A;
+    overflow: hidden;
+    box-shadow: 0 0 0 100vmax rgba(26, 13, 46, 0.55), 0 18px 50px rgba(0,0,0,0.5);
+    border-radius: clamp(0px, 3vw, 28px);
+  }
+  canvas#game, canvas#confetti {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  canvas#game {
+    z-index: 1;
+    cursor: pointer;
+    touch-action: none;
+  }
+  canvas#confetti {
+    z-index: 20;
+    pointer-events: none !important;
+  }
+
+  /* Screens */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: max(14px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    text-align: center;
+    overflow-y: auto;
+    scrollbar-width: none;
+    z-index: 30;
+    background: linear-gradient(180deg, #FFE599 0%, #FFB4D0 40%, #7EDDD2 100%);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  .screen::-webkit-scrollbar { display: none; }
+  .screen.hidden {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Badges & Typography */
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: clamp(12px, 3.4vw, 15px);
+    color: #fff;
+    background: var(--coral);
+    padding: 6px 16px;
+    border-radius: 999px;
+    box-shadow: 0 3px 0 var(--coral-deep);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transform: rotate(-1.5deg);
+  }
+  h1.game-title {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 6.8vw, 36px);
+    line-height: 1.08;
+    color: #FFF;
+    text-shadow: 0 3px 0 #D48B00, 0 6px 16px rgba(44, 34, 30, 0.35);
+    margin: 6px 0 4px;
+    text-wrap: balance;
+  }
+  h1.game-title span { color: #FFE66D; }
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 5.6vw, 28px);
+    color: #FFF;
+    text-shadow: 0 2px 0 rgba(44, 34, 30, 0.35);
+    margin: 4px 0 6px;
+  }
+  p.tagline {
+    font-family: var(--font-display);
+    font-size: clamp(12px, 3.4vw, 15px);
+    color: #2C221E;
+    background: rgba(255,255,255,0.92);
+    padding: 6px 14px;
+    border-radius: 14px;
+    margin: 4px 0 8px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+  }
+  .age-pill {
+    font-family: var(--font-display);
+    font-size: 11.5px;
+    background: #2EC4B6;
+    color: #fff;
+    padding: 3px 12px;
+    border-radius: 999px;
+    box-shadow: 0 2px 0 #0F8B8D;
+    display: inline-block;
+    margin-top: 2px;
+  }
+
+  /* Buttons */
+  .btn {
+    font-family: var(--font-display);
+    font-size: clamp(15px, 4.5vw, 20px);
+    color: #fff;
+    background: linear-gradient(180deg, #FFAE03, #FB8500);
+    border: none;
+    border-radius: 20px;
+    padding: 11px 26px;
+    box-shadow: 0 5px 0 #C96B00, 0 8px 14px rgba(44, 34, 30, 0.25);
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    touch-action: manipulation;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #C96B00;
+  }
+  .btn.big {
+    font-size: clamp(18px, 5.5vw, 24px);
+    padding: 13px 36px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #FF6B8B, #FF3366);
+    box-shadow: 0 6px 0 #B81943, 0 10px 18px rgba(255, 51, 102, 0.35);
+  }
+  .btn.big:active {
+    transform: translateY(5px);
+    box-shadow: 0 1px 0 #B81943;
+  }
+  .btn.teal {
+    background: linear-gradient(180deg, #2EC4B6, #0F8B8D);
+    box-shadow: 0 5px 0 #09595A;
+  }
+  .btn.teal:active { box-shadow: 0 1px 0 #09595A; }
+  .btn.purple {
+    background: linear-gradient(180deg, #9B5DE5, #7209B7);
+    box-shadow: 0 5px 0 #4F0680;
+  }
+  .btn.purple:active { box-shadow: 0 1px 0 #4F0680; }
+  .btn.ghost {
+    background: #FFF;
+    color: var(--ink);
+    box-shadow: 0 4px 0 #D4C9B8;
+    font-size: clamp(13px, 3.6vw, 16px);
+    padding: 8px 16px;
+  }
+  .btn.ghost:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #D4C9B8;
+  }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .card-panel {
+    background: rgba(255,255,255,0.96);
+    border: 3px solid #FFD166;
+    border-radius: 20px;
+    padding: 12px 10px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 6px 0 #E2C063, 0 10px 24px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Baby & Pants Grid */
+  .baby-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 440px;
+  }
+  .baby-card {
+    background: #FFF;
+    border: 3px solid #E2D5BE;
+    border-radius: 16px;
+    padding: 6px 4px 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #D8C7A8;
+    text-align: center;
+    touch-action: manipulation;
+  }
+  .baby-card.selected {
+    background: linear-gradient(180deg, #FFF9E6, #FFEAA7);
+    border-color: #FF5376;
+    box-shadow: 0 5px 0 #D9254C;
+    transform: translateY(-2px);
+  }
+  .baby-card canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px;
+  }
+  .baby-card .nm {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: bold;
+    margin-top: 3px;
+    color: var(--ink);
+  }
+  .baby-card .sub {
+    font-size: 10px;
+    color: var(--ink-soft);
+    line-height: 1.1;
+  }
+
+  /* Customizer Accessories Bar */
+  .accessory-bar {
+    display: flex;
+    gap: 6px;
+    overflow-x: auto;
+    padding: 4px 2px;
+    width: 100%;
+    scrollbar-width: none;
+    justify-content: center;
+  }
+  .accessory-bar::-webkit-scrollbar { display: none; }
+  .acc-chip {
+    font-family: var(--font-display);
+    font-size: 12px;
+    background: #FFF;
+    border: 2px solid #FFD166;
+    border-radius: 999px;
+    padding: 4px 10px;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #D8C7A8;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+  }
+  .acc-chip.active {
+    background: #FF5376;
+    color: #FFF;
+    border-color: #D9254C;
+    box-shadow: 0 3px 0 #A81B3B;
+  }
+
+  /* HUD */
+  #hud {
+    position: absolute;
+    top: max(8px, env(safe-area-inset-top));
+    left: 8px;
+    right: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    pointer-events: none;
+    z-index: 15;
+  }
+  #hud.on { display: flex; }
+  .hud-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hud-chip {
+    font-family: var(--font-display);
+    font-size: clamp(11.5px, 3.2vw, 14.5px);
+    background: rgba(255,255,255,0.95);
+    color: var(--ink);
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 2px solid #FFD166;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+    font-weight: bold;
+    pointer-events: auto;
+  }
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2.5px solid #FFD166;
+    background: #FFF;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+    touch-action: manipulation;
+  }
+  .icon-btn:active { transform: translateY(2px); }
+  #hud-banner {
+    background: rgba(255,255,255,0.96);
+    border-radius: 12px;
+    padding: 5px 8px;
+    font-family: var(--font-display);
+    font-size: clamp(11.5px, 3vw, 13.5px);
+    color: #2C221E;
+    border: 2px solid #72EFDD;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    text-align: center;
+    letter-spacing: 0.01em;
+  }
+
+  /* In-game floating notifications & cheer button */
+  #toast {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    background: #2C221E;
+    color: #FFF;
+    font-family: var(--font-display);
+    font-size: clamp(13px, 3.5vw, 15px);
+    padding: 8px 12px;
+    border-radius: 16px;
+    box-shadow: 0 5px 0 #111, 0 10px 20px rgba(0,0,0,0.25);
+    z-index: 18;
+    display: none;
+    text-align: center;
+    pointer-events: none;
+  }
+  #toast.show { display: block; }
+
+  #cheer-btn {
+    position: absolute;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 16;
+    display: none;
+    font-family: var(--font-display);
+    font-size: clamp(17px, 5.2vw, 22px);
+    color: #fff;
+    background: linear-gradient(180deg, #FF6B8B, #FF3366);
+    border: 3px solid #FFF;
+    border-radius: 24px;
+    padding: 11px 30px;
+    box-shadow: 0 6px 0 #B81943, 0 10px 22px rgba(255, 51, 102, 0.4);
+    cursor: pointer;
+    touch-action: manipulation;
+    animation: cheerPulse 1.1s infinite alternate ease-in-out;
+  }
+  #cheer-btn.on { display: block; }
+  #cheer-btn:active {
+    transform: translateX(-50%) translateY(4px);
+    box-shadow: 0 1px 0 #B81943;
+  }
+  @keyframes cheerPulse {
+    0% { transform: translateX(-50%) scale(1); }
+    100% { transform: translateX(-50%) scale(1.08); }
+  }
+
+  #cue {
+    position: absolute;
+    top: 36%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: linear-gradient(180deg, #FFD166, #FFB703);
+    border: 4px solid #FFF;
+    border-radius: 22px;
+    padding: 10px 20px;
+    font-family: var(--font-display);
+    font-size: clamp(18px, 5.2vw, 26px);
+    color: #2C221E;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    z-index: 25;
+    pointer-events: none;
+    text-align: center;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  #cue.show { transform: translate(-50%, -50%) scale(1); }
+
+  /* Certificate Modal */
+  #cert-modal {
+    position: absolute;
+    inset: 12px;
+    background: #FFFDF7;
+    border: 6px solid #FFB703;
+    border-radius: 20px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    text-align: center;
+  }
+  #cert-modal.open { display: flex; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .screen, #cue, #cheer-btn { transition: none; animation: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="frame">
+    <canvas id="game" width="420" height="740"></canvas>
+    <canvas id="confetti" width="420" height="740"></canvas>
+
+    <!-- Top In-Game HUD -->
+    <div id="hud">
+      <div class="hud-row">
+        <div id="hud-level" class="hud-chip">🛒 Level 1</div>
+        <div class="hud-row" style="gap:5px">
+          <div id="hud-count" class="hud-chip">0 / 3 grabs</div>
+          <button class="icon-btn" id="btn-music" aria-label="Music">🎵</button>
+          <button class="icon-btn" id="btn-sound" aria-label="Sound">🔊</button>
+          <button class="icon-btn" id="btn-home" aria-label="Home">🏠</button>
+        </div>
+      </div>
+      <div id="hud-banner">Find the real baby sitting on the shop floor!</div>
+    </div>
+
+    <!-- In-Game Popups & Prompts -->
+    <div id="toast"></div>
+    <button id="cheer-btn" type="button">CHEER!! 📣</button>
+    <div id="cue">⭐ Super Star! ⭐</div>
+
+    <!-- Title Screen -->
+    <div class="screen" id="s-title">
+      <div>
+        <div class="eyebrow">🚽 Designed by Florence 💩</div>
+        <h1 class="game-title">Train Your Baby<br><span>To Do The Potty</span></h1>
+        <p class="tagline">Supermarket Baby Hunt · Rocket Potty · Flush Vortex · Big Kid Pants!</p>
+        <div class="age-pill">Ages 5+ · 5 Crazy Levels · Deluxe Edition</div>
+      </div>
+      <div class="card-panel">
+        <canvas id="title-art" width="360" height="170" style="width:100%;max-width:360px;border-radius:14px;background:#EAF6FF;"></canvas>
+        <div style="font-family:var(--font-display);font-size:13.5px;line-height:1.3;color:var(--ink);">
+          Welcome to the <strong>Normal Shop</strong>. They sell bread, beans… and babies sitting on the floor!
+        </div>
+      </div>
+      <div class="btn-row" style="margin-bottom:6px;">
+        <button class="btn big" id="btn-play">PICK A BABY! 👶</button>
+      </div>
+      <div class="btn-row" style="margin-bottom:2px;">
+        <a class="btn ghost" href="index.html" style="text-decoration:none;">← Florence's Games</a>
+      </div>
+    </div>
+
+    <!-- Baby Selector Screen -->
+    <div class="screen hidden" id="s-baby">
+      <div>
+        <div class="eyebrow">Select Your Trainee</div>
+        <h2>Pick Your Baby</h2>
+      </div>
+      <div class="baby-grid" id="baby-grid"></div>
+      <div>
+        <div style="font-size:12px;font-weight:bold;margin-bottom:3px;color:var(--ink-soft);">Pick a Funny Hat:</div>
+        <div class="accessory-bar" id="hat-bar"></div>
+      </div>
+      <div class="btn-row" style="margin-bottom:6px;">
+        <button class="btn ghost" id="btn-baby-back">← Back</button>
+        <button class="btn big teal" id="btn-baby-go">TRAIN THIS BABY! 🚀</button>
+      </div>
+    </div>
+
+    <!-- Level Intro Screen -->
+    <div class="screen hidden" id="s-intro">
+      <div>
+        <div class="eyebrow" id="intro-badge">Level 1 of 5</div>
+        <h2 id="intro-title">The Normal Shop</h2>
+      </div>
+      <div class="card-panel">
+        <canvas id="intro-art" width="340" height="150" style="width:100%;max-width:340px;border-radius:14px;background:#F0F8FF;"></canvas>
+        <div id="intro-desc" style="font-family:var(--font-display);font-size:14.5px;line-height:1.35;color:var(--ink);"></div>
+        <div style="font-size:12px;color:var(--ink-soft);background:#FFF9E6;padding:5px 12px;border-radius:12px;border:1.5px dashed #FFB703;">
+          💡 Tap, drag &amp; enjoy! Responsive touch controls.
+        </div>
+      </div>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn big" id="btn-intro-go">START LEVEL! 🚀</button>
+      </div>
+    </div>
+
+    <!-- Level Complete Screen -->
+    <div class="screen hidden" id="s-complete">
+      <div>
+        <div class="eyebrow" id="complete-badge">Level Cleared!</div>
+        <h2 id="complete-title">Awesome Job!</h2>
+      </div>
+      <div class="card-panel">
+        <div style="font-size:48px;" id="complete-emoji">🛒👶</div>
+        <p id="complete-msg" style="font-family:var(--font-display);font-size:16px;line-height:1.35;color:var(--ink);">
+          Fantastic!
+        </p>
+        <div style="font-size:22px;letter-spacing:6px;color:#FFB703;">⭐⭐⭐⭐⭐</div>
+      </div>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn big" id="btn-next">Next Level →</button>
+      </div>
+    </div>
+
+    <!-- Final Trophy & Graduation Screen -->
+    <div class="screen hidden" id="s-trophy">
+      <div>
+        <div class="eyebrow">🏆 POTTY GRADUATION 🏆</div>
+        <h2>Golden Potty Trophy!</h2>
+      </div>
+      <div class="card-panel">
+        <canvas id="trophy-art" width="320" height="190" style="width:100%;max-width:320px;cursor:pointer;"></canvas>
+        <p id="trophy-msg" style="font-family:var(--font-display);font-size:15px;line-height:1.3;color:var(--ink);">
+          Baby mastered the shop, peeled the nappy, did a wee &amp; poo, flushed Sir Flushey, and wears Big Kid Pants!
+        </p>
+        <div style="font-size:22px;letter-spacing:6px;color:#FFB703;">⭐⭐⭐⭐⭐</div>
+      </div>
+      <div class="btn-row" style="margin-bottom:6px;">
+        <button class="btn purple" id="btn-cert">📜 View Diploma</button>
+        <button class="btn big" id="btn-again">Play Again! 🔄</button>
+      </div>
+      <div class="btn-row">
+        <a class="btn ghost" href="index.html" style="text-decoration:none;">← All Games</a>
+      </div>
+    </div>
+
+    <!-- Official Certificate Modal -->
+    <div id="cert-modal">
+      <div style="font-family:var(--font-display);font-size:20px;color:#D48B00;font-weight:bold;">
+        🌟 DIPLOMA OF EXCELLENCE 🌟
+      </div>
+      <div style="font-size:14px;color:var(--ink-soft);margin-top:2px;">Florence's Potty Training Academy</div>
+      <div style="border:2px dashed #FFB703;padding:12px;border-radius:14px;width:100%;background:#FFFDF7;margin:8px 0;">
+        <div style="font-size:13px;color:var(--ink);">This is proudly awarded to:</div>
+        <div id="cert-name" style="font-family:var(--font-display);font-size:22px;color:#FF3366;font-weight:bold;margin:4px 0;">Baby Bean</div>
+        <div style="font-size:12.5px;line-height:1.35;color:var(--ink);">
+          For heroic bravery at the checkout, conquering the Rocket Potty, successfully depositing both Wee &amp; Poo, and graduating to <strong>Big Kid Pants</strong>!
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-around;width:100%;align-items:center;">
+        <div>
+          <div style="font-family:var(--font-display);font-size:14px;color:#0F8B8D;font-weight:bold;">Florence</div>
+          <div style="font-size:10px;color:var(--ink-soft);">Head of Potty Academy</div>
+        </div>
+        <div style="font-size:32px;">🥇</div>
+      </div>
+      <button class="btn teal" id="btn-cert-close" style="margin-top:8px;">Close Diploma ✕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const VW = 420, VH = 740;
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const cCanvas = document.getElementById('confetti');
+  const cctx = cCanvas.getContext('2d');
+
+  /* ---------------- BABIES & ASSETS ---------------- */
+  const BABIES = {
+    bean:   { id: 'bean',   name: 'Baby Bean',   sub: 'Found by the baked beans', hair: '#C47A2A', hairStyle: 'curl', vest: '#2EC4B6', vestPattern: 'dots', cheek: '#FF8FA3' },
+    pip:    { id: 'pip',    name: 'Baby Pip',    sub: 'Supermarket floor model',   hair: '#2B170B', hairStyle: 'fluff',vest: '#FFD93D', vestPattern: 'star', cheek: '#FF7A90' },
+    toast:  { id: 'toast',  name: 'Baby Toast',  sub: 'Warm and very crumbly',    hair: '#F2C14E', hairStyle: 'swirl',vest: '#FF8FAB', vestPattern: 'stripes', cheek: '#FF6B8A' },
+    nugget: { id: 'nugget', name: 'Baby Nugget', sub: 'Speedy crawler & dino fan', hair: '#A0522D', hairStyle: 'spiky',vest: '#FF7A00', vestPattern: 'dino', cheek: '#FFAA85' },
+    sprout: { id: 'sprout', name: 'Baby Sprout', sub: 'Master squatter champion', hair: '#4A7C20', hairStyle: 'sprout',vest: '#70E000', vestPattern: 'leaf', cheek: '#FF8FA3' },
+    bubbles:{ id: 'bubbles',name: 'Baby Bubbles',sub: 'Loves splashy bath times',  hair: '#7B2CBF', hairStyle: 'curls',vest: '#B5179E', vestPattern: 'bubble', cheek: '#FF99C8' }
+  };
+
+  const HATS = [
+    { id: 'none',   label: 'No Hat', emoji: '👶' },
+    { id: 'crown',  label: 'Royal Crown', emoji: '👑' },
+    { id: 'duck',   label: 'Duck Cap', emoji: '🦆' },
+    { id: 'dino',   label: 'Dino Horns', emoji: '🦖' },
+    { id: 'chef',   label: 'Chef Toque', emoji: '👨‍🍳' },
+    { id: 'bow',    label: 'Glitter Bow', emoji: '🎀' }
+  ];
+
+  const PANTS_DESIGNS = [
+    { id: 'dino',   name: 'Dino Roar',   color: '#52B788', pattern: '🦖' },
+    { id: 'rainbow',name: 'Rainbow Fun', color: '#FF70A6', pattern: '🌈' },
+    { id: 'star',   name: 'Super Star',  color: '#FFD166', pattern: '⭐' },
+    { id: 'rocket', name: 'Space Rocket',color: '#06D6A0', pattern: '🚀' },
+    { id: 'berry',  name: 'Sweet Berry', color: '#EF476F', pattern: '🍓' },
+    { id: 'galaxy', name: 'Magic Disco', color: '#7209B7', pattern: '✨' }
+  ];
+
+  const LEVELS = [
+    {
+      title: 'The Normal Supermarket',
+      badge: 'Level 1 of 5',
+      desc: 'Find the real baby crawling by the baked beans. Tap them 3 times! Drag them onto the conveyor belt, scan their barcode, and drop 3 coins into the till!',
+      hud: 'Find the baby on the supermarket floor!'
+    },
+    {
+      title: 'The Stuck Nappy & Rocket Potty',
+      badge: 'Level 2 of 5',
+      desc: 'Home bathroom! Peel every sticky duck sticker, yank the nappy off, catch the flying superhero nappy, and park the runaway Rocket Potty!',
+      hud: 'Peel the duck stickers off the nappy!'
+    },
+    {
+      title: 'Potty Party: Wee & Poo!',
+      badge: 'Level 3 of 5',
+      desc: 'Pump the CHEER button! Fill the cheer meter until baby deposits Sparkly Wee-Wee and Mr. Poo safely into the potty!',
+      hud: 'Cheer loudly so baby can do a wee and a poo!'
+    },
+    {
+      title: 'Sir Flushey & The Flush Vortex',
+      badge: 'Level 4 of 5',
+      desc: 'Transport Wee & Poo into Sir Flushey the talking loo! Grab toilet paper to wipe baby clean, then pull the gold handle for the epic water whirlpool!',
+      hud: 'Drop Wee & Poo into Sir Flushey and flush!'
+    },
+    {
+      title: 'Big Kid Pants & Golden Trophy',
+      badge: 'Level 5 of 5',
+      desc: 'Baby graduated from nappies! Choose their favourite Big Kid Underwear, snap them on, and celebrate at the Golden Potty Coronation!',
+      hud: 'Pick Big Kid Pants and claim the Golden Trophy!'
+    }
+  ];
+
+  /* ---------------- STATE ---------------- */
+  const State = {
+    screen: 'title',
+    level: 1,
+    babyId: 'bean',
+    hat: 'none',
+    selectedPants: 'dino',
+    sound: true,
+    music: true,
+    t: 0,
+    last: 0,
+    pointer: { x: 210, y: 370, down: false },
+    drag: null,
+    particles: [],
+    confetti: [],
+    bubbles: [],
+    toast: '',
+    toastUntil: 0,
+    L: {},
+    audioInitialized: false
+  };
+
+  function baby() { return BABIES[State.babyId] || BABIES.bean; }
+
+  /* ---------------- HAPTICS ---------------- */
+  function vibrate(ms) {
+    if (navigator.vibrate) {
+      try { navigator.vibrate(ms || 25); } catch (e) {}
+    }
+  }
+
+  /* ---------------- SOUND SYNTHESIS ENGINE ---------------- */
+  let actx = null;
+  let bgmGain = null;
+  let bgmTimer = null;
+  let bgmStep = 0;
+
+  function audioInit() {
+    if (actx) {
+      if (actx.state === 'suspended') actx.resume().catch(function () {});
+      return;
+    }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      actx = new AC();
+      State.audioInitialized = true;
+      if (State.music) startBgm();
+    } catch (e) { actx = null; }
+  }
+
+  function beep(freq, dur, type, vol, pitchEnd) {
+    if (!State.sound || !actx) return;
+    try {
+      const t = actx.currentTime;
+      const o = actx.createOscillator();
+      const g = actx.createGain();
+      o.type = type || 'sine';
+      o.frequency.setValueAtTime(freq, t);
+      if (pitchEnd) o.frequency.exponentialRampToValueAtTime(Math.max(10, pitchEnd), t + (dur || 0.1));
+      g.gain.setValueAtTime(vol || 0.08, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + (dur || 0.12));
+      o.connect(g); g.connect(actx.destination);
+      o.start(t); o.stop(t + (dur || 0.12) + 0.02);
+    } catch (e) {}
+  }
+
+  function sfx(kind) {
+    if (!State.sound || !actx) return;
+    vibrate(kind === 'flush' ? 80 : kind === 'win' ? 60 : 25);
+    if (kind === 'pop') {
+      beep(540, 0.08, 'sine', 0.09, 880);
+    } else if (kind === 'quack') {
+      beep(320, 0.15, 'sawtooth', 0.06, 260);
+      setTimeout(() => beep(290, 0.12, 'sawtooth', 0.05, 240), 90);
+    } else if (kind === 'peel') {
+      beep(220, 0.08, 'triangle', 0.07, 680);
+    } else if (kind === 'scan') {
+      beep(1760, 0.18, 'square', 0.06);
+    } else if (kind === 'coin') {
+      beep(987, 0.06, 'sine', 0.09);
+      setTimeout(() => beep(1318, 0.12, 'sine', 0.08), 50);
+    } else if (kind === 'register') {
+      beep(659, 0.08, 'sine', 0.08);
+      setTimeout(() => beep(880, 0.1, 'sine', 0.08), 80);
+      setTimeout(() => beep(1318, 0.25, 'triangle', 0.09), 160);
+    } else if (kind === 'giggle') {
+      beep(587, 0.06, 'sine', 0.07);
+      setTimeout(() => beep(784, 0.07, 'sine', 0.08), 60);
+      setTimeout(() => beep(659, 0.06, 'sine', 0.07), 120);
+      setTimeout(() => beep(880, 0.1, 'sine', 0.08), 180);
+    } else if (kind === 'cheer') {
+      beep(440, 0.08, 'square', 0.05, 520);
+      setTimeout(() => beep(554, 0.08, 'square', 0.06, 659), 60);
+      setTimeout(() => beep(659, 0.12, 'square', 0.06), 120);
+    } else if (kind === 'flush') {
+      beep(180, 0.45, 'triangle', 0.09, 80);
+      setTimeout(() => beep(120, 0.5, 'sawtooth', 0.06, 60), 100);
+      setTimeout(() => beep(240, 0.35, 'sine', 0.05, 140), 220);
+    } else if (kind === 'splash') {
+      beep(400, 0.1, 'sine', 0.08, 160);
+      setTimeout(() => beep(600, 0.08, 'sine', 0.06, 200), 40);
+    } else if (kind === 'boing') {
+      beep(200, 0.22, 'sine', 0.09, 600);
+    } else if (kind === 'bubble') {
+      beep(700 + Math.random() * 400, 0.05, 'sine', 0.06, 1200);
+    } else if (kind === 'win') {
+      [523, 659, 784, 1046].forEach((f, idx) => {
+        setTimeout(() => beep(f, 0.18, 'sine', 0.09), idx * 90);
+      });
+    } else if (kind === 'no') {
+      beep(190, 0.16, 'sawtooth', 0.06, 140);
+    } else if (kind === 'ok') {
+      beep(523, 0.08, 'sine', 0.08);
+      setTimeout(() => beep(784, 0.12, 'sine', 0.08), 70);
+    }
+  }
+
+  /* ---------------- BACKGROUND MUSIC SYNTH ---------------- */
+  const BGM_MELODY = [
+    523.25, 0, 659.25, 0, 783.99, 659.25, 523.25, 0,
+    587.33, 0, 698.46, 0, 880.00, 698.46, 587.33, 0,
+    659.25, 0, 783.99, 0, 1046.50, 783.99, 659.25, 0,
+    783.99, 698.46, 659.25, 587.33, 523.25, 0, 0, 0
+  ];
+  const BGM_BASS = [
+    261.63, 0, 261.63, 0, 261.63, 0, 261.63, 0,
+    293.66, 0, 293.66, 0, 293.66, 0, 293.66, 0,
+    329.63, 0, 329.63, 0, 329.63, 0, 329.63, 0,
+    392.00, 0, 349.23, 0, 261.63, 0, 0, 0
+  ];
+
+  function startBgm() {
+    stopBgm();
+    if (!State.music || !actx) return;
+    bgmStep = 0;
+    bgmTimer = setInterval(() => {
+      if (!State.music || !actx || actx.state !== 'running') return;
+      const t = actx.currentTime;
+      const mFreq = BGM_MELODY[bgmStep % BGM_MELODY.length];
+      const bFreq = BGM_BASS[bgmStep % BGM_BASS.length];
+
+      if (mFreq > 0) {
+        const o = actx.createOscillator();
+        const g = actx.createGain();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(mFreq, t);
+        g.gain.setValueAtTime(0.02, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+        o.connect(g); g.connect(actx.destination);
+        o.start(t); o.stop(t + 0.15);
+      }
+      if (bFreq > 0) {
+        const ob = actx.createOscillator();
+        const gb = actx.createGain();
+        ob.type = 'sine';
+        ob.frequency.setValueAtTime(bFreq / 2, t);
+        gb.gain.setValueAtTime(0.025, t);
+        gb.gain.exponentialRampToValueAtTime(0.001, t + 0.16);
+        ob.connect(gb); gb.connect(actx.destination);
+        ob.start(t); ob.stop(t + 0.17);
+      }
+      bgmStep++;
+    }, 180);
+  }
+
+  function stopBgm() {
+    if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+  }
+
+  /* ---------------- UI HELPERS ---------------- */
+  function showScreen(id) {
+    ['s-title', 's-baby', 's-intro', 's-complete', 's-trophy'].forEach(function (s) {
+      document.getElementById(s).classList.toggle('hidden', s !== id);
+    });
+    const playing = !id;
+    document.getElementById('hud').classList.toggle('on', playing);
+    State.screen = id || 'play';
+    if (!playing) document.getElementById('cheer-btn').classList.remove('on');
+  }
+
+  function toast(msg, sec) {
+    State.toast = msg;
+    State.toastUntil = State.t + (sec || 2.5);
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  function hideToast() {
+    document.getElementById('toast').classList.remove('show');
+  }
+
+  function cue(msg) {
+    const el = document.getElementById('cue');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 950);
+  }
+
+  function setHud(levelText, countText, banner) {
+    document.getElementById('hud-level').textContent = levelText;
+    document.getElementById('hud-count').textContent = countText;
+    document.getElementById('hud-banner').textContent = banner;
+  }
+
+  function burst(x, y, color, n) {
+    for (let i = 0; i < (n || 12); i++) {
+      State.particles.push({
+        x: x, y: y,
+        vx: (Math.random() - 0.5) * 220,
+        vy: -40 - Math.random() * 180,
+        life: 0.5 + Math.random() * 0.5,
+        age: 0,
+        col: color || '#FFD166',
+        r: 3.5 + Math.random() * 4.5
+      });
+    }
+  }
+
+  function rainConfetti(n) {
+    const cols = ['#FF5D73', '#FFB703', '#2EC4B6', '#FFE66D', '#9B5DE5', '#06D6A0', '#FFF'];
+    for (let i = 0; i < (n || 50); i++) {
+      State.confetti.push({
+        x: Math.random() * VW,
+        y: -20 - Math.random() * 80,
+        vx: (Math.random() - 0.5) * 60,
+        vy: 90 + Math.random() * 120,
+        rot: Math.random() * 6.28,
+        vr: (Math.random() - 0.5) * 9,
+        col: cols[i % cols.length],
+        w: 7 + Math.random() * 7,
+        h: 4 + Math.random() * 5
+      });
+    }
+  }
+
+  function spawnSoapBubble(x, y) {
+    State.bubbles.push({
+      x: x || (40 + Math.random() * (VW - 80)),
+      y: y || (VH - 40),
+      vx: (Math.random() - 0.5) * 30,
+      vy: -40 - Math.random() * 50,
+      r: 12 + Math.random() * 16,
+      popped: false
+    });
+  }
+
+  /* ---------------- MATH / HIT ---------------- */
+  function dist(ax, ay, bx, by) {
+    const dx = ax - bx, dy = ay - by;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+  function hitC(px, py, x, y, r) { return dist(px, py, x, y) <= r; }
+  function hitR(px, py, x, y, w, h) { return px >= x && px <= x + w && py >= y && py <= y + h; }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  function canvasPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const src = (e.touches && e.touches.length > 0) ? e.touches[0] : (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0] : e;
+    return {
+      x: (src.clientX - r.left) * (VW / r.width),
+      y: (src.clientY - r.top) * (VH / r.height)
+    };
+  }
+
+  /* ---------------- DRAW PRIMITIVES & CHARACTERS ---------------- */
+  function rr(c, x, y, w, h, r) {
+    c.beginPath();
+    if (c.roundRect) c.roundRect(x, y, w, h, r);
+    else c.rect(x, y, w, h);
+    c.fill();
+  }
+
+  function drawHat(c, x, y, sc, hatId) {
+    const h = hatId || State.hat;
+    if (!h || h === 'none') return;
+    c.save();
+    c.translate(x, y);
+    c.scale(sc || 1, sc || 1);
+    if (h === 'crown') {
+      c.fillStyle = '#FFD166';
+      c.beginPath();
+      c.moveTo(-16, 0); c.lineTo(-18, -16); c.lineTo(-8, -8); c.lineTo(0, -20); c.lineTo(8, -8); c.lineTo(18, -16); c.lineTo(16, 0);
+      c.closePath(); c.fill();
+      c.strokeStyle = '#D48B00'; c.lineWidth = 1.5; c.stroke();
+      c.fillStyle = '#FF3366';
+      [-12, 0, 12].forEach(gx => { c.beginPath(); c.arc(gx, -4, 2.5, 0, Math.PI * 2); c.fill(); });
+    } else if (h === 'duck') {
+      c.fillStyle = '#FFE66D';
+      c.beginPath(); c.arc(0, -6, 14, Math.PI, 0); c.fill();
+      c.fillStyle = '#FF9F1C';
+      c.beginPath(); c.ellipse(12, -4, 8, 4, 0.2, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#2C221E';
+      c.beginPath(); c.arc(4, -8, 2, 0, Math.PI * 2); c.fill();
+    } else if (h === 'dino') {
+      c.fillStyle = '#52B788';
+      [-10, 0, 10].forEach(dx => {
+        c.beginPath(); c.moveTo(dx - 5, 0); c.lineTo(dx, -14); c.lineTo(dx + 5, 0); c.fill();
+      });
+    } else if (h === 'chef') {
+      c.fillStyle = '#FFFFFF';
+      c.beginPath(); c.arc(0, -12, 14, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(-10, -8, 10, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(10, -8, 10, 0, Math.PI * 2); c.fill();
+      rr(c, -14, -4, 28, 6, 2);
+    } else if (h === 'bow') {
+      c.fillStyle = '#FF4D6D';
+      c.beginPath(); c.moveTo(0, -4); c.lineTo(-14, -12); c.lineTo(-14, 4); c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(0, -4); c.lineTo(14, -12); c.lineTo(14, 4); c.closePath(); c.fill();
+      c.fillStyle = '#FFE66D';
+      c.beginPath(); c.arc(0, -4, 4, 0, Math.PI * 2); c.fill();
+    }
+    c.restore();
+  }
+
+  function drawBaby(c, x, y, opt) {
+    opt = opt || {};
+    const pose = opt.pose || 'sit';
+    const sc = opt.scale || 1;
+    const flip = opt.flip || 1;
+    const t = opt.t || 0;
+    const b = opt.b || baby();
+    const nappy = opt.nappy !== false;
+    const pants = opt.pants || null;
+    const mood = opt.mood || 'happy';
+    const bob = pose === 'crawl' ? Math.sin(t * 12) * 3 : Math.sin(t * 3) * 1.6;
+
+    c.save();
+    c.translate(x, y + bob);
+    c.scale(flip * sc, sc);
+
+    c.beginPath();
+    c.ellipse(0, 30, 22, 7, 0, 0, Math.PI * 2);
+    c.fillStyle = 'rgba(44,34,30,0.18)';
+    c.fill();
+
+    if (pose === 'crawl') {
+      c.fillStyle = '#FFD6B0';
+      rr(c, -18, 10, 11, 9, 4);
+      rr(c, 7, 10, 11, 9, 4);
+      c.fillStyle = b.vest;
+      rr(c, -17, -8, 34, 24, 8);
+      if (nappy) {
+        c.fillStyle = '#FFF8EE';
+        rr(c, -15, 6, 30, 15, 7);
+        c.fillStyle = '#FFD93D';
+        c.beginPath(); c.arc(-4, 13, 3, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(6, 12, 2.5, 0, Math.PI * 2); c.fill();
+      }
+      c.fillStyle = '#FFD6B0';
+      c.beginPath(); c.arc(16, -14, 14, 0, Math.PI * 2); c.fill();
+      c.fillStyle = b.cheek;
+      c.beginPath(); c.arc(20, -10, 3.5, 0, Math.PI * 2); c.fill();
+      drawBabyFace(c, 18, -14, 13, mood);
+      drawBabyHair(c, 14, -25, b);
+      drawHat(c, 16, -26, 0.85);
+    } else if (pose === 'held') {
+      c.fillStyle = b.vest;
+      rr(c, -14, -8, 28, 24, 8);
+      if (nappy) {
+        c.fillStyle = '#FFF8EE';
+        rr(c, -13, 7, 26, 13, 6);
+        c.fillStyle = '#FFD93D';
+        c.beginPath(); c.arc(0, 14, 3, 0, Math.PI * 2); c.fill();
+      }
+      c.fillStyle = '#FFD6B0';
+      rr(c, -18, 11, 8, 14, 4);
+      rr(c, 10, 11, 8, 14, 4);
+      c.beginPath(); c.arc(0, -21, 14, 0, Math.PI * 2); c.fill();
+      c.fillStyle = b.cheek;
+      c.beginPath(); c.arc(-8, -18, 3.5, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(8, -18, 3.5, 0, Math.PI * 2); c.fill();
+      drawBabyFace(c, 0, -21, 13, mood);
+      drawBabyHair(c, 0, -32, b);
+      drawHat(c, 0, -33, 0.9);
+    } else if (pose === 'potty' || pose === 'cheer') {
+      c.fillStyle = b.vest;
+      rr(c, -15, -12, 30, 22, 8);
+      c.fillStyle = '#FFD6B0';
+      rr(c, -20, -6, 9, 11, 4);
+      rr(c, 11, -6, 9, 11, 4);
+      if (pose === 'cheer') {
+        c.save();
+        c.translate(-19, -8); c.rotate(-0.8 + Math.sin(t * 10) * 0.2);
+        rr(c, -4, -16, 8, 18, 4);
+        c.restore();
+        c.save();
+        c.translate(19, -8); c.rotate(0.8 - Math.sin(t * 10) * 0.2);
+        rr(c, -4, -16, 8, 18, 4);
+        c.restore();
+      }
+      c.beginPath(); c.arc(0, -26, 14, 0, Math.PI * 2); c.fill();
+      c.fillStyle = b.cheek;
+      c.beginPath(); c.arc(-8, -23, 3.5, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(8, -23, 3.5, 0, Math.PI * 2); c.fill();
+      drawBabyFace(c, 0, -26, 13, mood);
+      drawBabyHair(c, 0, -37, b);
+      drawHat(c, 0, -38, 0.9);
+      if (nappy) {
+        c.fillStyle = '#FFF8EE';
+        rr(c, -14, 5, 28, 13, 6);
+      } else if (pants) {
+        drawBabyPants(c, 0, 5, pants);
+      }
+    } else {
+      c.fillStyle = '#FFD6B0';
+      if (pose === 'sit') {
+        rr(c, -24, 12, 17, 10, 4);
+        rr(c, 7, 12, 17, 10, 4);
+      } else {
+        rr(c, -13, 12, 9, 17, 4);
+        rr(c, 4, 12, 9, 17, 4);
+      }
+      c.fillStyle = b.vest;
+      rr(c, -16, -10, 32, 26, 8);
+      if (nappy) {
+        c.fillStyle = '#FFF8EE';
+        rr(c, -15, 7, 30, 15, 7);
+        c.fillStyle = '#FFD93D';
+        c.beginPath(); c.arc(-5, 14, 3, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(5, 13, 2.7, 0, Math.PI * 2); c.fill();
+        c.strokeStyle = '#E8D8B8'; c.lineWidth = 1.3;
+        c.strokeRect(-14, 8, 28, 13);
+      } else if (pants) {
+        drawBabyPants(c, 0, 7, pants);
+      }
+      c.fillStyle = '#FFD6B0';
+      c.beginPath(); c.arc(0, -23, 15, 0, Math.PI * 2); c.fill();
+      c.fillStyle = b.cheek;
+      c.beginPath(); c.arc(-9, -19, 3.5, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(9, -19, 3.5, 0, Math.PI * 2); c.fill();
+      drawBabyFace(c, 0, -23, 14, mood);
+      drawBabyHair(c, 0, -35, b);
+      drawHat(c, 0, -36, 0.95);
+    }
+    c.restore();
+  }
+
+  function drawBabyHair(c, x, y, b) {
+    c.fillStyle = b.hair;
+    if (b.hairStyle === 'spiky') {
+      [-8, 0, 8].forEach(hx => {
+        c.beginPath(); c.moveTo(x + hx - 4, y + 4); c.lineTo(x + hx, y - 8); c.lineTo(x + hx + 4, y + 4); c.fill();
+      });
+    } else if (b.hairStyle === 'sprout') {
+      c.beginPath(); c.arc(x, y + 2, 4, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(x - 5, y - 5, 5, 2.5, -0.6, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(x + 5, y - 5, 5, 2.5, 0.6, 0, Math.PI * 2); c.fill();
+    } else {
+      c.beginPath(); c.arc(x - 7, y + 2, 6, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(x + 5, y, 5.5, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(x + 11, y + 5, 4.5, 0, Math.PI * 2); c.fill();
+    }
+  }
+
+  function drawBabyFace(c, x, y, s, mood) {
+    c.fillStyle = '#2C221E';
+    c.beginPath(); c.arc(x - s * 0.22, y - s * 0.06, s * 0.08, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(x + s * 0.22, y - s * 0.06, s * 0.08, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#2C221E';
+    c.lineWidth = Math.max(1.5, s * 0.08);
+    c.lineCap = 'round';
+    c.beginPath();
+    if (mood === 'shock') {
+      c.fillStyle = '#2C221E';
+      c.beginPath(); c.arc(x, y + s * 0.24, s * 0.14, 0, Math.PI * 2); c.fill();
+    } else if (mood === 'concentrate') {
+      c.moveTo(x - s * 0.18, y + s * 0.24);
+      c.lineTo(x + s * 0.18, y + s * 0.24);
+      c.stroke();
+      c.fillStyle = '#72EFDD';
+      c.beginPath(); c.arc(x + s * 0.45, y - s * 0.2, 2.5, 0, Math.PI * 2); c.fill();
+    } else if (mood === 'proud' || mood === 'star') {
+      c.arc(x, y + s * 0.14, s * 0.22, 0.1, Math.PI - 0.1);
+      c.stroke();
+    } else {
+      c.arc(x, y + s * 0.12, s * 0.19, 0.12, Math.PI - 0.12);
+      c.stroke();
+    }
+  }
+
+  function drawBabyPants(c, x, y, pId) {
+    const pMeta = PANTS_DESIGNS.find(p => p.id === pId) || PANTS_DESIGNS[0];
+    c.fillStyle = pMeta.color;
+    rr(c, x - 15, y, 30, 16, 6);
+    c.fillStyle = '#FFF';
+    c.font = 'bold 10px sans-serif';
+    c.textAlign = 'center';
+    c.fillText(pMeta.pattern, x, y + 12);
+  }
+
+  function drawNappy(c, x, y, sc, spin) {
+    c.save();
+    c.translate(x, y);
+    c.rotate(spin || 0);
+    c.scale(sc || 1, sc || 1);
+    c.fillStyle = '#FFF8EE';
+    rr(c, -24, -15, 48, 30, 12);
+    c.fillStyle = '#FFE08A';
+    rr(c, -19, -7, 38, 17, 8);
+    c.fillStyle = '#FFD93D';
+    c.beginPath(); c.arc(-9, 0, 5, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(8, 1, 4, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#2C221E';
+    c.font = 'bold 10px Comic Sans MS, sans-serif';
+    c.textAlign = 'center';
+    c.fillText('QUACK', 0, 14);
+    c.restore();
+  }
+
+  function drawPotty(c, x, y, rocket, t) {
+    c.save();
+    c.translate(x, y);
+    c.beginPath(); c.ellipse(0, 24, 25, 8, 0, 0, Math.PI * 2);
+    c.fillStyle = 'rgba(0,0,0,0.18)'; c.fill();
+
+    if (rocket) {
+      const fl = 12 + Math.sin(t * 22) * 7;
+      c.fillStyle = '#FF9F1C';
+      c.beginPath(); c.moveTo(-12, 18); c.lineTo(0, 18 + fl); c.lineTo(12, 18); c.fill();
+      c.fillStyle = '#FFE66D';
+      c.beginPath(); c.moveTo(-6, 18); c.lineTo(0, 18 + fl * 0.65); c.lineTo(6, 18); c.fill();
+    }
+    c.fillStyle = '#FF5D73';
+    rr(c, -26, -7, 52, 28, 11);
+    c.fillStyle = '#FFFDF7';
+    c.beginPath(); c.ellipse(0, 2, 15, 11, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#BDE0FE';
+    c.beginPath(); c.ellipse(0, 3, 11, 7.5, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#FFD166';
+    rr(c, -30, -19, 13, 22, 5);
+    rr(c, 17, -19, 13, 22, 5);
+    c.fillStyle = '#2C221E';
+    c.beginPath(); c.arc(-8, -2, 2.2, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(8, -2, 2.2, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#2C221E'; c.lineWidth = 1.6;
+    c.beginPath(); c.arc(0, 4, 5, 0.15, Math.PI - 0.15); c.stroke();
+    c.restore();
+  }
+
+  function drawSirFlushey(c, x, y, t, openMouth, flushing) {
+    c.save();
+    c.translate(x, y);
+    c.fillStyle = '#E8EEF4';
+    rr(c, -30, 12, 60, 36, 12);
+    c.fillStyle = '#FFFFFF';
+    rr(c, -35, -9, 70, 30, 15);
+    c.fillStyle = flushing ? '#48CAE4' : '#90E0EF';
+    c.beginPath(); c.ellipse(0, 6, 20, 13, 0, 0, Math.PI * 2); c.fill();
+    if (flushing) {
+      c.strokeStyle = '#03045E';
+      c.lineWidth = 2.5;
+      c.beginPath();
+      for (let a = 0; a < Math.PI * 4; a += 0.2) {
+        const rad = (a / (Math.PI * 4)) * 16;
+        const sa = a + t * 14;
+        c.lineTo(Math.cos(sa) * rad, 6 + Math.sin(sa) * rad * 0.6);
+      }
+      c.stroke();
+    }
+    c.fillStyle = '#F4F7FA';
+    rr(c, -22, -45, 44, 40, 10);
+    c.fillStyle = '#2C221E';
+    c.beginPath(); c.arc(-9, -30, 2.8, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(9, -30, 2.8, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#2C221E'; c.lineWidth = 1.8;
+    c.beginPath();
+    if (openMouth) c.arc(0, -18, 8, 0.1, Math.PI - 0.1);
+    else c.arc(0, -20, 6, 0.2, Math.PI - 0.2);
+    c.stroke();
+    c.fillStyle = '#FFD166';
+    c.beginPath(); c.arc(36, -10, 9, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#D48B00';
+    c.beginPath(); c.arc(36, -10, 3.5, 0, Math.PI * 2); c.fill();
+    c.restore();
+  }
+
+  function drawWee(c, x, y, t) {
+    c.save();
+    c.translate(x, y);
+    c.rotate(Math.sin(t * 8) * 0.2);
+    const s = 18 + Math.sin(t * 10) * 2;
+    c.fillStyle = '#FFE66D';
+    c.beginPath();
+    for (let i = 0; i < 5; i++) {
+      const a = -Math.PI / 2 + i * Math.PI * 2 / 5;
+      const a2 = a + Math.PI / 5;
+      c.lineTo(Math.cos(a) * s, Math.sin(a) * s);
+      c.lineTo(Math.cos(a2) * s * 0.46, Math.sin(a2) * s * 0.46);
+    }
+    c.closePath();
+    c.fill();
+    c.strokeStyle = '#E0B800'; c.lineWidth = 2.2; c.stroke();
+    c.fillStyle = '#2C221E';
+    c.beginPath(); c.arc(-3, -1, 2, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(3, -1, 2, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#2C221E'; c.lineWidth = 1.4;
+    c.beginPath(); c.arc(0, 3, 3.5, 0.15, Math.PI - 0.15); c.stroke();
+    c.restore();
+  }
+
+  function drawMrPoo(c, x, y, t) {
+    c.save();
+    c.translate(x, y);
+    c.rotate(Math.sin(t * 6) * 0.15);
+    c.fillStyle = '#C17A3A';
+    c.beginPath(); c.ellipse(0, 9, 18, 11, 0, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.ellipse(0, 0, 14, 10, 0, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.ellipse(2, -9, 9, 8, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#2C221E';
+    rr(c, -11, -21, 22, 6, 2);
+    c.fillStyle = '#3A2415';
+    c.beginPath(); c.ellipse(0, -25, 9, 5, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#FFF';
+    c.beginPath(); c.arc(-6, -1, 5.5, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(6, -1, 5.5, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#2C221E';
+    c.beginPath(); c.arc(-5, 0, 2.4, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(7, 0, 2.4, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#2C221E'; c.lineWidth = 1.8;
+    c.beginPath(); c.arc(1, 7, 4.5, 0.2, Math.PI - 0.2); c.stroke();
+    c.restore();
+  }
+
+  /* ---------------- SCENES & BACKGROUNDS ---------------- */
+  function drawShopBg(c, t) {
+    c.fillStyle = '#D6EAF8';
+    c.fillRect(0, 0, VW, VH);
+    for (let i = 0; i < 4; i++) {
+      const lx = 50 + i * 105;
+      c.fillStyle = 'rgba(255,255,220,0.45)';
+      c.beginPath(); c.moveTo(lx - 35, 0); c.lineTo(lx + 35, 0); c.lineTo(lx + 85, 220); c.lineTo(lx - 85, 220); c.fill();
+      c.fillStyle = '#FFF6B0';
+      rr(c, lx - 24, 4, 48, 12, 4);
+    }
+    c.fillStyle = '#2B2D42';
+    c.fillRect(0, 92, VW, 28);
+    c.fillStyle = '#FFE66D';
+    c.font = 'bold 12px Comic Sans MS, sans-serif';
+    c.textAlign = 'left';
+    const msg = '  ★ TANNOY: CLEAN-UP IN AISLE 3! A LIVE BABY IS SITTING ON THE FLOOR NEXT TO THE BEANS. £3.99 EACH! ★  ';
+    const scroll = ((t * 45) % 950);
+    c.fillText(msg + msg, 10 - scroll, 111);
+
+    const fy = 440;
+    c.fillStyle = '#E8D5B0';
+    c.fillRect(0, fy, VW, VH - fy);
+    for (let y = 0; y < 8; y++) {
+      for (let x = 0; x < 11; x++) {
+        if ((x + y) % 2 === 0) {
+          c.fillStyle = '#D9C29A';
+          c.fillRect(x * 42 - 10, fy + y * 40, 42, 40);
+        }
+      }
+    }
+
+    c.fillStyle = '#8B5A2B';
+    rr(c, 8, 85, 135, 310, 8);
+    c.fillStyle = '#C48A4A';
+    [105, 175, 245, 315].forEach(sy => c.fillRect(14, sy, 123, 8));
+    const cans = ['#E63946', '#F4A261', '#2A9D8F', '#E9C46A', '#E76F51', '#457B9D'];
+    for (let i = 0; i < 6; i++) {
+      c.fillStyle = cans[i];
+      rr(c, 20 + (i % 3) * 38, 122 + Math.floor(i / 3) * 28, 30, 22, 4);
+      c.fillStyle = '#FFF';
+      c.font = 'bold 8px Comic Sans MS, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('BEANS', 35 + (i % 3) * 38, 136 + Math.floor(i / 3) * 28);
+    }
+    c.fillStyle = '#F4E1C1';
+    rr(c, 22, 192, 28, 20, 6);
+    rr(c, 58, 192, 28, 20, 6);
+    rr(c, 94, 190, 30, 22, 6);
+    c.fillStyle = '#FFF';
+    c.font = 'bold 11px Comic Sans MS, sans-serif';
+    c.fillText('BREAD', 75, 235);
+    c.fillStyle = '#FFE66D';
+    rr(c, 18, 262, 114, 44, 8);
+    c.fillStyle = '#2C221E';
+    c.font = 'bold 12px Comic Sans MS, sans-serif';
+    c.fillText('FLOOR BABIES', 75, 282);
+    c.font = 'bold 10px Comic Sans MS, sans-serif';
+    c.fillText('£3.99 · VERY FRESH', 75, 298);
+
+    c.fillStyle = '#8ECAE6';
+    rr(c, 280, 95, 130, 165, 10);
+    c.fillStyle = '#219EBC';
+    rr(c, 286, 102, 118, 24, 6);
+    c.fillStyle = '#FFF';
+    c.font = 'bold 12px Comic Sans MS, sans-serif';
+    c.fillText('ICE CREAM', 345, 119);
+
+    c.fillStyle = '#6C584C';
+    rr(c, 190, 500, 220, 100, 10);
+    c.fillStyle = '#D4A373';
+    rr(c, 198, 478, 204, 30, 6);
+    c.fillStyle = '#111';
+    rr(c, 325, 440, 75, 42, 6);
+    c.fillStyle = '#7DFFB3';
+    c.font = 'bold 12px Comic Sans MS, sans-serif';
+    c.textAlign = 'center';
+    c.fillText('47p DUE', 362, 466);
+    c.fillStyle = '#FFF';
+    c.font = 'bold 12px Comic Sans MS, sans-serif';
+    c.fillText('CHECKOUT 1', 300, 555);
+
+    const tx = 38 + Math.sin(t * 0.8) * 8;
+    c.strokeStyle = '#6C757D'; c.lineWidth = 3;
+    c.strokeRect(tx, 480, 72, 42);
+    c.beginPath(); c.arc(tx + 14, 532, 8, 0, Math.PI * 2); c.stroke();
+    c.beginPath(); c.arc(tx + 58, 532, 8, 0, Math.PI * 2); c.stroke();
+
+    c.save();
+    c.translate(245, 452);
+    c.fillStyle = '#FF8FAB'; rr(c, -16, -8, 32, 28, 8);
+    c.fillStyle = '#2EC4B6'; rr(c, -18, 4, 36, 22, 6);
+    c.fillStyle = '#FFD6B0'; c.beginPath(); c.arc(0, -18, 14, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#FF4D6D'; c.beginPath(); c.arc(0, -24, 15, Math.PI, Math.PI * 2); c.fill();
+    drawBabyFace(c, 0, -17, 12, 'happy');
+    c.restore();
+  }
+
+  function drawBathBg(c) {
+    c.fillStyle = '#B8E0D2';
+    c.fillRect(0, 0, VW, VH);
+    for (let y = 35; y < VH; y += 30) {
+      for (let x = 0; x < VW; x += 30) {
+        c.strokeStyle = 'rgba(255,255,255,0.4)';
+        c.strokeRect(x, y, 30, 30);
+      }
+    }
+    c.fillStyle = '#FFFFFF';
+    rr(c, 16, 85, 170, 75, 26);
+    c.fillStyle = '#90E0EF';
+    rr(c, 28, 100, 146, 48, 18);
+    c.fillStyle = '#FFB703';
+    c.beginPath(); c.arc(52, 118, 9, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(76, 114, 7, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#F8F9FA';
+    rr(c, 260, 85, 140, 75, 18);
+    c.fillStyle = '#CAF0F8';
+    c.beginPath(); c.ellipse(330, 128, 44, 20, 0, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#E9C46A';
+    rr(c, 16, 520, 75, 60, 10);
+    c.fillStyle = '#F4A261';
+    c.fillRect(16, 534, 75, 9);
+    c.fillStyle = '#2C221E';
+    c.font = 'bold 11px Comic Sans MS, sans-serif';
+    c.textAlign = 'center';
+    c.fillText('WASH 🧺', 53, 568);
+  }
+
+  function drawDecoy(c, d) {
+    c.save();
+    c.translate(d.x, d.y);
+    if (d.kind === 'cabbage') {
+      c.fillStyle = '#6A994E';
+      c.beginPath(); c.arc(0, 0, 20, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#A7C957';
+      c.beginPath(); c.arc(-5, -2, 11, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#FF8FAB';
+      rr(c, -18, -24, 36, 12, 7);
+    } else if (d.kind === 'bread') {
+      c.fillStyle = '#E9C46A';
+      rr(c, -20, -12, 40, 24, 11);
+      c.fillStyle = '#F4E1C1';
+      rr(c, -16, -7, 32, 15, 9);
+      c.fillStyle = '#FFB4D0';
+      rr(c, -14, -20, 28, 12, 7);
+    } else if (d.kind === 'teddy') {
+      c.fillStyle = '#A06CD5';
+      c.beginPath(); c.arc(0, 0, 18, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(-14, -14, 8, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(14, -14, 8, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#FFD166';
+      c.beginPath(); c.arc(0, 4, 7, 0, Math.PI * 2); c.fill();
+    } else {
+      c.fillStyle = '#C2B280';
+      rr(c, -18, -14, 36, 28, 9);
+      c.fillStyle = '#8B7355';
+      c.font = 'bold 9px Comic Sans MS, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('SPUDS', 0, 4);
+    }
+    c.restore();
+  }
+
+  /* ---------------- LEVEL INITIALIZATION & LIFECYCLE ---------------- */
+  function startLevel(n) {
+    State.level = n;
+    State.drag = null;
+    State.particles = [];
+    State.confetti = [];
+    State.bubbles = [];
+    const L = State.L = { phase: 'start', winAt: 0 };
+
+    if (n === 1) {
+      L.phase = 'find';
+      L.baby = { x: 200, y: 410, vx: 0, flip: 1, grabs: 0, stun: 0 };
+      L.held = false;
+      L.scanned = false;
+      L.onBelt = false;
+      L.coins = [
+        { x: 70, y: 620, homeX: 70, homeY: 620, paid: false, id: 0, val: '20p' },
+        { x: 130, y: 630, homeX: 130, homeY: 630, paid: false, id: 1, val: '20p' },
+        { x: 95, y: 670, homeX: 95, homeY: 670, paid: false, id: 2, val: '7p' }
+      ];
+      L.decoys = [
+        { kind: 'cabbage', x: 330, y: 310 },
+        { kind: 'bread', x: 80, y: 400 },
+        { kind: 'spud', x: 310, y: 390 },
+        { kind: 'teddy', x: 200, y: 270 }
+      ];
+      toast('A BABY is sitting on the FLOOR next to the beans! Tap to pick up.', 3);
+    } else if (n === 2) {
+      L.phase = 'stickers';
+      L.baby = { x: 210, y: 350 };
+      L.stickers = [];
+      for (let i = 0; i < 5; i++) {
+        L.stickers.push({
+          x: 176 + (i % 3) * 30,
+          y: 358 + Math.floor(i / 3) * 24,
+          gone: false,
+          id: i
+        });
+      }
+      L.nappy = { x: 210, y: 370, off: false, caught: false, vx: 80, vy: -30, ang: 0 };
+      L.potty = { x: 210, y: 530, parked: false, vx: 180 };
+      L.nappyDrag = 0;
+      for (let i = 0; i < 6; i++) spawnSoapBubble();
+      toast('Duck stickers are GLUED to this nappy! Peel every one!', 3);
+    } else if (n === 3) {
+      L.phase = 'cheer';
+      L.cheers = 0;
+      L.baby = { x: 210, y: 440 };
+      L.wee = { x: 175, y: 460, vx: 95, vy: -65, held: false, done: false };
+      L.poo = { x: 245, y: 470, vx: -75, vy: 45, held: false, done: false };
+      document.getElementById('cheer-btn').classList.add('on');
+      toast('Cheer loudly! Baby needs to do a wee AND a poo in the potty.', 3);
+    } else if (n === 4) {
+      L.phase = 'wee';
+      L.baby = { x: 130, y: 450 };
+      L.sirFlushey = { x: 310, y: 350 };
+      L.wee = { x: 130, y: 480, held: false, inLoo: false };
+      L.poo = { x: 130, y: 520, held: false, inLoo: false };
+      L.toiletPaper = { x: 60, y: 220, wiped: 0 };
+      L.flushed = false;
+      toast('Sir Flushey is hungry! Drop Wee and Poo into the loo!', 3);
+    } else {
+      L.phase = 'pants';
+      L.baby = { x: 210, y: 390 };
+      L.pantsOn = false;
+      toast('Baby graduated! Pick their stylish Big Kid Underwear!', 3);
+    }
+
+    showScreen(null);
+    document.getElementById('cheer-btn').classList.toggle('on', n === 3 && L.phase === 'cheer');
+    updateHud();
+    sfx('ok');
+  }
+
+  function updateHud() {
+    const L = State.L;
+    if (State.level === 1) {
+      const paid = L.coins ? L.coins.filter(c => c.paid).length : 0;
+      let b = 'Find the baby sitting on the supermarket floor!';
+      if (L.phase === 'chase') b = 'Catch that crawler! Tap tap tap!';
+      if (L.phase === 'carry') b = 'Carry baby to the CHECKOUT belt!';
+      if (L.phase === 'pay') b = 'Pay 47p! Drag 3 coins onto the till!';
+      setHud('🛒 Level 1', (L.phase === 'pay' ? paid + ' / 3 coins' : (L.baby.grabs || 0) + ' / 3 grabs'), b);
+    } else if (State.level === 2) {
+      const left = L.stickers ? L.stickers.filter(s => !s.gone).length : 0;
+      let b = 'Peel the duck stickers off the nappy!';
+      let cnt = (5 - left) + ' / 5 stickers';
+      if (L.phase === 'yank') { b = 'Drag the nappy DOWN to yank it off!'; cnt = 'YANK!'; }
+      if (L.phase === 'catchnappy') { b = 'Catch the flying nappy! Tap it mid-air!'; cnt = 'FLYING!'; }
+      if (L.phase === 'catchpotty') { b = 'STOP the Rocket Potty! Tap it!', cnt = 'ZOOM!'; }
+      if (L.phase === 'place') { b = 'Drag baby onto the potty!', cnt = 'SIT!'; }
+      setHud('🧻 Level 2', cnt, b);
+    } else if (State.level === 3) {
+      let b = 'Cheer loudly so baby can do a wee and a poo!';
+      let cnt = (L.cheers || 0) + ' / 6 cheers';
+      setHud('🎉 Level 3', cnt, b);
+    } else if (State.level === 4) {
+      let b = 'Drop Wee & Poo into Sir Flushey!';
+      let cnt = 'WEE & POO';
+      if (L.phase === 'wipe') { b = 'Drag soft toilet paper to wipe baby clean!'; cnt = 'WIPE!'; }
+      if (L.phase === 'flush') { b = 'Tap the GOLD HANDLE to flush Sir Flushey!'; cnt = 'FLUSH!'; }
+      setHud('🚽 Level 4', cnt, b);
+    } else {
+      let b = 'Pick Big Kid Pants and claim the Golden Trophy!';
+      setHud('👑 Level 5', 'BIG KID PANTS', b);
+    }
+  }
+
+  function winLevel() {
+    const L = State.L;
+    if (L.phase === 'won') return;
+    L.phase = 'won';
+    L.winAt = State.t + 1.2;
+    sfx('win');
+    rainConfetti(60);
+    cue(State.level === 1 ? 'SOLD! 🛒' : State.level === 2 ? 'PARKED! 🚽' : State.level === 3 ? 'POOP STARS! 🌟' : State.level === 4 ? 'WHOOSH FLUSH! 🌊' : 'CHAMPION! 🏆');
+    document.getElementById('cheer-btn').classList.remove('on');
+  }
+
+  function showComplete() {
+    const n = State.level;
+    const names = baby().name;
+    document.getElementById('complete-badge').textContent = 'Level ' + n + ' Cleared!';
+    if (n === 1) {
+      document.getElementById('complete-title').textContent = 'You bought ' + names + '!';
+      document.getElementById('complete-emoji').textContent = '🛒👶';
+      document.getElementById('complete-msg').textContent = 'Receipt: 1 floor-baby, 47p, barcode scanned. Take your new baby home!';
+    } else if (n === 2) {
+      document.getElementById('complete-title').textContent = names + ' is on the Potty!';
+      document.getElementById('complete-emoji').textContent = '🚽🧻';
+      document.getElementById('complete-msg').textContent = 'Duck stickers defeated. Rocket Potty tamed. Ready for the serious business!';
+    } else if (n === 3) {
+      document.getElementById('complete-title').textContent = 'Wee & Poo Delivered!';
+      document.getElementById('complete-emoji').textContent = '⭐💩';
+      document.getElementById('complete-msg').textContent = 'Baby performed like a superstar! Time to take them to the big toilet.';
+    } else if (n === 4) {
+      document.getElementById('complete-title').textContent = 'Sir Flushey is Satisfied!';
+      document.getElementById('complete-emoji').textContent = '🌊🚽';
+      document.getElementById('complete-msg').textContent = 'Wiped squeaky clean and flushed down the vortex! Now for the final graduation!';
+    }
+    showScreen('s-complete');
+    drawIntroPreview();
+  }
+
+  function showTrophy() {
+    document.getElementById('trophy-msg').textContent =
+      baby().name + ' is officially potty trained! No more nappies, only shiny Big Kid Pants!';
+    document.getElementById('cert-name').textContent = baby().name;
+    showScreen('s-trophy');
+    rainConfetti(90);
+    drawTrophyArt();
+  }
+
+  /* ---------------- FRAME UPDATE ---------------- */
+  function update(dt) {
+    const L = State.L;
+
+    State.particles.forEach(p => {
+      p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt;
+    });
+    State.particles = State.particles.filter(p => p.age < p.life);
+
+    State.confetti.forEach(p => {
+      p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
+    });
+    State.confetti = State.confetti.filter(p => p.y < VH + 25);
+
+    State.bubbles.forEach(b => {
+      b.x += b.vx * dt; b.y += b.vy * dt;
+      if (b.y < -30) { b.y = VH + 20; b.x = 40 + Math.random() * (VW - 80); }
+    });
+
+    if (State.t > State.toastUntil) hideToast();
+
+    if (State.screen !== 'play' || !L.phase || L.phase === 'won') {
+      if (L.phase === 'won' && State.t >= L.winAt) {
+        if (State.level === 5) showTrophy();
+        else showComplete();
+      }
+      return;
+    }
+
+    if (State.level === 1) updateL1(dt);
+    else if (State.level === 2) updateL2(dt);
+    else if (State.level === 3) updateL3(dt);
+    else if (State.level === 4) updateL4(dt);
+    else updateL5(dt);
+
+    updateHud();
+  }
+
+  function updateL1(dt) {
+    const L = State.L;
+    const b = L.baby;
+    if (L.phase === 'chase') {
+      if (b.stun > 0) {
+        b.stun -= dt;
+      } else {
+        if (b.vx === 0) b.vx = 90;
+        b.x += b.vx * dt;
+        if (b.x > 350) { b.x = 350; b.vx = -Math.abs(b.vx); b.flip = -1; }
+        if (b.x < 70) { b.x = 70; b.vx = Math.abs(b.vx); b.flip = 1; }
+      }
+    }
+    if (L.phase === 'carry' && State.drag && State.drag.kind === 'baby') {
+      b.x = State.pointer.x;
+      b.y = State.pointer.y + 10;
+    }
+    if (L.phase === 'pay') {
+      L.coins.forEach(coin => {
+        if (coin.paid) return;
+        if (State.drag && State.drag.kind === 'coin' && State.drag.id === coin.id) {
+          coin.x = State.pointer.x;
+          coin.y = State.pointer.y;
+        }
+      });
+    }
+  }
+
+  function updateL2(dt) {
+    const L = State.L;
+    if (L.phase === 'catchnappy' && L.nappy.off && !L.nappy.caught) {
+      L.nappy.ang = (L.nappy.ang || 0) + dt * 2.5;
+      L.nappy.x = L.baby.x + Math.cos(L.nappy.ang) * 80;
+      L.nappy.y = L.baby.y - 20 + Math.sin(L.nappy.ang) * 55;
+    }
+    if (L.phase === 'catchpotty' && !L.potty.parked) {
+      L.potty.x += L.potty.vx * dt;
+      if (L.potty.x > 360) { L.potty.x = 360; L.potty.vx *= -1; }
+      if (L.potty.x < 60) { L.potty.x = 60; L.potty.vx *= -1; }
+    }
+    if (L.phase === 'place' && State.drag && State.drag.kind === 'baby') {
+      L.baby.x = State.pointer.x;
+      L.baby.y = State.pointer.y;
+    }
+  }
+
+  function updateL3(dt) {
+    const L = State.L;
+    document.getElementById('cheer-btn').classList.toggle('on', L.phase === 'cheer');
+  }
+
+  function updateL4(dt) {
+    const L = State.L;
+    if (L.phase === 'wee' && L.wee.held) {
+      L.wee.x = State.pointer.x; L.wee.y = State.pointer.y;
+    }
+    if (L.phase === 'poo' && L.poo.held) {
+      L.poo.x = State.pointer.x; L.poo.y = State.pointer.y;
+    }
+    if (L.phase === 'wipe' && State.drag && State.drag.kind === 'paper') {
+      L.toiletPaper.x = State.pointer.x;
+      L.toiletPaper.y = State.pointer.y;
+      if (hitC(State.pointer.x, State.pointer.y, L.baby.x, L.baby.y + 10, 45)) {
+        L.toiletPaper.wiped += dt;
+        burst(State.pointer.x, State.pointer.y, '#FFF', 3);
+        if (L.toiletPaper.wiped > 1.2) {
+          L.phase = 'flush';
+          toast('Baby is squeaky clean! Now pull the GOLD FLUSH HANDLE!', 2.5);
+          sfx('ok');
+        }
+      }
+    }
+  }
+
+  function updateL5(dt) {
+    const L = State.L;
+  }
+
+  /* ---------------- TOUCH & POINTER INTERACTIONS ---------------- */
+  function onDown(e) {
+    audioInit();
+    if (State.screen !== 'play') return;
+    e.preventDefault();
+    const p = canvasPos(e);
+    State.pointer.x = p.x; State.pointer.y = p.y; State.pointer.down = true;
+
+    State.bubbles.forEach(b => {
+      if (hitC(p.x, p.y, b.x, b.y, b.r + 8)) {
+        b.y = VH + 30;
+        burst(p.x, p.y, '#72EFDD', 8);
+        sfx('bubble');
+      }
+    });
+
+    if (State.level === 1) downL1(p);
+    else if (State.level === 2) downL2(p);
+    else if (State.level === 3) downL3(p);
+    else if (State.level === 4) downL4(p);
+    else if (State.level === 5) downL5(p);
+  }
+
+  function onMove(e) {
+    if (!State.pointer.down) return;
+    e.preventDefault();
+    const p = canvasPos(e);
+    State.pointer.x = p.x; State.pointer.y = p.y;
+  }
+
+  function onUp(e) {
+    if (State.screen !== 'play') { State.pointer.down = false; return; }
+    e.preventDefault();
+    const p = canvasPos(e);
+    State.pointer.x = p.x; State.pointer.y = p.y;
+    if (State.level === 1) upL1(p);
+    else if (State.level === 2) upL2(p);
+    else if (State.level === 3) upL3(p);
+    else if (State.level === 4) upL4(p);
+    else if (State.level === 5) upL5(p);
+    State.pointer.down = false;
+    State.drag = null;
+  }
+
+  /* LEVEL 1 POINTER */
+  function downL1(p) {
+    const L = State.L;
+    if (L.phase === 'find' || L.phase === 'chase') {
+      if (hitC(p.x, p.y, L.baby.x, L.baby.y, 65)) {
+        L.baby.grabs++;
+        L.baby.stun = 0.7;
+        burst(L.baby.x, L.baby.y, '#FFD166', 10);
+        sfx('giggle');
+        L.phase = 'chase';
+        L.baby.vx = (Math.random() > 0.5 ? 1 : -1) * (85 + L.baby.grabs * 16);
+        toast(['Giggle! Floor-baby crawls fast!', 'Gotcha almost! Tap again!', 'CAUGHT THE BABY! To checkout!'][Math.min(L.baby.grabs - 1, 2)], 1.6);
+        if (L.baby.grabs >= 3) {
+          L.phase = 'carry';
+          L.held = true;
+          State.drag = { kind: 'baby' };
+          sfx('ok');
+        }
+      } else {
+        L.decoys.forEach(d => {
+          if (hitC(p.x, p.y, d.x, d.y, 30)) {
+            sfx('no');
+            const lines = {
+              cabbage: 'That is a CABBAGE in a bonnet! We do not potty-train cabbage!',
+              bread: 'That is warm BREAD! Smells nice, but zero nappies!',
+              spud: 'Sack of potatoes! Heavy starch, cannot do a wee!',
+              teddy: 'Stuffed teddy bear! He is already potty trained!'
+            };
+            toast(lines[d.kind], 2);
+          }
+        });
+      }
+    } else if (L.phase === 'carry') {
+      if (hitC(p.x, p.y, L.baby.x, L.baby.y, 55)) State.drag = { kind: 'baby' };
+    } else if (L.phase === 'pay') {
+      L.coins.forEach(coin => {
+        if (!coin.paid && hitC(p.x, p.y, coin.x, coin.y, 35)) State.drag = { kind: 'coin', id: coin.id };
+      });
+    }
+  }
+
+  function upL1(p) {
+    const L = State.L;
+    if (L.phase === 'carry' && L.held) {
+      if (hitR(p.x, p.y, 190, 470, 220, 110) || hitC(p.x, p.y, 300, 510, 80)) {
+        L.onBelt = true;
+        L.held = false;
+        L.baby.x = 280; L.baby.y = 490;
+        L.scanned = true;
+        sfx('scan');
+        burst(280, 490, '#FF3366', 15);
+        toast('BEEP! 1 Floor Baby scanned. 47p due! Drag coins into the till!', 2.5);
+        L.phase = 'pay';
+      }
+    } else if (L.phase === 'pay') {
+      L.coins.forEach(coin => {
+        if (coin.paid) return;
+        if (State.drag && State.drag.kind === 'coin' && State.drag.id === coin.id) {
+          const onTill = hitC(p.x, p.y, 362, 460, 55) || hitR(p.x, p.y, 320, 430, 85, 70);
+          const justTapped = dist(p.x, p.y, coin.homeX, coin.homeY) < 35;
+          if (onTill || justTapped) {
+            coin.paid = true;
+            coin.x = 362; coin.y = 460;
+            sfx('coin');
+            burst(362, 460, '#FFD166', 8);
+          } else {
+            coin.x = coin.homeX; coin.y = coin.homeY;
+          }
+        }
+      });
+      if (L.coins.every(c => c.paid)) {
+        sfx('register');
+        winLevel();
+      }
+    }
+  }
+
+  /* LEVEL 2 POINTER */
+  function downL2(p) {
+    const L = State.L;
+    if (L.phase === 'stickers') {
+      L.stickers.forEach(s => {
+        if (!s.gone && hitC(p.x, p.y, s.x, s.y, 25)) {
+          s.gone = true;
+          sfx('quack');
+          burst(s.x, s.y, '#FFD93D', 12);
+          const left = L.stickers.filter(k => !k.gone).length;
+          toast(left === 0 ? 'ALL DUCKS PEELED! Now drag the nappy DOWN!' : 'Duck peeled! ' + left + ' left!', 1.2);
+        }
+      });
+      if (L.stickers.every(s => s.gone)) {
+        L.phase = 'yank';
+        sfx('ok');
+      }
+    } else if (L.phase === 'yank') {
+      if (hitC(p.x, p.y, L.baby.x, L.baby.y + 20, 55)) {
+        State.drag = { kind: 'nappy', sy: p.y };
+        L.nappyDrag = 0;
+      }
+    } else if (L.phase === 'catchnappy') {
+      if (hitC(p.x, p.y, L.nappy.x, L.nappy.y, 70)) {
+        L.nappy.caught = true;
+        L.nappy.x = 55; L.nappy.y = 530;
+        L.phase = 'catchpotty';
+        sfx('splash');
+        burst(55, 530, '#FFF', 12);
+        toast('Nappy in the wash! Watch out — ROCKET POTTY IS ZOOMING!!', 2.2);
+      }
+    } else if (L.phase === 'catchpotty') {
+      if (hitC(p.x, p.y, L.potty.x, L.potty.y, 50)) {
+        L.potty.parked = true;
+        L.potty.x = 210; L.potty.y = 540;
+        L.phase = 'place';
+        sfx('ok');
+        burst(210, 540, '#2EC4B6', 15);
+        toast('Potty parked safely! Drag baby onto the potty!', 2.2);
+      }
+    } else if (L.phase === 'place') {
+      if (hitC(p.x, p.y, L.baby.x, L.baby.y, 55)) State.drag = { kind: 'baby' };
+    }
+  }
+
+  function upL2(p) {
+    const L = State.L;
+    if (L.phase === 'yank' && State.drag && State.drag.kind === 'nappy') {
+      const pull = p.y - State.drag.sy;
+      L.nappyDrag += pull;
+      if (pull > 45 || L.nappyDrag > 60) {
+        L.nappy.off = true;
+        L.nappy.x = L.baby.x + 30;
+        L.nappy.y = L.baby.y - 20;
+        L.phase = 'catchnappy';
+        sfx('boing');
+        burst(L.baby.x, L.baby.y, '#FFF8EE', 16);
+        toast('NAPPY LAUNCH!! Tap it to catch it!', 2);
+      } else {
+        toast('Yank harder! Drag DOWN like opening a present!', 1.4);
+        sfx('no');
+      }
+    } else if (L.phase === 'place' && State.drag && State.drag.kind === 'baby') {
+      if (hitC(p.x, p.y, L.potty.x, L.potty.y - 10, 60)) {
+        L.baby.x = L.potty.x;
+        L.baby.y = L.potty.y - 18;
+        winLevel();
+      }
+    }
+  }
+
+  /* LEVEL 3 POINTER */
+  function downL3(p) {
+    const L = State.L;
+    if (L.phase === 'cheer') {
+      doCheer();
+    }
+  }
+  function upL3(p) {}
+
+  function doCheer() {
+    const L = State.L;
+    if (L.phase !== 'cheer') return;
+    L.cheers++;
+    sfx('cheer');
+    burst(210, 420, '#FF5D73', 10);
+    const cheerMsgs = [
+      'Go baby GO!! 🎉',
+      'You can do a wee!! ⭐',
+      'Concentrate face activated!! 💨',
+      'Pushing gently... almost!! 💫',
+      'Here comes the magic!! ✨',
+      'HOORAY!! WEE & POO ARE HERE!! 🌟💩'
+    ];
+    toast(cheerMsgs[Math.min(L.cheers - 1, 5)], 1.3);
+    if (L.cheers >= 6) {
+      document.getElementById('cheer-btn').classList.remove('on');
+      winLevel();
+    }
+    updateHud();
+  }
+
+  /* LEVEL 4 POINTER */
+  function downL4(p) {
+    const L = State.L;
+    if (L.phase === 'wee' && hitC(p.x, p.y, L.wee.x, L.wee.y, 40)) {
+      L.wee.held = true;
+    } else if (L.phase === 'poo' && hitC(p.x, p.y, L.poo.x, L.poo.y, 40)) {
+      L.poo.held = true;
+    } else if (L.phase === 'wipe' && hitC(p.x, p.y, L.toiletPaper.x, L.toiletPaper.y, 40)) {
+      State.drag = { kind: 'paper' };
+    } else if (L.phase === 'flush' && (hitC(p.x, p.y, 346, 340, 35) || hitC(p.x, p.y, 310, 350, 70))) {
+      L.flushed = true;
+      sfx('flush');
+      burst(310, 350, '#90E0EF', 20);
+      toast('WHOOOOOOSH!! Sir Flushey burps with joy!', 2.2);
+      setTimeout(() => winLevel(), 1200);
+    }
+  }
+
+  function upL4(p) {
+    const L = State.L;
+    if (L.phase === 'wee' && L.wee.held) {
+      L.wee.held = false;
+      if (hitC(p.x, p.y, 310, 350, 70)) {
+        L.wee.inLoo = true;
+        L.wee.x = 310; L.wee.y = 350;
+        L.phase = 'poo';
+        sfx('splash');
+        burst(310, 350, '#FFE66D', 15);
+        toast('Wee-Wee in the loo! Now drag Mr Poo into Sir Flushey!', 2.2);
+      }
+    } else if (L.phase === 'poo' && L.poo.held) {
+      L.poo.held = false;
+      if (hitC(p.x, p.y, 310, 350, 70)) {
+        L.poo.inLoo = true;
+        L.poo.x = 310; L.poo.y = 350;
+        L.phase = 'wipe';
+        sfx('splash');
+        burst(310, 350, '#C17A3A', 15);
+        toast('Now drag soft toilet paper to wipe baby clean!', 2.2);
+      }
+    }
+  }
+
+  /* LEVEL 5 POINTER */
+  function downL5(p) {
+    const L = State.L;
+    if (L.phase === 'pants') {
+      PANTS_DESIGNS.forEach((pMeta, idx) => {
+        const bx = 65 + (idx % 3) * 145;
+        const by = 530 + Math.floor(idx / 3) * 75;
+        if (hitR(p.x, p.y, bx - 60, by - 30, 120, 60)) {
+          State.selectedPants = pMeta.id;
+          L.pantsOn = true;
+          sfx('pop');
+          burst(210, 420, pMeta.color, 18);
+          toast(pMeta.name + ' Pants equipped! Perfect fit!', 1.8);
+          setTimeout(() => winLevel(), 900);
+        }
+      });
+    }
+  }
+  function upL5(p) {}
+
+  /* ---------------- DRAW PLAY SCENES ---------------- */
+  function drawPlay() {
+    const c = ctx;
+    const L = State.L;
+    const t = State.t;
+
+    if (State.level === 1) {
+      drawShopBg(c, t);
+      L.decoys.forEach(d => drawDecoy(c, d));
+      c.fillStyle = '#FFE66D';
+      rr(c, L.baby.x + 22, L.baby.y - 52, 58, 22, 5);
+      c.fillStyle = '#2C221E';
+      c.font = 'bold 10.5px Comic Sans MS, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('£3.99 SALE', L.baby.x + 51, L.baby.y - 37);
+
+      const pose = (L.phase === 'carry' && L.held) ? 'held' : (L.phase === 'chase' || L.phase === 'find') ? (Math.abs(L.baby.vx) > 70 ? 'crawl' : 'sit') : L.onBelt ? 'held' : 'sit';
+      drawBaby(c, L.baby.x, L.baby.y, {
+        pose: pose,
+        flip: L.baby.flip || 1,
+        t: t,
+        mood: L.phase === 'chase' ? 'shock' : 'happy',
+        nappy: true
+      });
+
+      if (L.phase === 'carry') {
+        c.strokeStyle = '#FF3366'; c.setLineDash([8, 6]); c.lineWidth = 3;
+        c.strokeRect(198, 478, 204, 30);
+        c.setLineDash([]);
+      }
+
+      if (L.phase === 'pay' || L.phase === 'won') {
+        L.coins.forEach(coin => {
+          if (coin.paid) return;
+          c.fillStyle = '#FFD166';
+          c.beginPath(); c.arc(coin.x, coin.y, 20, 0, Math.PI * 2); c.fill();
+          c.strokeStyle = '#D48B00'; c.lineWidth = 3; c.stroke();
+          c.fillStyle = '#8B5A2B';
+          c.font = 'bold 12px Comic Sans MS, sans-serif';
+          c.textAlign = 'center';
+          c.fillText(coin.val, coin.x, coin.y + 4.5);
+        });
+      }
+    } else if (State.level === 2) {
+      drawBathBg(c);
+      drawPotty(c, L.potty.x, L.potty.y, L.phase === 'catchpotty' && !L.potty.parked, t);
+      const nappyOn = !L.nappy.off;
+      const sitting = L.phase === 'won';
+      drawBaby(c, L.baby.x, sitting ? L.potty.y - 18 : L.baby.y, {
+        pose: sitting ? 'potty' : (State.drag && State.drag.kind === 'baby' ? 'held' : 'stand'),
+        t: t,
+        nappy: nappyOn,
+        mood: L.phase === 'yank' ? 'shock' : 'happy'
+      });
+
+      if (L.phase === 'stickers') {
+        L.stickers.forEach(s => {
+          if (s.gone) return;
+          c.fillStyle = '#FFE66D';
+          c.beginPath(); c.arc(s.x, s.y, 14, 0, Math.PI * 2); c.fill();
+          c.fillStyle = '#FB8500';
+          c.beginPath(); c.arc(s.x + 5, s.y - 2, 3.5, 0, Math.PI * 2); c.fill();
+          c.fillStyle = '#2C221E';
+          c.font = 'bold 10px sans-serif';
+          c.textAlign = 'center';
+          c.fillText('🦆', s.x, s.y + 3.5);
+        });
+      }
+      if (L.nappy.off && !L.nappy.caught) {
+        drawNappy(c, L.nappy.x, L.nappy.y, 1, t * 6);
+      } else if (L.nappy.caught) {
+        drawNappy(c, 55, 530, 0.7, 0.2);
+      }
+      if (L.phase === 'place') {
+        c.strokeStyle = '#FF3366'; c.setLineDash([8, 6]); c.lineWidth = 3;
+        c.beginPath(); c.arc(L.potty.x, L.potty.y - 10, 42, 0, Math.PI * 2); c.stroke();
+        c.setLineDash([]);
+      }
+    } else if (State.level === 3) {
+      drawBathBg(c);
+      drawPotty(c, 210, 470, false, t);
+      drawBaby(c, 210, 452, {
+        pose: 'cheer',
+        t: t,
+        nappy: false,
+        mood: L.cheers < 5 ? 'concentrate' : 'proud'
+      });
+      c.fillStyle = 'rgba(255,255,255,0.95)';
+      rr(c, 50, 180, 320, 26, 13);
+      const fillW = clamp((L.cheers / 6) * 312, 0, 312);
+      c.fillStyle = '#FF5D73';
+      rr(c, 54, 184, fillW, 18, 9);
+      c.fillStyle = '#2C221E';
+      c.font = 'bold 12px Comic Sans MS, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('CHEER POWER: ' + Math.min(100, Math.round((L.cheers / 6) * 100)) + '%', 210, 198);
+
+      if (L.cheers >= 6) {
+        drawWee(c, L.wee.x, L.wee.y, t);
+        drawMrPoo(c, L.poo.x, L.poo.y, t);
+      }
+    } else if (State.level === 4) {
+      drawBathBg(c);
+      drawSirFlushey(c, L.sirFlushey.x, L.sirFlushey.y, t, L.wee.inLoo || L.poo.inLoo, L.flushed);
+      drawPotty(c, 130, 480, false, t);
+      drawBaby(c, 130, 462, {
+        pose: 'potty',
+        t: t,
+        nappy: false,
+        mood: 'happy'
+      });
+
+      if (!L.wee.inLoo) drawWee(c, L.wee.x, L.wee.y, t);
+      if (!L.poo.inLoo) drawMrPoo(c, L.poo.x, L.poo.y, t);
+
+      c.fillStyle = '#FFF';
+      rr(c, L.toiletPaper.x - 18, L.toiletPaper.y - 15, 36, 30, 8);
+      c.fillStyle = '#DDD';
+      c.beginPath(); c.ellipse(L.toiletPaper.x, L.toiletPaper.y, 6, 12, 0, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#2C221E';
+      c.font = 'bold 10px Comic Sans MS, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('WIPE', L.toiletPaper.x, L.toiletPaper.y + 26);
+    } else {
+      drawBathBg(c);
+      drawBaby(c, L.baby.x, L.baby.y, {
+        pose: 'stand',
+        t: t,
+        nappy: false,
+        pants: L.pantsOn ? State.selectedPants : null,
+        mood: 'star',
+        scale: 1.2
+      });
+
+      c.fillStyle = '#FFF';
+      rr(c, 40, 470, 340, 32, 12);
+      c.fillStyle = '#2C221E';
+      c.font = 'bold 14px Comic Sans MS, sans-serif';
+      c.textAlign = 'center';
+      c.fillText('CHOOSE BIG KID UNDERWEAR:', 210, 492);
+
+      PANTS_DESIGNS.forEach((pMeta, idx) => {
+        const bx = 65 + (idx % 3) * 145;
+        const by = 530 + Math.floor(idx / 3) * 75;
+        c.fillStyle = pMeta.color;
+        rr(c, bx - 55, by - 24, 110, 50, 14);
+        c.fillStyle = '#FFF';
+        c.font = 'bold 18px sans-serif';
+        c.textAlign = 'center';
+        c.fillText(pMeta.pattern, bx, by);
+        c.font = 'bold 10px Comic Sans MS, sans-serif';
+        c.fillText(pMeta.name, bx, by + 18);
+      });
+    }
+
+    State.bubbles.forEach(b => {
+      c.save();
+      c.beginPath(); c.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      c.fillStyle = 'rgba(114, 239, 221, 0.35)'; c.fill();
+      c.strokeStyle = 'rgba(255, 255, 255, 0.8)'; c.lineWidth = 1.5; c.stroke();
+      c.beginPath(); c.arc(b.x - b.r * 0.35, b.y - b.r * 0.35, b.r * 0.25, 0, Math.PI * 2);
+      c.fillStyle = '#FFF'; c.fill();
+      c.restore();
+    });
+
+    State.particles.forEach(p => {
+      c.globalAlpha = 1 - p.age / p.life;
+      c.fillStyle = p.col;
+      c.beginPath(); c.arc(p.x, p.y, p.r, 0, Math.PI * 2); c.fill();
+      c.globalAlpha = 1;
+    });
+  }
+
+  function drawConfetti() {
+    cctx.clearRect(0, 0, VW, VH);
+    State.confetti.forEach(p => {
+      cctx.save();
+      cctx.translate(p.x, p.y);
+      cctx.rotate(p.rot);
+      cctx.fillStyle = p.col;
+      cctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      cctx.restore();
+    });
+  }
+
+  /* ---------------- PREVIEW & DECORATIVE CANVASES ---------------- */
+  function drawTitleArt() {
+    const cv = document.getElementById('title-art');
+    if (!cv) return;
+    const c = cv.getContext('2d');
+    c.clearRect(0, 0, 360, 170);
+    c.fillStyle = '#CDE7F5'; c.fillRect(0, 0, 360, 170);
+    c.fillStyle = '#E8D5B0'; c.fillRect(0, 120, 360, 50);
+    drawBaby(c, 90, 100, { pose: 'sit', t: 0, nappy: true, scale: 1.1 });
+    drawPotty(c, 210, 118, false, 0);
+    drawSirFlushey(c, 300, 100, 0, false, false);
+    c.fillStyle = '#2C221E';
+    c.font = 'bold 12px Comic Sans MS, sans-serif';
+    c.textAlign = 'center';
+    c.fillText('SUPERMARKET AISLE 3', 90, 150);
+  }
+
+  function drawIntroPreview() {
+    const cv = document.getElementById('intro-art');
+    if (!cv) return;
+    const c = cv.getContext('2d');
+    c.clearRect(0, 0, 340, 150);
+    const n = State.level;
+    if (n === 1) {
+      c.fillStyle = '#CDE7F5'; c.fillRect(0, 0, 340, 150);
+      c.fillStyle = '#E8D5B0'; c.fillRect(0, 100, 340, 50);
+      drawBaby(c, 170, 85, { pose: 'sit', t: 0, nappy: true });
+    } else if (n === 2) {
+      c.fillStyle = '#B8E0D2'; c.fillRect(0, 0, 340, 150);
+      drawBaby(c, 120, 80, { pose: 'stand', t: 0, nappy: true });
+      drawPotty(c, 230, 95, true, 1);
+    } else if (n === 3) {
+      c.fillStyle = '#B8E0D2'; c.fillRect(0, 0, 340, 150);
+      drawPotty(c, 170, 95, false, 0);
+      drawBaby(c, 170, 80, { pose: 'cheer', t: 0, nappy: false, mood: 'concentrate' });
+    } else if (n === 4) {
+      c.fillStyle = '#B8E0D2'; c.fillRect(0, 0, 340, 150);
+      drawSirFlushey(c, 220, 90, 0, true, false);
+      drawWee(c, 90, 80, 0);
+      drawMrPoo(c, 140, 90, 0);
+    } else {
+      c.fillStyle = '#FFD166'; c.fillRect(0, 0, 340, 150);
+      drawBaby(c, 170, 80, { pose: 'stand', t: 0, nappy: false, pants: State.selectedPants });
+    }
+  }
+
+  function drawTrophyArt() {
+    const cv = document.getElementById('trophy-art');
+    if (!cv) return;
+    const c = cv.getContext('2d');
+    c.clearRect(0, 0, 320, 190);
+    c.fillStyle = '#FFF6DC'; c.fillRect(0, 0, 320, 190);
+    c.fillStyle = '#FFD166';
+    c.beginPath(); c.arc(160, 80, 48, 0, Math.PI * 2); c.fill();
+    drawPotty(c, 160, 95, false, 0);
+    drawBaby(c, 160, 60, { pose: 'cheer', t: 0, nappy: false, pants: State.selectedPants, mood: 'proud', scale: 0.95 });
+    c.fillStyle = '#D48B00';
+    c.font = 'bold 16px Comic Sans MS, sans-serif';
+    c.textAlign = 'center';
+    c.fillText('🏆 GOLDEN POTTY CUP 🏆', 160, 165);
+  }
+
+  function buildBabySelect() {
+    const grid = document.getElementById('baby-grid');
+    grid.innerHTML = '';
+    Object.keys(BABIES).forEach(id => {
+      const b = BABIES[id];
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'baby-card' + (State.babyId === id ? ' selected' : '');
+      card.innerHTML = '<canvas width="110" height="110"></canvas><div class="nm"></div><div class="sub"></div>';
+      card.querySelector('.nm').textContent = b.name;
+      card.querySelector('.sub').textContent = b.sub;
+      const cv = card.querySelector('canvas');
+      const c = cv.getContext('2d');
+      c.fillStyle = '#EAF6FF'; c.fillRect(0, 0, 110, 110);
+      drawBaby(c, 55, 68, { pose: 'sit', t: 0, nappy: true, scale: 1.05, b: b });
+      card.addEventListener('click', () => {
+        State.babyId = id;
+        grid.querySelectorAll('.baby-card').forEach(el => el.classList.remove('selected'));
+        card.classList.add('selected');
+        sfx('pop');
+      });
+      grid.appendChild(card);
+    });
+
+    const hatBar = document.getElementById('hat-bar');
+    hatBar.innerHTML = '';
+    HATS.forEach(h => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = 'acc-chip' + (State.hat === h.id ? ' active' : '');
+      chip.innerHTML = '<span>' + h.emoji + '</span> <span>' + h.label + '</span>';
+      chip.addEventListener('click', () => {
+        State.hat = h.id;
+        hatBar.querySelectorAll('.acc-chip').forEach(el => el.classList.remove('active'));
+        chip.classList.add('active');
+        sfx('pop');
+      });
+      hatBar.appendChild(chip);
+    });
+  }
+
+  function openIntro() {
+    const meta = LEVELS[State.level - 1];
+    document.getElementById('intro-badge').textContent = meta.badge;
+    document.getElementById('intro-title').textContent = meta.title;
+    document.getElementById('intro-desc').textContent = meta.desc;
+    showScreen('s-intro');
+    drawIntroPreview();
+  }
+
+  /* ---------------- RESIZE & LOOP ---------------- */
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    [canvas, cCanvas].forEach(cv => {
+      cv.width = VW * dpr;
+      cv.height = VH * dpr;
+      const g = cv.getContext('2d');
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    });
+  }
+
+  function loop(now) {
+    const t = now / 1000;
+    const dt = State.last ? Math.min(0.033, t - State.last) : 0.016;
+    State.last = t;
+    State.t += dt;
+    if (State.screen === 'play') {
+      update(dt);
+      ctx.clearRect(0, 0, VW, VH);
+      drawPlay();
+    } else {
+      ctx.clearRect(0, 0, VW, VH);
+    }
+    drawConfetti();
+    requestAnimationFrame(loop);
+  }
+
+  /* ---------------- UI EVENT LISTENERS ---------------- */
+  document.getElementById('btn-play').addEventListener('click', () => {
+    audioInit();
+    sfx('ok');
+    buildBabySelect();
+    showScreen('s-baby');
+  });
+  document.getElementById('btn-baby-back').addEventListener('click', () => showScreen('s-title'));
+  document.getElementById('btn-baby-go').addEventListener('click', () => {
+    audioInit();
+    State.level = 1;
+    openIntro();
+    sfx('ok');
+  });
+  document.getElementById('btn-intro-go').addEventListener('click', () => {
+    audioInit();
+    startLevel(State.level);
+  });
+  document.getElementById('btn-next').addEventListener('click', () => {
+    State.level++;
+    openIntro();
+    sfx('ok');
+  });
+  document.getElementById('btn-again').addEventListener('click', () => {
+    State.level = 1;
+    openIntro();
+  });
+  document.getElementById('btn-sound').addEventListener('click', function () {
+    State.sound = !State.sound;
+    this.textContent = State.sound ? '🔊' : '🔇';
+    audioInit();
+  });
+  document.getElementById('btn-music').addEventListener('click', function () {
+    State.music = !State.music;
+    this.textContent = State.music ? '🎵' : '🔇';
+    if (State.music) startBgm();
+    else stopBgm();
+  });
+  document.getElementById('btn-home').addEventListener('click', () => {
+    State.L = {};
+    showScreen('s-title');
+    document.getElementById('cheer-btn').classList.remove('on');
+  });
+  document.getElementById('cheer-btn').addEventListener('click', (e) => {
+    e.stopPropagation();
+    audioInit();
+    doCheer();
+  });
+
+  document.getElementById('btn-cert').addEventListener('click', () => {
+    document.getElementById('cert-modal').classList.add('open');
+    sfx('win');
+  });
+  document.getElementById('btn-cert-close').addEventListener('click', () => {
+    document.getElementById('cert-modal').classList.remove('open');
+  });
+
+  document.getElementById('trophy-art').addEventListener('click', () => {
+    rainConfetti(40);
+    sfx('win');
+  });
+
+  canvas.addEventListener('pointerdown', onDown);
+  canvas.addEventListener('pointermove', onMove);
+  canvas.addEventListener('pointerup', onUp);
+  canvas.addEventListener('pointercancel', onUp);
+  canvas.addEventListener('touchstart', onDown, { passive: false });
+  canvas.addEventListener('touchmove', onMove, { passive: false });
+  canvas.addEventListener('touchend', onUp, { passive: false });
+
+  window.addEventListener('resize', resize);
+  resize();
+  drawTitleArt();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

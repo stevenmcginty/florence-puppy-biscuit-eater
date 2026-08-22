@@ -1,6 +1,175 @@
 <!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
-<title>Florence's Puppy Biscuit Eater</title>
-<meta http-equiv="refresh" content="0;url=puppy-biscuit-eater.html">
-<link rel="canonical" href="puppy-biscuit-eater.html">
-<p><a href="puppy-biscuit-eater.html">Play Florence's Puppy Biscuit Eater</a></p>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Florence's Games — The Way to Get on Your Holiday</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏖️</text></svg>">
+<style>
+  :root {
+    --sky: #5CB8FF;
+    --ocean: #0077B6;
+    --sand: #FFE082;
+    --gold: #FFB703;
+    --coral: #FF5376;
+    --ink: #2C221E;
+    --font-display: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Marker Felt', 'Nunito', cursive, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: radial-gradient(circle at 50% 20%, #5CB8FF, #0077B6 60%, #023E8A 100%);
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    color: var(--ink);
+    padding: 24px 16px;
+  }
+  .container {
+    background: #FFFDF7;
+    border-radius: 28px;
+    padding: 28px 24px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.3), 0 6px 0 #E2D5BE;
+    text-align: center;
+  }
+  .badge {
+    display: inline-block;
+    background: var(--coral);
+    color: #fff;
+    padding: 6px 18px;
+    border-radius: 999px;
+    font-size: 14px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    box-shadow: 0 3px 0 #D9254C;
+    margin-bottom: 8px;
+    transform: rotate(-2deg);
+  }
+  h1 {
+    font-size: clamp(26px, 7vw, 36px);
+    line-height: 1.1;
+    color: var(--ocean);
+    margin-bottom: 6px;
+  }
+  p.subtitle {
+    color: #6A5B52;
+    font-size: 15px;
+    margin-bottom: 20px;
+  }
+  .game-card {
+    display: flex; align-items: center; gap: 14px;
+    background: #FFF;
+    border: 3px solid #FFD166;
+    border-radius: 18px;
+    padding: 14px 16px;
+    text-decoration: none;
+    color: var(--ink);
+    margin-bottom: 14px;
+    box-shadow: 0 4px 0 #E5C365;
+    transition: transform 0.1s ease;
+  }
+  .game-card:active, .game-card:hover {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #E5C365;
+  }
+  .game-card.featured {
+    background: linear-gradient(180deg, #FFF9E6, #FFEAA7);
+    border-color: #FF5376;
+    box-shadow: 0 5px 0 #D9254C, 0 0 0 3px rgba(255, 83, 118, 0.25);
+  }
+  .icon {
+    font-size: 38px;
+    width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    background: #FFF;
+    border-radius: 14px;
+    box-shadow: 0 2px 0 rgba(0,0,0,0.1);
+    flex-shrink: 0;
+  }
+  .info { text-align: left; }
+  .title { font-size: 18px; font-weight: bold; color: var(--ink); line-height: 1.2; }
+  .desc { font-size: 12.5px; color: #7A6A55; margin-top: 2px; }
+  .tag {
+    display: inline-block;
+    background: #FF5376; color: #FFF;
+    font-size: 10px; font-weight: bold;
+    padding: 2px 8px; border-radius: 6px;
+    margin-left: 6px; vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <div class="badge">🏖️ Florence's Game Studio 🌟</div>
+  <h1>Pick a Game to Play!</h1>
+  <p class="subtitle">Choose an adventure designed by Florence:</p>
+
+  <a class="game-card featured" href="how-to-make-sure-your-baby-is-right.html" style="background:linear-gradient(180deg,#FFF5EB,#FFE3EC);border-color:#FF3366;box-shadow:0 5px 0 #D9254C, 0 0 0 3px rgba(255,51,102,0.25);">
+    <div class="icon" style="background:#FFF;">👶</div>
+    <div class="info">
+      <div class="title" style="color:#2C221E;">How to Make Sure Your Baby is Right <span class="tag" style="background:#FF3366;">NEW FLORENCE GAME!</span></div>
+      <div class="desc">Ages up to 10 · 5 Levels! Pick up a real baby at the shop, change the nappy, buy a dummy &amp; clothes, strap into the buggy and steer to the Park for the Trophy!</div>
+    </div>
+  </a>
+
+  <a class="game-card" href="train-your-baby-to-do-the-potty.html">
+    <div class="icon">🚽</div>
+    <div class="info">
+      <div class="title">Train Your Baby To Do The Potty <span class="tag" style="background:#FFB703;color:#2C221E;">DELUXE!</span></div>
+      <div class="desc">5 crazy levels! Buy a floor-baby in a shop, peel duck stickers, tame Rocket Potty, cheer for Wee &amp; Poo, flush Sir Flushey &amp; unlock Big Kid Pants!</div>
+    </div>
+  </a>
+
+  <a class="game-card" href="the-moving-house-game.html">
+    <div class="icon">📦</div>
+    <div class="info">
+      <div class="title">The Moving House Game</div>
+      <div class="desc">10 levels! Choose Mum, Dad, Sister, Brother or Teenager, pack the van, unpack all 9 rooms &amp; claim the Living Room Trophy!</div>
+    </div>
+  </a>
+
+  <a class="game-card" href="the-way-to-get-on-your-holiday.html">
+    <div class="icon">✈️</div>
+    <div class="info">
+      <div class="title">The Way to Get on Your Holiday</div>
+      <div class="desc">7 levels! Pack the bags, drive, fly through clouds, unpack &amp; win the Beach Trophy!</div>
+    </div>
+  </a>
+
+  <a class="game-card featured" href="puppy-biscuit-tokyo-subway.html" style="background:linear-gradient(180deg,#20103A,#32185C);border-color:#00F0FF;box-shadow:0 5px 0 #0077B6, 0 0 12px rgba(0,240,255,0.35);color:#fff;">
+    <div class="icon" style="background:#130924;">🗼</div>
+    <div class="info">
+      <div class="title" style="color:#00F0FF;">Puppy Biscuit Eater: Tokyo Subway <span class="tag" style="background:#FF2A85;">LEVEL 2!</span></div>
+      <div class="desc" style="color:#D8CCF0;">Level 2! Ceiling running, wild boars, rival dog walker ambush, hyper magnets &amp; Taiyaki treats!</div>
+    </div>
+  </a>
+
+  <a class="game-card" href="puppy-biscuit-eater.html">
+    <div class="icon">🐶</div>
+    <div class="info">
+      <div class="title">Puppy Biscuit Eater (Sunny Park) <span class="tag" style="background:#79C94F;">LEVEL 1</span></div>
+      <div class="desc">Chomp biscuits and run across the sunny park!</div>
+    </div>
+  </a>
+
+  <a class="game-card" href="haribo-star-mix.html">
+    <div class="icon">🍬</div>
+    <div class="info">
+      <div class="title">Haribo Star Mix</div>
+      <div class="desc">4-level candy factory and delivery adventure!</div>
+    </div>
+  </a>
+
+  <a class="game-card" href="the-box-in-the-loft.html">
+    <div class="icon">📦</div>
+    <div class="info">
+      <div class="title">The Box in the Loft</div>
+      <div class="desc">Mystery adventure story &amp; puzzle booklet!</div>
+    </div>
+  </a>
+</div>
+
+</body>
+</html>

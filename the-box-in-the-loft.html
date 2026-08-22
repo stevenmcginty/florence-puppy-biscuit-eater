@@ -1,0 +1,867 @@
+<meta charset="utf-8">
+<title>The Box in the Loft</title>
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { background: #f6f1e7; }
+  body { font-family: Georgia, 'Times New Roman', serif; color: #2b3a55; }
+
+  .page {
+    width: 210mm; min-height: 296mm;
+    padding: 20mm 18mm;
+    page-break-after: always;
+    position: relative;
+    background: #f6f1e7;
+    overflow: hidden;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* ---------- generic ---------- */
+  h1, h2, h3 { font-family: Georgia, serif; }
+  .doc-label {
+    display: inline-block;
+    font-family: 'Courier New', monospace;
+    font-size: 10.5pt; letter-spacing: 1px;
+    background: #2b3a55; color: #f6f1e7;
+    padding: 3px 12px; margin-bottom: 14px;
+    transform: rotate(-1deg);
+  }
+  .part-num {
+    font-family: 'Courier New', monospace;
+    letter-spacing: 4px; font-size: 11pt; color: #c94f4f;
+    text-transform: uppercase; margin-bottom: 8px;
+  }
+  .part-title {
+    font-size: 34pt; line-height: 1.05; color: #2b3a55;
+    margin-bottom: 18px;
+  }
+  .rule { border: none; border-top: 2px solid #2b3a55; opacity: .25; margin: 16px 0; }
+  p { line-height: 1.55; }
+
+  /* ---------- cover ---------- */
+  .cover {
+    background: #22304a;
+    color: #f6f1e7;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .cover .tape {
+    font-family: 'Courier New', monospace; font-size: 11pt; letter-spacing: 2px;
+    background: #e8b93c; color: #22304a; padding: 4px 18px;
+    transform: rotate(2deg); margin-bottom: 24px; font-weight: bold;
+  }
+  .cover h1 {
+    font-size: 52pt; line-height: 1.0; color: #f0623f;
+    text-shadow: 3px 3px 0 rgba(0,0,0,.35);
+    margin: 10px 0 6px;
+  }
+  .cover h1 .white { color: #f6f1e7; }
+  .cover .subtitle { font-style: italic; font-size: 14pt; color: #cfd8e8; margin-top: 14px; }
+  .cover .byline { margin-top: 26px; font-size: 12.5pt; color: #e8b93c; letter-spacing: 1px; }
+  .cover svg { margin-top: 30px; }
+
+  /* ---------- chat ---------- */
+  .chat {
+    max-width: 138mm; margin: 0 auto;
+    background: #ffffff; border: 2px solid #2b3a55;
+    border-radius: 22px; padding: 14px 13px 12px;
+    box-shadow: 5px 5px 0 rgba(43,58,85,.18);
+  }
+  .chat-header {
+    text-align: center; font-family: Arial, sans-serif; font-size: 10pt;
+    color: #6b7688; border-bottom: 1px solid #e3e0d6; padding-bottom: 8px; margin-bottom: 12px;
+  }
+  .chat-header b { display: block; font-size: 12pt; color: #2b3a55; }
+  .stamp {
+    text-align: center; font-family: Arial, sans-serif; font-size: 8.5pt;
+    color: #98a0ae; margin: 12px 0 6px;
+  }
+  .bubble {
+    break-inside: avoid;
+    max-width: 78%; padding: 8px 13px; margin: 4px 0;
+    font-family: Arial, sans-serif; font-size: 10.5pt; line-height: 1.45;
+    border-radius: 16px; clear: both;
+  }
+  .flo   { float: right; background: #2f7d5c; color: #fff; border-bottom-right-radius: 4px; }
+  .del   { float: left;  background: #eeeae0; color: #2b3a55; border-bottom-left-radius: 4px; }
+  .who { display: block; font-size: 8pt; font-weight: bold; opacity: .75; margin-bottom: 2px; letter-spacing: .5px; }
+  .chat::after { content: ""; display: block; clear: both; }
+  .photo-note {
+    float: left; clear: both; margin: 6px 0;
+    border: 6px solid #fff; box-shadow: 0 2px 6px rgba(0,0,0,.25);
+    transform: rotate(-2deg);
+  }
+
+  /* ---------- newspaper ---------- */
+  .newspaper {
+    background: #efe8d8; border: 1px solid #b9ad92;
+    padding: 22px 24px; box-shadow: 4px 4px 0 rgba(43,58,85,.15);
+    transform: rotate(-.4deg);
+  }
+  .np-mast {
+    text-align: center; border-bottom: 3px double #2b3a55; padding-bottom: 8px; margin-bottom: 4px;
+  }
+  .np-mast h2 { font-size: 27pt; letter-spacing: 2px; font-variant: small-caps; }
+  .np-date {
+    display: flex; justify-content: space-between;
+    font-family: 'Courier New', monospace; font-size: 8.5pt;
+    border-bottom: 1px solid #2b3a55; padding: 3px 0; margin-bottom: 14px;
+  }
+  .np-head { font-size: 21pt; line-height: 1.1; text-align: center; margin-bottom: 4px; }
+  .np-sub { text-align: center; font-style: italic; font-size: 11pt; margin-bottom: 12px; }
+  .np-cols { column-count: 2; column-gap: 18px; column-rule: 1px solid #c6bba0; font-size: 10pt; text-align: justify; }
+  .np-cols p { margin-bottom: 8px; line-height: 1.45; }
+  .np-cols .drop::first-letter { font-size: 26pt; float: left; line-height: .9; padding-right: 4px; }
+  .np-fig { break-inside: avoid; text-align: center; margin: 6px 0 10px; }
+  .np-fig .cap { font-size: 8pt; font-style: italic; margin-top: 3px; }
+
+  /* ---------- diary ---------- */
+  .diary {
+    background: #fdfbf3;
+    border: 1px solid #d8cfae;
+    box-shadow: 5px 5px 0 rgba(43,58,85,.15);
+    padding: 26px 30px 30px 44px;
+    position: relative;
+    background-image: repeating-linear-gradient(#fdfbf3 0px, #fdfbf3 27px, #d9e4ef 28px);
+  }
+  .diary::before {
+    content: ""; position: absolute; top: 0; bottom: 0; left: 30px;
+    border-left: 1.5px solid #e7b8b8;
+  }
+  .diary .d-date {
+    font-family: 'Segoe Print', cursive; font-weight: bold; color: #a04343;
+    font-size: 12pt; margin: 10px 0 2px;
+  }
+  .diary p {
+    font-family: 'Segoe Print', cursive; font-size: 11pt; line-height: 28px; color: #37456b;
+  }
+  .diary-del p, .diary-del .d-date { font-family: 'Comic Sans MS', cursive; }
+
+  /* ---------- typed / police ---------- */
+  .typed {
+    background: #f2efe4; border: 1px solid #b9b29a;
+    font-family: 'Courier New', monospace; font-size: 10pt; line-height: 1.6;
+    padding: 26px 30px; box-shadow: 4px 4px 0 rgba(43,58,85,.15);
+  }
+  .typed h3 { font-family: 'Courier New', monospace; font-size: 12pt; letter-spacing: 1px; text-align: center; margin-bottom: 4px;}
+  .typed .stamp-red {
+    font-weight: bold; color: #b03a3a; border: 3px solid #b03a3a;
+    display: inline-block; padding: 2px 10px; transform: rotate(-6deg);
+    letter-spacing: 2px; margin: 10px 0;
+  }
+  .typed p { margin-bottom: 9px; }
+  .typed .field { border-bottom: 1px dotted #7c7660; }
+
+  /* ---------- letter ---------- */
+  .letter {
+    background: #fffdf6; border: 1px solid #d8cfae;
+    padding: 30px 36px; box-shadow: 5px 5px 0 rgba(43,58,85,.15);
+    transform: rotate(.4deg);
+  }
+  .letter p { font-family: 'Segoe Print', cursive; font-size: 11pt; line-height: 1.72; color: #3a3f56; margin-bottom: 11px; }
+  .letter .sign { text-align: right; font-size: 14pt; }
+
+  /* ---------- email ---------- */
+  .email {
+    background: #fff; border: 2px solid #2b3a55; border-radius: 8px;
+    font-family: Arial, sans-serif; font-size: 10.5pt;
+    box-shadow: 5px 5px 0 rgba(43,58,85,.18); overflow: hidden;
+  }
+  .email .e-bar { background: #2b3a55; color: #fff; padding: 6px 14px; font-size: 9.5pt; letter-spacing: 1px; }
+  .email .e-meta { padding: 10px 16px; border-bottom: 1px solid #e3e0d6; font-size: 9.5pt; color: #4d5668; line-height: 1.6; }
+  .email .e-body { padding: 14px 18px 18px; line-height: 1.55; }
+  .email .e-body p { margin-bottom: 9px; }
+
+  /* ---------- cast ---------- */
+  .cast { display: grid; grid-template-columns: 1fr 1fr; gap: 10mm 8mm; margin-top: 10mm; }
+  .cast .c-item { display: flex; gap: 5mm; align-items: flex-start; }
+  .cast .c-name { font-weight: bold; font-size: 12.5pt; }
+  .cast .c-desc { font-size: 10pt; line-height: 1.45; color: #4a5570; margin-top: 2px; }
+
+  /* ---------- suspect board ---------- */
+  .board {
+    background: #7a5b3e; padding: 18px; box-shadow: 5px 5px 0 rgba(43,58,85,.25);
+  }
+  .board-inner { background: #c9a978; padding: 16px; }
+  .board h3 {
+    font-family: 'Segoe Print', cursive; text-align: center; color: #3a2b1c;
+    font-size: 16pt; margin-bottom: 12px;
+  }
+  .board-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .s-card {
+    background: #fdfbf3; padding: 10px 12px; box-shadow: 0 2px 5px rgba(0,0,0,.3);
+  }
+  .s-card:nth-child(odd) { transform: rotate(-1.2deg); }
+  .s-card:nth-child(even) { transform: rotate(1deg); }
+  .s-card .s-name { font-family: 'Segoe Print', cursive; font-weight: bold; font-size: 11pt; }
+  .s-card .s-note { font-family: 'Segoe Print', cursive; font-size: 9pt; line-height: 1.5; color: #444; }
+  .s-card .verdict { font-family: 'Comic Sans MS', cursive; color: #b03a3a; font-weight: bold; font-size: 9.5pt; }
+
+  /* ---------- postcard ---------- */
+  .postcard {
+    background: #fffdf6; border: 1px solid #cfc6a8; width: 150mm; margin: 8mm auto;
+    box-shadow: 5px 5px 0 rgba(43,58,85,.15); display: flex;
+  }
+  .pc-left { flex: 1.2; padding: 14px; border-right: 1px dashed #b9ad92; }
+  .pc-right { flex: 1; padding: 14px; position: relative; }
+  .pc-right .pc-stamp {
+    position: absolute; top: 10px; right: 12px; width: 18mm; height: 22mm;
+    border: 2px solid #b9ad92; display: flex; align-items: center; justify-content: center;
+  }
+  .pc-addr { font-family: 'Segoe Print', cursive; font-size: 11pt; margin-top: 26mm; line-height: 2; color: #3a3f56; }
+
+  .footer-note {
+    position: absolute; bottom: 10mm; left: 0; right: 0; text-align: center;
+    font-family: 'Courier New', monospace; font-size: 8.5pt; color: #9aa2b0;
+  }
+
+  .fig { text-align: center; margin: 8mm 0 4mm; }
+  .fig .cap { font-size: 9pt; font-style: italic; color: #6b7688; margin-top: 6px; }
+  .center { text-align: center; }
+</style>
+
+<!-- ============================== COVER ============================== -->
+<div class="page cover">
+  <div class="tape">TOP SECRET — DO NOT OPEN</div>
+  <h1>THE BOX<br><span class="white">in the</span><br>LOFT</h1>
+  <div class="subtitle">A mystery unlocked in texts, diaries<br>and thirty-nine-year-old secrets</div>
+  <svg width="360" height="300" viewBox="0 0 360 300">
+    <!-- torch beam -->
+    <polygon points="40,20 190,170 320,140" fill="#e8b93c" opacity="0.14"/>
+    <circle cx="40" cy="20" r="9" fill="#e8b93c" opacity="0.8"/>
+    <rect x="26" y="4" width="22" height="16" rx="4" fill="#94a3bd" transform="rotate(38 37 12)"/>
+    <!-- floorboards -->
+    <line x1="20" y1="262" x2="340" y2="262" stroke="#8fa0bd" stroke-width="2" opacity=".5"/>
+    <line x1="60" y1="262" x2="55" y2="292" stroke="#8fa0bd" stroke-width="1.5" opacity=".3"/>
+    <line x1="180" y1="262" x2="180" y2="292" stroke="#8fa0bd" stroke-width="1.5" opacity=".3"/>
+    <line x1="300" y1="262" x2="308" y2="292" stroke="#8fa0bd" stroke-width="1.5" opacity=".3"/>
+    <!-- box -->
+    <g transform="translate(120,150)">
+      <polygon points="0,60 60,100 160,60 100,24" fill="#b98a55"/>
+      <polygon points="0,60 60,100 60,150 0,112" fill="#8a6238"/>
+      <polygon points="60,100 160,60 160,112 60,150" fill="#a37647"/>
+      <polygon points="0,60 100,24 96,10 -6,46" fill="#c99a63"/>
+      <polygon points="160,60 100,24 104,10 168,46" fill="#9c7040"/>
+      <!-- papers spilling -->
+      <rect x="42" y="26" width="52" height="34" fill="#f6f1e7" transform="rotate(-14 68 43)"/>
+      <rect x="74" y="16" width="50" height="32" fill="#efe8d8" transform="rotate(9 99 32)"/>
+      <line x1="50" y1="34" x2="86" y2="26" stroke="#94a3bd" stroke-width="2"/>
+      <line x1="52" y1="42" x2="88" y2="34" stroke="#94a3bd" stroke-width="2"/>
+      <line x1="80" y1="28" x2="116" y2="34" stroke="#94a3bd" stroke-width="2"/>
+      <line x1="80" y1="36" x2="112" y2="41" stroke="#94a3bd" stroke-width="2"/>
+      <!-- label -->
+      <rect x="66" y="78" width="64" height="30" fill="#f6f1e7" transform="rotate(-3 98 93)"/>
+      <text x="98" y="92" text-anchor="middle" font-family="Courier New" font-size="10" fill="#b03a3a" font-weight="bold" transform="rotate(-3 98 93)">PRIVATE</text>
+      <text x="98" y="103" text-anchor="middle" font-family="Courier New" font-size="8" fill="#2b3a55" transform="rotate(-3 98 93)">R.M. 1987</text>
+    </g>
+    <!-- red string + pins -->
+    <circle cx="70" cy="230" r="4" fill="#f0623f"/>
+    <circle cx="290" cy="215" r="4" fill="#f0623f"/>
+    <line x1="70" y1="230" x2="290" y2="215" stroke="#f0623f" stroke-width="1.5" opacity=".8"/>
+  </svg>
+  <div class="byline">Starring FLO &amp; DELILAH<br><span style="font-size:9.5pt; color:#8fa0bd; letter-spacing:0;">an original mystery in the style of the books they love</span></div>
+</div>
+
+<!-- ============================== HOW TO READ ============================== -->
+<div class="page">
+  <div class="part-num">Before you begin</div>
+  <h2 class="part-title">A Note to the Reader</h2>
+  <p style="font-size:12pt; max-width:150mm;">This is not an ordinary story. Nobody is going to tell you what happened.</p>
+  <p style="font-size:12pt; max-width:150mm; margin-top:10px;">Instead, you are going to see the <i>evidence</i> — the actual text messages, diary pages, newspaper cuttings and letters, in the order the sisters found them. You will know exactly what Flo and Delilah knew, at exactly the moment they knew it.</p>
+  <p style="font-size:12pt; max-width:150mm; margin-top:10px;">Which means you have precisely the same chance they had of solving the mystery first.</p>
+  <p style="font-size:12pt; max-width:150mm; margin-top:10px;">Keep your eyes open. Nothing in this box is here by accident.</p>
+
+  <hr class="rule">
+
+  <div class="part-num" style="margin-top:8mm;">The people in this story</div>
+  <div class="cast">
+    <div class="c-item">
+      <svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="#f0b9a0"/><path d="M8 22 Q10 4 26 5 Q44 4 45 24 L44 34 Q40 12 26 13 Q12 12 9 32 Z" fill="#5a3a24"/><path d="M9 30 Q6 44 12 48 L14 30 Z" fill="#5a3a24"/><path d="M44 30 Q47 44 41 48 L39 30 Z" fill="#5a3a24"/><circle cx="19" cy="27" r="2" fill="#2b3a55"/><circle cx="33" cy="27" r="2" fill="#2b3a55"/><path d="M20 37 Q26 41 32 37" stroke="#2b3a55" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <div><div class="c-name">Florence “Flo”, 12</div><div class="c-desc">Big sister. Lives with Mum in town. Reads murder mysteries under the duvet with a torch. Motto: <i>evidence first, theories second.</i></div></div>
+    </div>
+    <div class="c-item">
+      <svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="#f0b9a0"/><path d="M9 20 Q12 5 26 5 Q40 5 43 20 L43 26 Q38 12 26 12 Q14 12 9 26 Z" fill="#8a5a30"/><path d="M12 18 Q4 24 7 34 L13 26 Z" fill="#8a5a30"/><path d="M40 18 Q48 24 45 34 L39 26 Z" fill="#8a5a30"/><circle cx="19" cy="26" r="2.2" fill="#2b3a55"/><circle cx="33" cy="26" r="2.2" fill="#2b3a55"/><path d="M19 36 Q26 43 33 36" stroke="#2b3a55" stroke-width="2" fill="none" stroke-linecap="round"/><circle cx="14" cy="33" r="2.5" fill="#f0623f" opacity=".55"/><circle cx="38" cy="33" r="2.5" fill="#f0623f" opacity=".55"/></svg>
+      <div><div class="c-name">Delilah, 8</div><div class="c-desc">Little sister. Lives with Dad by the sea. Afraid of absolutely nothing except broccoli. Finder of the box.</div></div>
+    </div>
+    <div class="c-item">
+      <svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="#eebfa6"/><path d="M10 18 Q14 6 26 6 Q38 6 42 18 Q43 22 41 24 Q38 13 26 13 Q14 13 11 24 Q9 22 10 18Z" fill="#c9c2b5"/><path d="M9 24 Q7 34 11 40 L14 26 Z" fill="#c9c2b5"/><path d="M43 24 Q45 34 41 40 L38 26 Z" fill="#c9c2b5"/><circle cx="19" cy="27" r="2" fill="#2b3a55"/><circle cx="33" cy="27" r="2" fill="#2b3a55"/><ellipse cx="19" cy="27" rx="5.5" ry="4.5" fill="none" stroke="#7a5b3e" stroke-width="1.5"/><ellipse cx="33" cy="27" rx="5.5" ry="4.5" fill="none" stroke="#7a5b3e" stroke-width="1.5"/><line x1="24.5" y1="27" x2="27.5" y2="27" stroke="#7a5b3e" stroke-width="1.5"/><path d="M20 37 Q26 40 32 37" stroke="#2b3a55" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <div><div class="c-name">Grandma Rosie, 56</div><div class="c-desc">Dad’s mum. In 1987 she was seventeen, and a chambermaid at the Seagull Hotel. She has kept a secret for thirty-nine years.</div></div>
+    </div>
+    <div class="c-item">
+      <svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="#eebfa6"/><path d="M10 20 Q12 6 26 6 Q40 6 42 20 L42 24 Q38 12 26 12 Q14 12 10 24 Z" fill="#e8e2d6"/><path d="M9 22 Q6 36 12 44 L15 26 Z" fill="#e8e2d6"/><path d="M43 22 Q46 36 40 44 L37 26 Z" fill="#e8e2d6"/><circle cx="19" cy="26" r="2" fill="#2b3a55"/><circle cx="33" cy="26" r="2" fill="#2b3a55"/><path d="M14 22 L23 21" stroke="#c9c2b5" stroke-width="2"/><path d="M29 21 L38 22" stroke="#c9c2b5" stroke-width="2"/><path d="M21 36 Q26 39 31 36" stroke="#2b3a55" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+      <div><div class="c-name">Margot Frost, then 48</div><div class="c-desc">Queen of the seaside murder mystery. Author of eleven famous detective novels. Vanished from Room 9 of the Seagull Hotel on 23rd August 1987.</div></div>
+    </div>
+    <div class="c-item">
+      <svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="#e8b08e"/><path d="M12 16 Q16 7 26 7 Q36 7 40 16 L40 20 Q34 13 26 13 Q18 13 12 20 Z" fill="#4a4038"/><circle cx="19" cy="25" r="2" fill="#2b3a55"/><circle cx="33" cy="25" r="2" fill="#2b3a55"/><path d="M15 21 L23 20" stroke="#4a4038" stroke-width="2.5"/><path d="M29 20 L37 21" stroke="#4a4038" stroke-width="2.5"/><path d="M18 34 L26 32 L34 34" stroke="#4a4038" stroke-width="3" fill="none"/><path d="M21 39 Q26 37 31 39" stroke="#2b3a55" stroke-width="2" fill="none"/></svg>
+      <div><div class="c-name">Gerald Pinch, then 51</div><div class="c-desc">Manager of the Seagull Hotel. Smiles with his mouth but never with his eyes.</div></div>
+    </div>
+    <div class="c-item">
+      <svg width="52" height="52" viewBox="0 0 52 52"><circle cx="26" cy="26" r="24" fill="#f6f1e7"/><g transform="translate(6,10)"><path d="M8 26 Q6 12 12 8 L16 16 Q20 13 24 16 L28 8 Q34 12 32 26 Q32 34 20 34 Q8 34 8 26Z" fill="#3b3b3b"/><circle cx="15" cy="23" r="2.2" fill="#e8b93c"/><circle cx="25" cy="23" r="2.2" fill="#e8b93c"/><path d="M18 28 L20 30 L22 28" stroke="#e8b93c" stroke-width="1.4" fill="none"/><path d="M2 22 L10 24 M2 27 L10 27" stroke="#3b3b3b" stroke-width="1.2"/><path d="M38 22 L30 24 M38 27 L30 27" stroke="#3b3b3b" stroke-width="1.2"/></g></svg>
+      <div><div class="c-name">Bram</div><div class="c-desc">Margot Frost’s black cat. Remember the cat. The cat matters.</div></div>
+    </div>
+  </div>
+  <div class="footer-note">EVIDENCE FILE 001 — ASSEMBLED BY F. &amp; D.</div>
+</div>
+
+<!-- ============================== PART ONE ============================== -->
+<div class="page">
+  <div class="part-num">Part One</div>
+  <h2 class="part-title">The Box</h2>
+
+  <div class="doc-label">DOCUMENT 1 — TEXT MESSAGES</div>
+  <div class="chat">
+    <div class="chat-header"><b>Flo 🔎 &amp; Delilah 🦖</b>Sunday, 7:52 pm</div>
+    <div class="bubble del"><span class="who">DELILAH</span>FLO. FLO FLO FLO ANSWER YOUR PHONE</div>
+    <div class="bubble del"><span class="who">DELILAH</span>THIS IS AN EMERGENCY</div>
+    <div class="bubble flo"><span class="who">FLO</span>Is it an actual emergency or a “the ice cream van played the sad music” emergency</div>
+    <div class="bubble del"><span class="who">DELILAH</span>ACTUAL. I went up in Dad’s loft to find my paddling pool</div>
+    <div class="bubble del"><span class="who">DELILAH</span>and behind the water tank there was a BOX</div>
+    <div class="bubble del"><span class="who">DELILAH</span>an old old old box. all dusty. tied with string</div>
+    <div class="bubble flo"><span class="who">FLO</span>A box is not an emergency Delilah</div>
+    <div class="bubble del"><span class="who">DELILAH</span>it says PRIVATE. DO NOT OPEN. on the lid. in RED PEN</div>
+    <div class="bubble flo"><span class="who">FLO</span>DO NOT open it. Wait till Saturday when I come to Dad’s. We open it together. Promise me</div>
+    <div class="bubble del"><span class="who">DELILAH</span>promise 🤞</div>
+    <div class="bubble flo"><span class="who">FLO</span>Delilah that is the crossed fingers emoji</div>
+  </div>
+  <div class="footer-note">1</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 1 — CONTINUED</div>
+  <div class="chat">
+    <div class="chat-header"><b>Flo 🔎 &amp; Delilah 🦖</b>Sunday, 8:01 pm</div>
+    <div class="bubble del"><span class="who">DELILAH</span>ok so small problem. I already opened it</div>
+    <div class="bubble flo"><span class="who">FLO</span>DELILAH</div>
+    <div class="bubble del"><span class="who">DELILAH</span>I opened it BEFORE I promised so it doesn’t count. that’s the law</div>
+    <div class="bubble flo"><span class="who">FLO</span>…what’s inside</div>
+    <div class="bubble del"><span class="who">DELILAH</span>newspapers. a green diary. letters tied up with string. a photo of a hotel. and piles and piles of typed pages</div>
+    <div class="bubble del"><span class="who">DELILAH</span>the typed pages have titles. look</div>
+    <div class="bubble del"><span class="who">DELILAH</span>“The Murder at Larkspur Lodge”. “Six Murders Before Breakfast”. “The Murder on the Last Train Home”</div>
+    <div class="bubble flo"><span class="who">FLO</span>Delilah.</div>
+    <div class="bubble flo"><span class="who">FLO</span>You have found a box full of murders.</div>
+  </div>
+
+  <div class="fig">
+    <svg width="220" height="100" viewBox="0 0 240 120">
+      <rect x="30" y="10" width="180" height="100" rx="6" fill="#3f6b4f"/>
+      <rect x="30" y="10" width="16" height="100" rx="6" fill="#2e523b"/>
+      <text x="126" y="52" text-anchor="middle" font-family="Courier New" font-size="15" fill="#e8b93c" letter-spacing="2">DIARY</text>
+      <text x="126" y="74" text-anchor="middle" font-family="Courier New" font-size="13" fill="#e8b93c">1987</text>
+      <path d="M204 30 q14 4 0 10" stroke="#e8b93c" stroke-width="2" fill="none"/>
+    </svg>
+    <div class="cap">Exhibit C — the green diary found in the box.</div>
+  </div>
+  <div class="footer-note">2</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 1 — CONCLUDED</div>
+  <div class="chat">
+    <div class="chat-header"><b>Flo 🔎 &amp; Delilah 🦖</b>Sunday, 8:14 pm</div>
+    <div class="bubble flo"><span class="who">FLO</span>Send me a photo of everything. Lay it out on your carpet like a museum</div>
+    <div class="bubble del"><span class="who">DELILAH</span>
+      <svg class="photo-note" width="178" height="125" viewBox="0 0 200 140">
+        <rect width="200" height="140" fill="#8a7f6a"/>
+        <rect x="12" y="14" width="52" height="38" fill="#efe8d8" transform="rotate(-5 38 33)"/>
+        <line x1="18" y1="24" x2="58" y2="20" stroke="#7c7660" stroke-width="1.5"/>
+        <line x1="18" y1="31" x2="58" y2="27" stroke="#7c7660" stroke-width="1.5"/>
+        <line x1="18" y1="38" x2="50" y2="35" stroke="#7c7660" stroke-width="1.5"/>
+        <rect x="76" y="10" width="44" height="56" fill="#3f6b4f"/>
+        <text x="98" y="42" text-anchor="middle" font-family="Courier New" font-size="7" fill="#e8b93c">DIARY</text>
+        <text x="98" y="52" text-anchor="middle" font-family="Courier New" font-size="7" fill="#e8b93c">1987</text>
+        <rect x="132" y="16" width="54" height="40" fill="#fffdf6" transform="rotate(4 159 36)"/>
+        <line x1="138" y1="28" x2="180" y2="31" stroke="#94a3bd" stroke-width="1.5"/>
+        <line x1="138" y1="36" x2="180" y2="39" stroke="#94a3bd" stroke-width="1.5"/>
+        <rect x="14" y="66" width="80" height="58" fill="#f6f1e7" transform="rotate(-2 54 95)"/>
+        <text x="52" y="88" text-anchor="middle" font-family="Courier New" font-size="6.5" fill="#2b3a55" transform="rotate(-2 54 95)">THE MURDER AT</text>
+        <text x="52" y="98" text-anchor="middle" font-family="Courier New" font-size="6.5" fill="#2b3a55" transform="rotate(-2 54 95)">LARKSPUR LODGE</text>
+        <rect x="104" y="70" width="82" height="54" fill="#efe8d8" transform="rotate(3 145 97)"/>
+        <text x="144" y="92" text-anchor="middle" font-family="Courier New" font-size="6.5" fill="#2b3a55" transform="rotate(3 145 97)">SIX MURDERS</text>
+        <text x="144" y="102" text-anchor="middle" font-family="Courier New" font-size="6.5" fill="#2b3a55" transform="rotate(3 145 97)">BEFORE BREAKFAST</text>
+      </svg>
+    </div>
+    <div class="bubble flo"><span class="who">FLO</span>Whose box is it? Ask Dad. CASUALLY. Don’t say we opened it</div>
+    <div class="bubble del"><span class="who">DELILAH</span>asked him. he says the loft stuff is Grandma Rosie’s from when she moved to her flat</div>
+    <div class="bubble flo"><span class="who">FLO</span>R.M. on the lid. Rosie Marsh. It’s GRANDMA’S box</div>
+    <div class="bubble del"><span class="who">DELILAH</span>grandma has a box full of murders?? 😱 is grandma a murderer</div>
+    <div class="bubble flo"><span class="who">FLO</span>Grandma cried when a pigeon flew into her window. She is not a murderer</div>
+    <div class="bubble flo"><span class="who">FLO</span>The typed pages aren’t real murders anyway. They look like STORIES. Manuscripts. Like books before they’re books</div>
+    <div class="bubble flo"><span class="who">FLO</span>Read me the newspaper. The oldest one. Slowly</div>
+  </div>
+  <div class="footer-note">3</div>
+</div>
+
+<!-- ============================== PART TWO ============================== -->
+<div class="page">
+  <div class="part-num">Part Two</div>
+  <h2 class="part-title">1987</h2>
+
+  <div class="doc-label">DOCUMENT 2 — NEWSPAPER CUTTING</div>
+  <div class="newspaper">
+    <div class="np-mast"><h2>The Seacliff Gazette</h2></div>
+    <div class="np-date"><span>MONDAY 24 AUGUST 1987</span><span>PRICE 22p</span></div>
+    <div class="np-head">MYSTERY WRITER VANISHES<br>FROM SEAGULL HOTEL</div>
+    <div class="np-sub">Queen of the seaside murder mystery missing from Room 9 — cardigan found at Gull Point</div>
+    <div class="np-cols">
+      <p class="drop">Margot Frost, 48, the celebrated crime novelist, has disappeared from the Seagull Hotel, where she had been staying since June to finish her twelfth book. Staff raised the alarm yesterday morning when Miss Frost did not appear for breakfast — something witnesses say had never once happened in eleven weeks.</p>
+      <p>Her bed had not been slept in. The window of Room 9 stood open. Most puzzling of all, her famous green typewriter — which she carried everywhere and called “the only man I’ve ever trusted” — was gone, along with every page of the unfinished novel, believed to be titled <i>The Silver Tide</i>.</p>
+      <div class="np-fig">
+        <svg width="150" height="100" viewBox="0 0 150 100">
+          <rect width="150" height="100" fill="#ded5c0"/>
+          <path d="M0 62 L36 30 L60 44 L92 18 L150 52 L150 100 L0 100 Z" fill="#a89c82"/>
+          <rect x="52" y="34" width="52" height="34" fill="#c8bda2"/>
+          <rect x="58" y="40" width="8" height="8" fill="#6b6350"/>
+          <rect x="72" y="40" width="8" height="8" fill="#6b6350"/>
+          <rect x="86" y="40" width="8" height="8" fill="#6b6350"/>
+          <rect x="58" y="54" width="8" height="8" fill="#6b6350"/>
+          <rect x="72" y="54" width="8" height="8" fill="#6b6350"/>
+          <rect x="86" y="54" width="8" height="8" fill="#6b6350"/>
+          <path d="M64 34 L78 22 L92 34 Z" fill="#8d8168"/>
+          <path d="M0 84 Q40 74 75 84 Q115 94 150 82 L150 100 L0 100Z" fill="#7e8d99"/>
+          <circle cx="28" cy="20" r="8" fill="#e8e2d2"/>
+          <path d="M110 16 q4 -5 8 0 q4 -5 8 0" stroke="#6b6350" fill="none" stroke-width="1.5"/>
+        </svg>
+        <div class="cap">The Seagull Hotel, photographed last summer. Room 9 is beneath the gable.</div>
+      </div>
+      <p>A search of the cliffs revealed Miss Frost’s grey cardigan folded neatly on the rocks at Gull Point, below which the currents are known to be treacherous. Police say they are “gravely concerned”, and that the sea does not often give back what it takes.</p>
+      <p>Hotel manager Mr Gerald Pinch, 51, described himself as “devastated beyond words”. “She was our brightest star,” he told the Gazette. “The Seagull was her home. I was her dearest friend on this earth.”</p>
+      <p>The last person known to have seen Miss Frost is a chambermaid, Rosie Marsh, 17, who took the author her cocoa at nine o’clock on Saturday night. Miss Marsh declined to speak to reporters, and was seen leaving the hotel in tears.</p>
+      <p>Miss Frost’s black cat, Bram, who sat on her lap each evening in the residents’ lounge, has not been found.</p>
+    </div>
+  </div>
+  <div class="footer-note">3</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 3 — TEXT MESSAGES</div>
+  <div class="chat">
+    <div class="chat-header"><b>Flo 🔎 &amp; Delilah 🦖</b>Sunday, 8:51 pm</div>
+    <div class="bubble flo"><span class="who">FLO</span>Rosie Marsh. SEVENTEEN. Chambermaid. Last person to see her alive</div>
+    <div class="bubble del"><span class="who">DELILAH</span>GRANDMA WAS IN THE NEWSPAPER</div>
+    <div class="bubble flo"><span class="who">FLO</span>Grandma was the last person to see a famous writer who vanished off a cliff. And she kept a secret box about it for 39 years. In OUR loft</div>
+    <div class="bubble del"><span class="who">DELILAH</span>do we ask her about it??</div>
+    <div class="bubble flo"><span class="who">FLO</span>Not yet. Rule one of detectives: evidence first, theories second. Rule two: don’t frighten your witness</div>
+    <div class="bubble del"><span class="who">DELILAH</span>grandma is not a witness she is a grandma</div>
+    <div class="bubble flo"><span class="who">FLO</span>She can be both. Is the green diary hers? Read it</div>
+    <div class="bubble del"><span class="who">DELILAH</span>it says ROSIE MARSH — PRIVATE on the first page</div>
+    <div class="bubble del"><span class="who">DELILAH</span>flo it feels naughty reading grandma’s diary</div>
+    <div class="bubble flo"><span class="who">FLO</span>It is slightly naughty. But she kept it in a box marked DO NOT OPEN, in a loft, for 39 years, labelled with the year the writer vanished. Diaries like that WANT to be read eventually</div>
+    <div class="bubble del"><span class="who">DELILAH</span>ok. photographing the pages. some bits are underlined and there’s cocoa on one page. or mud. hopefully cocoa</div>
+  </div>
+  <div class="footer-note">5</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 4 — THE DIARY OF ROSIE MARSH (1)</div>
+  <div class="diary">
+    <div class="d-date">Tuesday 30th June, 1987</div>
+    <p>First week at the Seagull. My feet ache like anything but I don’t care, because guess who is staying in Room 9. MARGOT FROST. The actual real Margot Frost. Mum has read every one of her books from the library, twice. I carried her cocoa up tonight and she looked at me over her glasses and said, “You read on your breaks. I’ve seen you. Which one of mine is your favourite?” and I said the one where the postman did it, and she laughed like a drain and said “Everyone suspects the postman. Nobody suspects the post.” I don’t know what that means but I wrote it down because it sounds important.</p>
+
+    <div class="d-date">Saturday 11th July, 1987</div>
+    <p>Margot (she says I must call her Margot, “Miss Frost sounds like a fridge”) lets me sit with her when my shift ends. She’s teaching me how mysteries work. She says every mystery has three things: a secret, a lie, and a person brave enough to notice the difference. Her cat Bram sat on my lap the whole time. He only likes three people in the world, she says. Her, me, and absolutely nobody else.</p>
+
+    <div class="d-date">Friday 24th July, 1987</div>
+    <p>Something horrible today. I was polishing the landing and I heard Mr Pinch in Room 9, sort of hissing. He said, “You owe me, Margot. Half that book is mine and you know it.” And Margot said, cold as anything, “No, Gerald. You locked me in this hotel with a contract, not a kindness. You’ll get what the paper says and not a penny of my pages.” Then the door opened and I had to pretend to polish the same spot of banister for about a year.</p>
+
+    <div class="d-date">Sunday 9th August, 1987</div>
+    <p>Margot asked me strange questions today. Whether I could keep a secret. Whether I thought a person could be two people in one lifetime. Then she said the oddest thing. She said, “Rosie, when you read a mystery, everyone watches the detective. Nobody watches the luggage.” And she looked at her big trunk in the corner and winked.</p>
+  </div>
+  <div class="footer-note">5</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 4 — THE DIARY OF ROSIE MARSH (2)</div>
+  <div class="diary">
+    <div class="d-date">Saturday 22nd August, 1987 — very late</div>
+    <p>I am writing this fast in the linen cupboard because I don’t want to forget one single word. Tonight when I brought the cocoa, Margot had the box out on her bed. This box. She put my hand on the lid and said: “Keep this safe and keep it secret. Don’t open it, don’t burn it, don’t give it to anyone — especially not to Gerald Pinch. One day someone in your family will need it. You’ll know them because they’ll find it all by themselves.” Then she said, “Trust the postcards, Rosie.” I said what postcards? and she just smiled and gave Bram a whole sardine.</p>
+
+    <div class="d-date">Monday 24th August, 1987</div>
+    <p>She’s gone. Everyone is saying she walked into the sea off Gull Point because her cardigan was on the rocks. The police came. I tried to tell the sergeant that it CAN’T be that, and he patted my head — actually patted it, like I was a spaniel — and said “leave the thinking to us, pet.” So I will write my thinking here instead:</p>
+    <p>ONE. Margot hated swimming. She called the sea “a lot of wet weather with fish in it.”</p>
+    <p>TWO. Her typewriter is gone. A typewriter weighs as much as a Christmas turkey. You do not carry your typewriter off a cliff.</p>
+    <p>THREE. Bram is gone too. Cats do not walk into the sea. Nobody takes their cat to a drowning.</p>
+    <p>FOUR. The cardigan was folded NEATLY. Margot never folded anything neatly in her life. Room 9 looked like a jumble sale every single day.</p>
+    <p>FIVE. Her big trunk went down to the station on Friday with the luggage van. Nobody watches the luggage.</p>
+    <p>She is not drowned. She has ESCAPED. And I am the only person in the whole world who knows, and I am seventeen, and nobody will ever believe me.</p>
+  </div>
+  <div class="footer-note">6</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 5 — POLICE REPORT (COPY, FOUND IN THE BOX)</div>
+  <div class="typed">
+    <h3>SEACLIFF CONSTABULARY — CASE SUMMARY</h3>
+    <p style="text-align:center;">- - - - - - - - - - - - - - - - - - - - -</p>
+    <p>CASE No: <span class="field">87/0412</span>&nbsp;&nbsp;DATE: <span class="field">14 October 1987</span></p>
+    <p>SUBJECT: <span class="field">FROST, Margot — reported missing 23 Aug 1987</span></p>
+    <p>FINDINGS: Subject last seen 21:00 hrs, 22 Aug, by chambermaid R. Marsh (statement attached — NOTE: statement of R. Marsh judged fanciful, witness is a juvenile). Cardigan recovered Gull Point. Currents at said location severe. No body recovered. No note recovered.</p>
+    <p>ITEMS UNACCOUNTED FOR: One (1) typewriter, green, Empire model. One (1) manuscript, incomplete, "THE SILVER TIDE". One (1) cat, black, answers (occasionally) to "Bram".</p>
+    <p>OBSERVATION OF SGT. HOWELL: Query — why should a drowning woman first post her trunk to an unknown address from the railway station? Luggage clerk recalls trunk "heavy as a church organ". Recommend further inquiry.</p>
+    <p>OBSERVATION OF INSPECTOR CRADDOCK: Sgt. Howell is reminded that the summer season ends Friday and the paperwork will not do itself. The sea has taken another, as the sea does.</p>
+    <p>CONCLUSION: Presumed accidental drowning.</p>
+    <div class="stamp-red">CASE CLOSED</div>
+  </div>
+
+  <div class="fig">
+    <svg width="220" height="110" viewBox="0 0 220 110">
+      <rect x="30" y="40" width="160" height="44" rx="8" fill="#3f6b4f"/>
+      <rect x="46" y="26" width="128" height="22" rx="6" fill="#356044"/>
+      <rect x="70" y="14" width="80" height="16" rx="4" fill="#2e523b"/>
+      <rect x="76" y="18" width="68" height="8" fill="#f6f1e7"/>
+      <g fill="#e8b93c">
+        <circle cx="60" cy="56" r="4"/><circle cx="76" cy="56" r="4"/><circle cx="92" cy="56" r="4"/><circle cx="108" cy="56" r="4"/><circle cx="124" cy="56" r="4"/><circle cx="140" cy="56" r="4"/><circle cx="156" cy="56" r="4"/>
+        <circle cx="68" cy="68" r="4"/><circle cx="84" cy="68" r="4"/><circle cx="100" cy="68" r="4"/><circle cx="116" cy="68" r="4"/><circle cx="132" cy="68" r="4"/><circle cx="148" cy="68" r="4"/>
+      </g>
+      <rect x="60" y="84" width="100" height="10" rx="5" fill="#356044"/>
+    </svg>
+    <div class="cap">The famous green Empire typewriter — “heavy as a Christmas turkey.” Never found.</div>
+  </div>
+  <div class="footer-note">7</div>
+</div>
+
+<!-- ============================== PART THREE ============================== -->
+<div class="page">
+  <div class="part-num">Part Three</div>
+  <h2 class="part-title">The Investigation</h2>
+
+  <div class="doc-label">DOCUMENT 6 — TEXT MESSAGES</div>
+  <div class="chat">
+    <div class="chat-header"><b>Flo 🔎 &amp; Delilah 🦖</b>Monday, 4:20 pm</div>
+    <div class="bubble flo"><span class="who">FLO</span>I couldn’t sleep. I read everything you photographed twice. Delilah, Grandma was RIGHT and the police were WRONG</div>
+    <div class="bubble del"><span class="who">DELILAH</span>because of the cat</div>
+    <div class="bubble del"><span class="who">DELILAH</span>you don’t take your cat to a drowning. you take your cat to a NEW HOUSE</div>
+    <div class="bubble flo"><span class="who">FLO</span>EXACTLY. The cat, the typewriter, the trunk. That’s not a drowning, that’s a MOVING DAY</div>
+    <div class="bubble flo"><span class="who">FLO</span>Margot Frost faked it. She escaped from Gerald Pinch and his horrible contract and started a new life. “A person can be two people in one lifetime”</div>
+    <div class="bubble del"><span class="who">DELILAH</span>but why is her box in OUR loft 😵</div>
+    <div class="bubble flo"><span class="who">FLO</span>Because she trusted one single person. A 17-year-old with cocoa. And that person grew up and became our grandma</div>
+    <div class="bubble del"><span class="who">DELILAH</span>“one day someone in your family will need it. they’ll find it all by themselves” ……flo. THAT’S ME. I’M THE SOMEONE</div>
+    <div class="bubble flo"><span class="who">FLO</span>You’re the someone 🦖</div>
+  </div>
+  <div class="footer-note">8</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 6 — CONTINUED</div>
+  <div class="chat">
+    <div class="chat-header"><b>Flo 🔎 &amp; Delilah 🦖</b>Monday, 4:44 pm</div>
+    <div class="bubble flo"><span class="who">FLO</span>But hang on. Why would anyone NEED it? Keeping it safe, fine. Needing it, that’s different. There’s something in that box we haven’t understood yet</div>
+    <div class="bubble del"><span class="who">DELILAH</span>there’s still the letters tied in string and one more newspaper. it’s newer. 1989</div>
+    <div class="bubble flo"><span class="who">FLO</span>Read the 1989 one next. And Delilah — “trust the postcards.” Ask Dad if Grandma collects postcards</div>
+    <div class="bubble del"><span class="who">DELILAH</span>asked. dad says grandma has a biscuit tin she’s weird about. she keeps it on top of the wardrobe and no one’s allowed to touch it 👀</div>
+  </div>
+
+  <div class="doc-label" style="margin-top:8mm;">DOCUMENT 7 — NEWSPAPER CUTTING</div>
+  <div class="newspaper" style="transform: rotate(.5deg);">
+    <div class="np-mast"><h2>The Seacliff Gazette</h2></div>
+    <div class="np-date"><span>SATURDAY 15 JULY 1989</span><span>PRICE 26p</span></div>
+    <div class="np-head">FROM HOTEL DESK TO BESTSELLER LIST:<br>PINCH’S “SALT GRAVE” TRIUMPH</div>
+    <div class="np-sub">Seagull Hotel manager stuns literary world with debut mystery</div>
+    <div class="np-cols">
+      <p class="drop">Two summers after tragedy touched the Seagull Hotel, its manager Gerald Pinch has become an unlikely literary sensation. His first novel, <i>The Salt Grave</i>, sits atop the bestseller lists, and critics are astonished.</p>
+      <p>“It reads,” wrote one reviewer, “as though Margot Frost herself wrote one last masterpiece. The same wit. The same tricks. Even her habit of hiding the vital clue in the luggage.”</p>
+      <p>Mr Pinch, now living in a large house inland, said, mopping his brow: “In a way, her voice lives on through me. Whole chapters arrive as if already typed.” He ended the interview abruptly when a reporter asked, in jest, whether he had ever learned to type.</p>
+    </div>
+  </div>
+  <div class="footer-note">9</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 8 — TEXT MESSAGES</div>
+  <div class="chat">
+    <div class="chat-header"><b>Flo 🔎 &amp; Delilah 🦖</b>Monday, 6:03 pm</div>
+    <div class="bubble flo"><span class="who">FLO</span>“Whole chapters arrive as if already typed.” I BET THEY DO, GERALD</div>
+    <div class="bubble del"><span class="who">DELILAH</span>he stole her book?!</div>
+    <div class="bubble flo"><span class="who">FLO</span>Think about it. Margot escapes with the typewriter and the finished pages. But she’d been at the Seagull ALL SUMMER writing. Writers make notes, plans, spare copies. Pinch ran the hotel. Master key. He kept whatever she left behind and published it as HIS</div>
+    <div class="bubble del"><span class="who">DELILAH</span>and she couldn’t tell on him!! because then everyone would know she wasn’t drowned!!</div>
+    <div class="bubble flo"><span class="who">FLO</span>The perfect crime. The only victim who can’t complain is one everybody thinks is at the bottom of the sea</div>
+    <div class="bubble flo"><span class="who">FLO</span>THAT’S why someone would need the box one day. It’s not a memory box Delilah. It’s EVIDENCE</div>
+  </div>
+
+  <div class="fig">
+    <svg width="300" height="140" viewBox="0 0 300 140">
+      <g transform="translate(40,14) rotate(-2 55 55)">
+        <rect x="0" y="0" width="92" height="112" rx="3" fill="#4a4038"/>
+        <rect x="6" y="0" width="86" height="112" fill="#5a5048"/>
+        <text x="49" y="34" text-anchor="middle" font-family="Georgia" font-size="11" fill="#e8b93c">THE SALT</text>
+        <text x="49" y="48" text-anchor="middle" font-family="Georgia" font-size="11" fill="#e8b93c">GRAVE</text>
+        <text x="49" y="78" text-anchor="middle" font-family="Georgia" font-size="8" fill="#d8cfae">GERALD PINCH</text>
+        <text x="49" y="92" text-anchor="middle" font-family="Georgia" font-size="7" fill="#a89c82">1989</text>
+      </g>
+      <text x="150" y="72" text-anchor="middle" font-family="Segoe Print" font-size="14" fill="#b03a3a">=?</text>
+      <g transform="translate(168,16) rotate(2 55 55)">
+        <rect x="0" y="0" width="92" height="112" fill="#f6f1e7" stroke="#cfc6a8"/>
+        <text x="46" y="26" text-anchor="middle" font-family="Courier New" font-size="8" fill="#2b3a55">PLAN + NOTES</text>
+        <text x="46" y="40" text-anchor="middle" font-family="Courier New" font-size="8" fill="#2b3a55">"THE SALT GRAVE"</text>
+        <line x1="14" y1="54" x2="78" y2="54" stroke="#94a3bd" stroke-width="2"/>
+        <line x1="14" y1="63" x2="78" y2="63" stroke="#94a3bd" stroke-width="2"/>
+        <line x1="14" y1="72" x2="66" y2="72" stroke="#94a3bd" stroke-width="2"/>
+        <line x1="14" y1="81" x2="78" y2="81" stroke="#94a3bd" stroke-width="2"/>
+        <text x="46" y="102" text-anchor="middle" font-family="Courier New" font-size="7" fill="#b03a3a">M. FROST — 1987</text>
+      </g>
+    </svg>
+    <div class="cap">Exhibit K — the same story, two years apart, two different names.</div>
+  </div>
+  <div class="footer-note">10</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 9 — LETTER FOUND IN THE BOX, TIED IN STRING</div>
+  <div class="letter">
+    <p style="text-align:right; font-size:10pt;">Room 9, The Seagull Hotel<br>22nd August 1987</p>
+    <p>My dear Rosie,</p>
+    <p>If you are reading this properly — by which I mean years from now, with your heart thumping — then whoever found my box has done exactly what I hoped, and you may tell them from me: <i>well done, detective.</i></p>
+    <p>By morning I shall be somebody else. Do not grieve, and do not believe the sea took me. The sea and I have an understanding: it doesn’t write novels and I don’t go paddling.</p>
+    <p>In this box are my eleven finished manuscripts — my life’s murders, all of them harmless — and my diary of this last strange summer. They are the proof of how I write: my plans, my crossings-out, my tricks. A story’s fingerprints, if you like. Should a certain gentleman ever pretend my words are his, this box will say otherwise, louder than I ever could.</p>
+    <p>Every summer, no matter where I am, I shall send you a postcard. No message — messages can be read — only a little drawing of Bram. While the postcards come, you will know we are well. The postmark will tell you where to find me, when finding me matters.</p>
+    <p>Be brave, dear girl. You were the only one who noticed things at that hotel. Noticing is the whole of it.</p>
+    <p class="sign">Your friend,<br>M.</p>
+  </div>
+  <div class="footer-note">11</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 10 — THE SUSPECT BOARD (MADE BY DELILAH, HELPED BY NOBODY)</div>
+  <div class="board">
+    <div class="board-inner">
+      <h3>WHO DID WHAT?? — an investigation</h3>
+      <div class="board-grid">
+        <div class="s-card">
+          <div class="s-name">Gerald Pinch 😠</div>
+          <div class="s-note">Hotel boss. Horrible contract. Said “half that book is mine.” Suddenly writes amazing books when Margot is “gone”. Can’t even type??</div>
+          <div class="verdict">VERDICT: BOOK THIEF. 100%</div>
+        </div>
+        <div class="s-card">
+          <div class="s-name">Margot Frost ✒️</div>
+          <div class="s-note">Not drowned!! Took cat + typewriter + trunk. Faked cardigan clue (folded = FAKE). Escaped to be a new person.</div>
+          <div class="verdict">VERDICT: ALIVE. FIND HER.</div>
+        </div>
+        <div class="s-card">
+          <div class="s-name">Grandma Rosie 👵</div>
+          <div class="s-note">Kept box safe 39 years like she promised. Told police the truth at 17. Got head-patted. STILL RIGHT.</div>
+          <div class="verdict">VERDICT: HERO 🏅</div>
+        </div>
+        <div class="s-card">
+          <div class="s-name">Bram the cat 🐈‍⬛</div>
+          <div class="s-note">Key witness. Liked 3 people: Margot, Rosie, nobody. Went with Margot = proof of moving day not drowning day.</div>
+          <div class="verdict">VERDICT: GOOD BOY. INNOCENT.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="doc-label" style="margin-top:8mm;">DOCUMENT 11 — TEXT MESSAGES</div>
+  <div class="chat">
+    <div class="chat-header"><b>Flo 🔎 &amp; Delilah 🦖</b>Tuesday, 5:30 pm</div>
+    <div class="bubble flo"><span class="who">FLO</span>Your suspect board is actually really good</div>
+    <div class="bubble del"><span class="who">DELILAH</span>I know</div>
+    <div class="bubble flo"><span class="who">FLO</span>It’s time. Saturday we show Grandma what we found. Both of us together</div>
+    <div class="bubble del"><span class="who">DELILAH</span>what if she’s cross we opened it</div>
+    <div class="bubble flo"><span class="who">FLO</span>“You’ll know them because they’ll find it all by themselves.” We didn’t break the rule Delilah. We ARE the rule</div>
+  </div>
+  <div class="footer-note">12</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 12 — THE NEW DIARY OF DELILAH, AGE 8 (STARTED SATURDAY)</div>
+  <div class="diary diary-del">
+    <div class="d-date">Saturday</div>
+    <p>Flo says real detectives write everything down so this is my diary now. Grandma came for tea. We put the box on the kitchen table and Grandma went completely still, like when you pause a film. Then she touched the lid and said “Oh. It’s you two, then. Of course it’s you two.” And she LAUGHED and CRIED at the SAME TIME which I didn’t know grandmas could do.</p>
+    <div class="d-date">Saturday, after sausages</div>
+    <p>Grandma got her biscuit tin down from the wardrobe. NO BISCUITS. Instead: THIRTY-EIGHT POSTCARDS. One every summer since 1988. No words on any of them, just a little drawing of a black cat. Sometimes the cat is on a deckchair. Sometimes eating a sardine. The cat drawings get a bit wobblier lately but Grandma says so does everyone.</p>
+    <div class="d-date">Saturday, bedtime</div>
+    <p>Flo laid all the postcards on the floor in date order (she loves doing that kind of thing) and read out the postmarks. All different seaside towns. But the last SIX years are all the same place. A village called LITTLE WICK, 43 miles away. Flo went quiet and did her thinking face. Then she said: “The postmark tells you where to find me, when finding me matters.” Grandma looked at the postcards for a long time. Then she said, “Girls. Fetch my road atlas.” GRANDMA IS COMING WITH US. BEST DAY OF MY LIFE.</p>
+  </div>
+
+  <div class="fig">
+    <svg width="300" height="110" viewBox="0 0 300 110">
+      <rect x="8" y="18" width="88" height="62" fill="#fffdf6" stroke="#cfc6a8" transform="rotate(-4 52 49)"/>
+      <g transform="rotate(-4 52 49)">
+        <path d="M34 52 Q30 40 40 38 L44 44 Q50 40 56 44 L60 38 Q70 40 66 52 Q66 60 50 60 Q34 60 34 52Z" fill="#3b3b3b"/>
+        <path d="M66 54 q10 -2 8 -10" stroke="#3b3b3b" stroke-width="3" fill="none"/>
+        <circle cx="45" cy="50" r="1.6" fill="#e8b93c"/><circle cx="55" cy="50" r="1.6" fill="#e8b93c"/>
+      </g>
+      <rect x="106" y="12" width="88" height="62" fill="#fffdf6" stroke="#cfc6a8" transform="rotate(3 150 43)"/>
+      <g transform="rotate(3 150 43)">
+        <rect x="122" y="46" width="56" height="8" rx="4" fill="#f0623f"/>
+        <path d="M136 46 Q132 32 142 30 L146 36 Q152 32 158 36 L162 30 Q172 32 168 46Z" fill="#3b3b3b"/>
+        <circle cx="147" cy="40" r="1.6" fill="#e8b93c"/><circle cx="157" cy="40" r="1.6" fill="#e8b93c"/>
+      </g>
+      <rect x="204" y="20" width="88" height="62" fill="#fffdf6" stroke="#cfc6a8" transform="rotate(-2 248 51)"/>
+      <g transform="rotate(-2 248 51)">
+        <path d="M232 58 Q228 46 238 44 L242 50 Q248 46 254 50 L258 44 Q268 46 264 58 Q264 66 248 66 Q232 66 232 58Z" fill="#3b3b3b"/>
+        <circle cx="243" cy="54" r="1.6" fill="#e8b93c"/><circle cx="253" cy="54" r="1.6" fill="#e8b93c"/>
+        <ellipse cx="272" cy="62" rx="7" ry="4" fill="#94a3bd"/>
+      </g>
+      <text x="150" y="103" text-anchor="middle" font-family="Segoe Print" font-size="10" fill="#6b7688">38 summers. 38 cats. Not one single word.</text>
+    </svg>
+  </div>
+  <div class="footer-note">13</div>
+</div>
+
+<!-- ============================== PART FOUR ============================== -->
+<div class="page">
+  <div class="part-num">Part Four</div>
+  <h2 class="part-title">Little Wick</h2>
+
+  <div class="doc-label">DOCUMENT 13 — THE NEW DIARY OF DELILAH, AGE 8</div>
+  <div class="diary diary-del">
+    <div class="d-date">Sunday</div>
+    <p>Dad drove us. Grandma sat in the front with the atlas open on her knees even though Dad has a phone with maps, because Grandma says satellites don’t know everything.</p>
+    <p>Little Wick has one shop, one lighthouse and about a MILLION seagulls. Flo said “how do we find one lady in a whole village” and Grandma said “we don’t look for a lady. We look for a cat.” See, this is why you bring a grandma.</p>
+    <p>We asked the shop man if there was a lady with a black cat and he laughed and said “You’ll be wanting Miss Marsh at Driftwood Cottage. Cats, plural. And keep your sandwiches shut.”</p>
+    <p>Flo grabbed my arm SO HARD. Miss MARSH. The lady is called MARSH. That’s GRANDMA’S name. She borrowed grandma’s name to be her new person!! Grandma had to sit down on the sea wall for a minute. She said, quiet, “Thirty-nine years, and she’s been being ME.”</p>
+    <div class="d-date">Sunday, later, IMPORTANT</div>
+    <p>Driftwood Cottage is blue with hollyhocks. On the doorstep was a very old black cat eating a sardine. A voice from inside said, “If you’re selling something, I have everything. If you’re the two young detectives and Rosie Marsh, you took your time. Come in — the kettle’s on.”</p>
+    <p>SHE KNEW. HOW DID SHE KNOW?? (Flo says: the shop man phoned ahead. Villages are like that. I say: WITCH. We may never agree.)</p>
+  </div>
+
+  <div class="fig" style="margin-top:5mm;">
+    <svg width="286" height="130" viewBox="0 0 330 150">
+      <path d="M0 118 Q80 104 165 114 Q250 124 330 110 L330 150 L0 150 Z" fill="#7e8d99"/>
+      <rect x="60" y="58" width="96" height="56" fill="#8fb3c7"/>
+      <path d="M52 58 L108 26 L164 58 Z" fill="#c96f50"/>
+      <rect x="74" y="76" width="20" height="38" fill="#3f4c63"/>
+      <rect x="112" y="74" width="24" height="20" fill="#f6f1e7"/>
+      <line x1="124" y1="74" x2="124" y2="94" stroke="#8fb3c7" stroke-width="2"/>
+      <path d="M62 114 q4 -26 0 -40 M66 90 q6 -4 0 -12 M58 96 q-6 -4 0 -12" stroke="#3f6b4f" stroke-width="3" fill="none"/>
+      <circle cx="62" cy="70" r="4" fill="#f0623f"/><circle cx="60" cy="82" r="4" fill="#e8b93c"/><circle cx="64" cy="92" r="4" fill="#f0623f"/>
+      <g transform="translate(180,96)">
+        <ellipse cx="16" cy="16" rx="15" ry="9" fill="#3b3b3b"/>
+        <circle cx="28" cy="8" r="7" fill="#3b3b3b"/>
+        <path d="M24 3 L26 -2 L29 3 Z M31 3 L33 -2 L36 3Z" fill="#3b3b3b"/>
+        <path d="M2 16 q-8 0 -6 -8" stroke="#3b3b3b" stroke-width="3" fill="none"/>
+        <ellipse cx="40" cy="20" rx="6" ry="3" fill="#94a3bd"/>
+      </g>
+      <g transform="translate(252,18)">
+        <polygon points="14,72 34,72 30,10 18,10" fill="#f6f1e7"/>
+        <polygon points="16,44 32,44 31,28 17,28" fill="#f0623f"/>
+        <rect x="16" y="2" width="16" height="10" fill="#2b3a55"/>
+        <circle cx="24" cy="7" r="3" fill="#e8b93c"/>
+      </g>
+      <path d="M20 22 q5 -6 10 0 q5 -6 10 0 M240 34 q4 -5 8 0 q4 -5 8 0" stroke="#94a3bd" stroke-width="2" fill="none"/>
+    </svg>
+    <div class="cap">Driftwood Cottage, Little Wick. Note the sardine.</div>
+  </div>
+  <div class="footer-note">14</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 14 — WRITTEN STATEMENT OF “MISS PEGGY MARSH” OF DRIFTWOOD COTTAGE</div>
+  <div class="letter" style="transform: rotate(-.3deg);">
+    <p>My name — my first name, the one I was born with and shall no doubt die with — is Margot Frost. I am eighty-seven years old, and I have been dead for thirty-nine of them. I recommend it. The queue at the post office treats you beautifully.</p>
+    <p>In 1987 I was the most famous mystery writer in England and the unhappiest woman in it. Gerald Pinch had trapped me with a wicked contract signed in a foolish moment, and he took half of everything I earned, and reminded me daily that he always would. I could not out-argue him. I could not out-lawyer him. But — and here I was fortunate — I could out-PLOT him. Plotting was my entire profession.</p>
+    <p>So I wrote my own vanishing. The folded cardigan (a clumsy clue, folded far too neatly — I hoped somebody would notice, and one dear girl did). The trunk sent ahead from the station. The typewriter in a hat box. Bram in a fish basket, bribed with sardines beyond counting. By Sunday morning Margot Frost was a tragedy, and Peggy Marsh — I borrowed the name of the only trustworthy person I knew — was a plain woman on a bus with a heavy amount of luggage. Nobody watches the luggage.</p>
+    <p>Then Gerald published my stolen notes as his own, exactly as I feared he might, and I could say nothing — for the dead make poor witnesses. That is why the box exists. Eleven manuscripts and a diary: my fingerprints, waiting in a loft for someone with sharp eyes and no fear of dust.</p>
+    <p>It seems the wait is over. Rosie — you kept your promise for thirty-nine years, which is thirty-eight more than most people manage. And your granddaughters found it all by themselves, exactly as foretold. The little one, I am told, suspected the cat evidence at once. She will go far.</p>
+    <p class="sign">Signed, in my own unmistakable hand,<br>MARGOT FROST<br><span style="font-size:9pt;">(dictated to no one, typed by nobody, entirely alive)</span></p>
+  </div>
+  <div class="footer-note">15</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 15 — EMAIL</div>
+  <div class="email">
+    <div class="e-bar">NEW MESSAGE</div>
+    <div class="e-meta">
+      <b>From:</b> Flo &lt;flo.detective.agency@mailmail.com&gt;<br>
+      <b>To:</b> The Editor, The Seacliff Gazette; Hartwell &amp; Blyth Publishers Ltd<br>
+      <b>Subject:</b> Margot Frost is alive, and we can prove Gerald Pinch stole “The Salt Grave”
+    </div>
+    <div class="e-body">
+      <p>Dear Editor and Publishers,</p>
+      <p>We are Flo (12) and Delilah (8). Thirty-nine years ago you reported that the writer Margot Frost drowned at Gull Point. She didn’t. We have found her, and she has given us permission to tell you everything.</p>
+      <p>Attached you will find: (1) photographs of eleven original manuscripts in Margot Frost’s own typing, kept sealed in a box since 1987; (2) her 1987 diary and planning notes, which contain the entire plot of “The Salt Grave” — two years before Gerald Pinch “wrote” it; (3) a signed statement from Miss Frost; (4) a drawing of the cat by my sister (not evidence, but it is very good).</p>
+      <p>Our grandma Rosie Marsh told the police the truth in 1987 and was patted on the head. We would like it officially recorded that she was right about everything.</p>
+      <p>Yours faithfully,<br>Flo &amp; Delilah<br><i>(and Rosie Marsh, and Margot Frost, and Bram IV)</i></p>
+    </div>
+  </div>
+
+  <div class="doc-label" style="margin-top:8mm;">DOCUMENT 16 — TEXT MESSAGES</div>
+  <div class="chat">
+    <div class="chat-header"><b>Flo 🔎 &amp; Delilah 🦖</b>Three weeks later, 7:40 am</div>
+    <div class="bubble del"><span class="who">DELILAH</span>FLO. DAD SAYS WE'RE IN THE PAPER. THE ACTUAL PAPER. HE BOUGHT NINE COPIES</div>
+    <div class="bubble flo"><span class="who">FLO</span>Mum bought ELEVEN. she’s laminating one</div>
+    <div class="bubble del"><span class="who">DELILAH</span>read it to me!! I'm not allowed the scissors yet and grandma is guarding hers</div>
+  </div>
+  <div class="footer-note">16</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 17 — NEWSPAPER CUTTING (LAMINATED BY MUM)</div>
+  <div class="newspaper">
+    <div class="np-mast"><h2>The Seacliff Gazette</h2></div>
+    <div class="np-date"><span>SATURDAY 26 SEPTEMBER 2026</span><span>PRICE £1.60</span></div>
+    <div class="np-head">“DEAD” FOR 39 YEARS — QUEEN OF<br>MYSTERY FOUND ALIVE BY SISTERS, 12 &amp; 8</div>
+    <div class="np-sub">Case reopened as experts confirm Pinch’s bestseller was Frost’s stolen work — “The cat was the clue,” says younger detective</div>
+    <div class="np-cols">
+      <p class="drop">The mystery writer Margot Frost, presumed drowned at Gull Point in August 1987, is alive and, in her own words, “extremely well, thank you, and owed a great deal of royalties.” The astonishing discovery was made by two sisters, Florence, 12, and Delilah, 8, who found a sealed box of evidence in their family loft.</p>
+      <p>Document experts this week confirmed that <i>The Salt Grave</i>, the 1989 bestseller published by former hotel manager Gerald Pinch, 90, was composed from Miss Frost’s stolen notes. Mr Pinch, confronted with eleven manuscripts and a diary, is reported to have said only: “Thirty-nine years. I was undone by an eight-year-old and a cat.”</p>
+      <p>Miss Frost paid particular tribute to Rosie Marsh, 56, who was dismissed as “fanciful” by police in 1987. Inspector J. Okafor of Seacliff CID said this week: “The record now shows that Miss Marsh, then aged 17, out-detected the entire 1987 Seacliff Constabulary. We have sent flowers.”</p>
+      <p>Miss Frost’s twelfth novel, <i>The Silver Tide</i> — begun at the Seagull Hotel and finished “thirty-nine years late, which for a writer is practically on time” — will be published next spring, under her real name.</p>
+    </div>
+  </div>
+  <div class="footer-note">17</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 18 — INVITATION (KEPT BY EVERYONE)</div>
+  <div class="letter" style="text-align:center; padding: 40px 36px;">
+    <p style="font-family: Georgia, serif; font-size: 10pt; letter-spacing: 3px; color:#c94f4f;">HARTWELL &amp; BLYTH PUBLISHERS<br>REQUEST THE PLEASURE OF YOUR COMPANY</p>
+    <p style="font-family: Georgia, serif; font-size: 20pt; margin: 14px 0 4px; line-height:1.2;">at the launch of<br><i>THE SILVER TIDE</i></p>
+    <p style="font-family: Georgia, serif; font-size: 12pt;">by <b>MARGOT FROST</b><br><span style="font-size:10pt;">her first new book for thirty-nine years</span></p>
+    <svg width="240" height="90" viewBox="0 0 240 90" style="margin:10px 0;">
+      <path d="M10 60 Q60 40 120 55 Q180 70 230 50" stroke="#8fb3c7" stroke-width="3" fill="none"/>
+      <path d="M10 70 Q60 52 120 66 Q180 80 230 62" stroke="#7e8d99" stroke-width="3" fill="none"/>
+      <circle cx="200" cy="24" r="12" fill="#e8b93c"/>
+      <path d="M60 30 q6 -8 12 0 q6 -8 12 0 M120 20 q5 -7 10 0 q5 -7 10 0" stroke="#94a3bd" stroke-width="2" fill="none"/>
+      <g transform="translate(24,44)"><ellipse cx="10" cy="8" rx="9" ry="5" fill="#3b3b3b"/><circle cx="17" cy="3" r="4" fill="#3b3b3b"/><path d="M15 0 L16 -3 L18 0Z M19 0 L20 -3 L22 0Z" fill="#3b3b3b"/><path d="M1 8 q-5 0 -4 -5" stroke="#3b3b3b" stroke-width="2" fill="none"/></g>
+    </svg>
+    <p style="font-family: Georgia, serif; font-size: 10.5pt;">The author will be introduced by her three favourite detectives:<br><b>ROSIE MARSH, FLORENCE &amp; DELILAH</b></p>
+    <p style="font-family: Georgia, serif; font-size: 9pt; color:#6b7688; margin-top:10px;">The dedication page reads:<br><i>“For Rosie, who kept the box. And for Flo and Delilah, who opened it.”</i></p>
+  </div>
+  <div class="footer-note">18</div>
+</div>
+
+<div class="page">
+  <div class="doc-label">DOCUMENT 19 — TEXT MESSAGES (THE LAST ONES IN THE FILE)</div>
+  <div class="chat">
+    <div class="chat-header"><b>Flo 🔎 &amp; Delilah 🦖</b>The night after the book launch, 9:58 pm</div>
+    <div class="bubble flo"><span class="who">FLO</span>You awake?</div>
+    <div class="bubble del"><span class="who">DELILAH</span>no</div>
+    <div class="bubble del"><span class="who">DELILAH</span>mum and dad sat NEXT TO EACH OTHER tonight and shared the crisps and nobody argued even once</div>
+    <div class="bubble flo"><span class="who">FLO</span>I noticed. Margot says noticing is the whole of it</div>
+    <div class="bubble del"><span class="who">DELILAH</span>Margot said I can have a kitten from Bram the Fourth’s family. I'm calling it Sardine</div>
+    <div class="bubble del"><span class="who">DELILAH</span>flo</div>
+    <div class="bubble flo"><span class="who">FLO</span>what</div>
+    <div class="bubble del"><span class="who">DELILAH</span>I liked being detectives with you. even though you live at mum’s and I live at dad’s. the mystery didn’t care whose house we were at</div>
+    <div class="bubble flo"><span class="who">FLO</span>Best thing about a case file, Delilah. It fits down a phone line. We were never actually apart for one minute of it</div>
+    <div class="bubble del"><span class="who">DELILAH</span>so what do we do now it’s over 🦖❤️🔎</div>
+    <div class="bubble flo"><span class="who">FLO</span>Now? Now you check MUM’S loft</div>
+    <div class="bubble del"><span class="who">DELILAH</span>😱😱😱</div>
+  </div>
+  <div class="footer-note">19</div>
+</div>
+
+<!-- ============================== BACK ============================== -->
+<div class="page cover" style="justify-content:center;">
+  <svg width="360" height="164" viewBox="0 0 330 150">
+    <circle cx="272" cy="34" r="16" fill="#f6f1e7"/>
+    <circle cx="266" cy="30" r="16" fill="#22304a"/>
+    <circle cx="60" cy="26" r="1.6" fill="#e8b93c"/><circle cx="110" cy="16" r="1.4" fill="#e8b93c"/><circle cx="160" cy="30" r="1.6" fill="#e8b93c"/><circle cx="210" cy="14" r="1.4" fill="#e8b93c"/><circle cx="34" cy="48" r="1.4" fill="#e8b93c"/><circle cx="308" cy="70" r="1.4" fill="#e8b93c"/>
+    <path d="M0 122 Q80 108 165 118 Q250 128 330 114 L330 150 L0 150Z" fill="#31435f"/>
+    <g transform="translate(96,66)">
+      <circle cx="20" cy="14" r="11" fill="#1a2438"/>
+      <rect x="10" y="26" width="20" height="34" rx="8" fill="#1a2438"/>
+      <circle cx="76" cy="22" r="8.5" fill="#1a2438"/>
+      <rect x="69" y="31" width="15" height="28" rx="6" fill="#1a2438"/>
+      <path d="M30 40 L69 42" stroke="#1a2438" stroke-width="5" stroke-linecap="round"/>
+      <g transform="translate(42,30)"><rect x="0" y="4" width="18" height="12" rx="2" fill="#b98a55"/><rect x="-1" y="1" width="20" height="5" rx="2" fill="#c99a63"/></g>
+      <path d="M104 56 q-6 0 -5 -7 M96 58 a7 5 0 1 0 14 0 a7 5 0 1 0 -14 0" fill="#1a2438"/>
+      <circle cx="112" cy="50" r="4" fill="#1a2438"/>
+    </g>
+    <text x="165" y="143" text-anchor="middle" font-family="Georgia" font-style="italic" font-size="11" fill="#8fa0bd">The mystery didn’t care whose house we were at.</text>
+  </svg>
+  <h1 style="font-size: 22pt; color:#f6f1e7; margin-top: 20px;">THE END</h1>
+  <div class="subtitle" style="margin-top:16px; max-width: 120mm;">Every mystery has three things:<br>a secret, a lie, and a person brave enough<br>to notice the difference.</div>
+  <div class="byline" style="margin-top:30px;">This book was made for two real detectives.<br><span style="color:#8fa0bd; font-size:10pt;">Keep noticing things.</span></div>
+</div>

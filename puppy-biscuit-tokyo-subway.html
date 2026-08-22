@@ -1,0 +1,1661 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗼</text></svg>">
+<title>Florence's Puppy Biscuit Eater — Level 2: Tokyo Subway Rush</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<style>
+  /* ============ Florence's Puppy Biscuit Eater — Level 2: Tokyo Subway Rush ============
+     Theme: Vibrant Cyberpunk Tokyo Underground, Neon Station Lights, Dynamic Blackouts,
+     Ceiling Running & Gravity Inversion, Wild Boars & Dog Walker Ambushes! */
+  :root {
+    --bg-dark: #0F0A1A;
+    --neon-cyan: #00F0FF;
+    --neon-pink: #FF2A85;
+    --neon-yellow: #FFE600;
+    --neon-green: #05FFA1;
+    --neon-purple: #B026FF;
+    --tokyo-gold: #FFB800;
+    --sakura: #FFB7D5;
+    --ink: #1C1526;
+    --panel: #FFFDF4;
+    --display: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Marker Felt', cursive, sans-serif;
+    --body: 'Trebuchet MS', 'Segoe UI', -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  body {
+    background: #090514;
+    font-family: var(--body);
+    color: #fff;
+    touch-action: none;
+    user-select: none; -webkit-user-select: none;
+    position: fixed; inset: 0;
+  }
+  #stage {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(circle at 50% 20%, rgba(176,38,255,.25), transparent 60%),
+      linear-gradient(#1A0B2E 0%, #0D0618 100%);
+  }
+  #frame {
+    position: relative;
+    width: min(100vw, 62vh);
+    height: min(100vh, 161vw);
+    max-width: 520px;
+    overflow: hidden;
+    background: #120A20;
+    box-shadow: 0 0 0 100vmax rgba(10,5,20,.8), 0 0 40px rgba(0,240,255,.2);
+    border-radius: 12px;
+  }
+  #game { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #title-pup { display: block; }
+
+  /* ---------- Screens ---------- */
+  .screen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center;
+    padding: max(16px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
+    text-align: center;
+    overflow-y: auto;
+    background: linear-gradient(180deg, #1C0F38 0%, #2A144E 50%, #0F081E 100%);
+    z-index: 5;
+    color: #fff;
+  }
+  .screen.hidden { display: none; }
+  .eyebrow {
+    font-family: var(--display);
+    font-size: clamp(14px, 4vw, 18px);
+    color: #fff;
+    background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple));
+    padding: 6px 18px; border-radius: 999px;
+    box-shadow: 0 3px 0 #7b1050, 0 0 12px rgba(255,42,133,.5);
+    letter-spacing: .06em;
+    margin-top: 4px;
+    transform: rotate(-2deg);
+  }
+  h1.gamename {
+    font-family: var(--display);
+    font-size: clamp(28px, 8.5vw, 42px);
+    line-height: 1.05;
+    margin: 10px 0 2px;
+    text-shadow: 0 0 15px rgba(0,240,255,.6);
+  }
+  .gametag {
+    display: inline-block;
+    background: var(--neon-cyan);
+    color: #0F0A1A;
+    font-size: 11px;
+    font-weight: 900;
+    padding: 3px 10px;
+    border-radius: 8px;
+    margin-bottom: 6px;
+    letter-spacing: 0.08em;
+  }
+  h2 {
+    font-family: var(--display);
+    font-size: clamp(22px, 6.5vw, 30px);
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0,240,255,.5);
+    margin: 4px 0 10px;
+  }
+  .btn {
+    font-family: var(--display);
+    font-size: clamp(18px, 5.2vw, 24px);
+    color: #0F0A1A;
+    background: linear-gradient(180deg, #FFE600, #FFB800);
+    border: none; border-radius: 20px;
+    padding: 13px 36px;
+    box-shadow: 0 5px 0 #B37A00, 0 8px 16px rgba(0,0,0,.4);
+    cursor: pointer;
+    letter-spacing: .04em;
+    font-weight: bold;
+    transition: transform 0.1s ease;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #B37A00; }
+  .btn.big { padding: 16px 50px; font-size: clamp(22px, 7vw, 30px); }
+  .btn.neon {
+    background: linear-gradient(180deg, #00F0FF, #00B0FF);
+    color: #071526;
+    box-shadow: 0 5px 0 #0077B6, 0 0 14px rgba(0,240,255,.5);
+  }
+  .btn.ghost {
+    background: rgba(255,255,255,.12); color: #fff;
+    border: 2px solid rgba(255,255,255,.3);
+    box-shadow: 0 4px 0 rgba(0,0,0,.3);
+    font-size: clamp(14px, 4vw, 17px);
+    padding: 9px 20px;
+  }
+  .btn.ghost:active { transform: translateY(2px); box-shadow: none; }
+  .btnrow { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+
+  /* ---------- Title Visuals ---------- */
+  .starfield { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+  .starfield .st {
+    position: absolute; font-size: 20px;
+    animation: twinkle 2s ease-in-out infinite;
+  }
+  @keyframes twinkle {
+    0%, 100% { transform: scale(.7) rotate(-8deg); opacity: .45; }
+    50% { transform: scale(1.15) rotate(8deg); opacity: 1; filter: drop-shadow(0 0 8px #FF2A85); }
+  }
+
+  /* ---------- Breed Select Cards ---------- */
+  .breedgrid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+    width: 100%; max-width: 430px; margin-top: 4px;
+  }
+  .breedcard {
+    background: rgba(36, 20, 60, 0.85);
+    border: 3px solid #5A358A;
+    border-radius: 18px;
+    padding: 8px 6px 10px;
+    cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    box-shadow: 0 4px 0 #2A144E;
+    color: #fff;
+  }
+  .breedcard canvas { position: static; width: 84px; height: 68px; }
+  .breedcard .bname { font-family: var(--display); font-size: 16px; color: var(--neon-yellow); }
+  .breedcard .btrait { font-size: 11.5px; color: #D0C4E8; line-height: 1.2; }
+  .breedcard.picked {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 4px 0 #0088A3, 0 0 0 4px rgba(0,240,255,.35);
+    animation: pickpop .3s ease;
+  }
+  @keyframes pickpop { 50% { transform: scale(1.05); } }
+
+  /* ---------- Name Entry ---------- */
+  .nameslots { display: flex; gap: 8px; margin: 8px 0 14px; }
+  .nameslot {
+    width: 48px; height: 58px; border-radius: 12px;
+    background: rgba(36, 20, 60, 0.9); border: 3px solid #5A358A;
+    font-family: var(--display); font-size: 32px; color: var(--neon-cyan);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 0 #2A144E;
+  }
+  .nameslot.active { border-color: var(--neon-pink); box-shadow: 0 4px 0 #9E104E, 0 0 12px rgba(255,42,133,.6); }
+  .keys {
+    display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px;
+    width: 100%; max-width: 430px;
+  }
+  .key {
+    font-family: var(--display); font-size: 18px; color: #fff;
+    background: #3A2060; border: none; border-radius: 10px;
+    padding: 9px 0; box-shadow: 0 3px 0 #200E38; cursor: pointer;
+  }
+  .key:active { transform: translateY(2px); box-shadow: none; }
+  .key.wide { grid-column: span 2; background: #FF2A85; color: #fff; }
+
+  /* ---------- HUD ---------- */
+  #hud { position: absolute; inset: 0; pointer-events: none; z-index: 4; display: none; }
+  #hud.on { display: block; }
+  .hudchip {
+    position: absolute;
+    font-family: var(--display);
+    background: rgba(20, 12, 34, 0.92);
+    border-radius: 14px;
+    border: 2px solid rgba(255,255,255,.2);
+    box-shadow: 0 3px 0 rgba(0,0,0,.4);
+    padding: 6px 12px;
+    color: #fff;
+    font-variant-numeric: tabular-nums;
+  }
+  #hud-timer {
+    top: 10px; left: 10px; font-size: clamp(20px, 6vw, 26px);
+    border-color: var(--neon-green); color: var(--neon-green);
+    box-shadow: 0 3px 0 #027A4D, 0 0 10px rgba(5,255,161,.3);
+  }
+  #hud-timer::before { content: '⏱️ '; font-size: .7em; vertical-align: .15em; }
+  #hud-timer.low { border-color: var(--neon-pink); color: #fff; background: var(--neon-pink); }
+  #hud-score {
+    top: 10px; right: 10px; font-size: clamp(20px, 6vw, 26px);
+    border-color: var(--tokyo-gold); color: var(--tokyo-gold);
+    box-shadow: 0 3px 0 #B37A00, 0 0 10px rgba(255,184,0,.3);
+  }
+  #hud-ceiling {
+    top: 10px; left: 50%; transform: translateX(-50%);
+    font-size: 13px; font-weight: bold; color: var(--neon-cyan);
+    background: rgba(0, 240, 255, 0.15); border-color: var(--neon-cyan);
+    display: none; padding: 4px 14px; border-radius: 99px;
+    animation: blink 0.8s infinite;
+  }
+  @keyframes blink { 50% { opacity: 0.6; } }
+
+  #hud-power {
+    top: 56px; left: 50%; transform: translateX(-50%);
+    font-size: clamp(12px, 3.6vw, 15px);
+    display: none; min-width: 130px; text-align: center; color: #fff;
+  }
+  #hud-power.phase { display: block; background: linear-gradient(90deg, var(--neon-pink), var(--neon-purple), var(--neon-cyan)); }
+  #hud-power.magnet { display: block; background: #FF1A1A; border-color: #FF5E5E; box-shadow: 0 0 10px rgba(255,26,26,.5); }
+  #hud-power.twox { display: block; background: var(--tokyo-gold); color: #1C1526; }
+  #hud-power.shield { display: block; background: #00B0FF; }
+  #hud-power.speed { display: block; background: var(--neon-cyan); color: #081B2B; }
+  #hud-power.sick { display: block; background: #4CAF50; }
+  #hud-power .pbarwrap { height: 6px; background: rgba(0,0,0,.3); border-radius: 99px; margin-top: 3px; overflow: hidden; }
+  #hud-power .pbar { height: 100%; background: #fff; border-radius: 99px; width: 100%; }
+
+  /* ---------- Banners & Hints ---------- */
+  #banner {
+    position: absolute; top: 32%; left: 0; right: 0; z-index: 6;
+    text-align: center; pointer-events: none;
+    font-family: var(--display);
+    font-size: clamp(34px, 11vw, 56px); color: #fff;
+    text-shadow: 0 0 20px var(--neon-pink), 0 4px 0 #000;
+    display: none;
+    line-height: 1.1;
+  }
+  #hint {
+    position: absolute; top: 52%; left: 0; right: 0; z-index: 6;
+    text-align: center; pointer-events: none;
+    font-family: var(--display);
+    font-size: clamp(14px, 4.2vw, 18px); color: var(--neon-yellow);
+    text-shadow: 0 2px 4px #000;
+    display: none;
+  }
+
+  /* ---------- Game Over ---------- */
+  .scorecard {
+    background: rgba(36, 20, 60, 0.9); border-radius: 20px;
+    border: 3px solid #5A358A;
+    box-shadow: 0 5px 0 #2A144E;
+    padding: 14px 22px; margin: 8px 0 4px; min-width: min(78vw, 320px);
+  }
+  .scorecard .big {
+    font-family: var(--display); font-size: clamp(40px, 13vw, 58px); color: var(--tokyo-gold);
+    line-height: 1; text-shadow: 0 0 12px rgba(255,184,0,.5);
+  }
+  .scorecard .lbl { font-size: 13px; color: #D0C4E8; letter-spacing: .08em; text-transform: uppercase; }
+  .newbest {
+    font-family: var(--display); color: #fff; background: var(--neon-pink);
+    border-radius: 999px; padding: 4px 16px; font-size: 15px;
+    box-shadow: 0 3px 0 #9E104E; transform: rotate(-2deg); margin-top: 6px; display: none;
+  }
+  table.lb {
+    border-collapse: collapse; margin-top: 8px;
+    background: rgba(36, 20, 60, 0.9); border-radius: 16px; overflow: hidden;
+    border: 2px solid #5A358A; min-width: min(80vw, 320px);
+  }
+  table.lb td, table.lb th { padding: 6px 12px; font-size: 15px; }
+  table.lb th {
+    font-family: var(--display); background: #5A358A; color: #fff;
+    font-size: 16px; letter-spacing: .05em;
+  }
+  table.lb td.rank { font-family: var(--display); color: var(--tokyo-gold); }
+  table.lb td.pts { font-family: var(--display); font-variant-numeric: tabular-nums; text-align: right; color: var(--neon-yellow); }
+  table.lb tr:nth-child(even) { background: rgba(255,255,255,.05); }
+
+  .level-badge {
+    display: inline-block;
+    background: var(--neon-cyan);
+    color: #0F0A1A;
+    font-size: 12px;
+    font-weight: bold;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+  }
+
+  /* Gear Settings */
+  .gear {
+    position: absolute; top: calc(10px + env(safe-area-inset-top)); right: 12px;
+    width: 42px; height: 42px; border-radius: 50%;
+    border: none; background: rgba(36, 20, 60, 0.9);
+    color: #fff; font-size: 20px; cursor: pointer;
+    box-shadow: 0 3px 0 #200E38; z-index: 7;
+  }
+  .setrow {
+    display: flex; align-items: center; justify-content: space-between;
+    background: rgba(36, 20, 60, 0.9); border-radius: 14px;
+    border: 2px solid #5A358A;
+    box-shadow: 0 3px 0 #200E38;
+    padding: 10px 14px; width: 100%; max-width: 360px; margin-top: 10px;
+  }
+  .setrow .sname { font-family: var(--display); font-size: 17px; }
+  .toggle {
+    width: 58px; height: 30px; border-radius: 99px; border: none; cursor: pointer;
+    background: #4A306E; position: relative; transition: background .15s;
+  }
+  .toggle::after {
+    content: ''; position: absolute; top: 3px; left: 3px; width: 24px; height: 24px;
+    border-radius: 50%; background: #fff; transition: left .15s;
+  }
+  .toggle.on { background: var(--neon-green); }
+  .toggle.on::after { left: 31px; }
+  .backbtn { margin-top: auto; padding-top: 14px; }
+</style>
+</head>
+<body>
+
+<div id="stage"><div id="frame">
+  <canvas id="game"></canvas>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div id="hud-timer" class="hudchip">1:15</div>
+    <div id="hud-score" class="hudchip">🦴 0</div>
+    <div id="hud-ceiling" class="hudchip">🌀 CEILING RUN 🌀</div>
+    <div id="hud-power" class="hudchip">
+      <span id="hud-power-txt"></span>
+      <div class="pbarwrap"><div class="pbar" id="hud-power-bar"></div></div>
+    </div>
+  </div>
+
+  <div id="banner"></div>
+  <div id="hint">Swipe ⬅➡ to steer • Swipe ⬆ or tap to JUMP • Tackle Walkers!</div>
+
+  <!-- TITLE SCREEN -->
+  <div class="screen" id="s-title">
+    <div class="starfield" id="titlestars"></div>
+    <button class="gear" id="btn-settings" aria-label="Settings">⚙️</button>
+    <div class="eyebrow">A game designed by Florence</div>
+    <h1 class="gamename" id="rainbowname">PUPPY BISCUIT EATER</h1>
+    <div class="level-badge">LEVEL 2: TOKYO SUBWAY RUSH 🗼✨</div>
+    <p style="color:#D0C4E8;font-size:13px;margin:2px 0 6px;">Ceiling Running • Wild Boars • Dog Walker Ambush • Hyper Magnets!</p>
+    <canvas id="title-pup" width="520" height="230"></canvas>
+    <button class="btn big neon" id="btn-play">TOKYO SPRINT! 🚀</button>
+    <div class="btnrow">
+      <button class="btn ghost" id="btn-scores">🏆 Tokyo High Scores</button>
+      <a href="puppy-biscuit-eater.html" class="btn ghost" style="text-decoration:none;">🌳 Play Level 1 (Park)</a>
+    </div>
+  </div>
+
+  <!-- BREED SELECT -->
+  <div class="screen hidden" id="s-breed">
+    <h2>Pick your Tokyo Puppy!</h2>
+    <div class="breedgrid" id="breedgrid"></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="btn-breed-back">← Back</button>
+      <button class="btn" id="btn-breed-next">Next →</button>
+    </div>
+  </div>
+
+  <!-- NAME ENTRY -->
+  <div class="screen hidden" id="s-name">
+    <h2>Name your Tokyo puppy!</h2>
+    <p style="color:#D0C4E8;font-size:14px;margin-bottom:6px;">3 to 5 letters — e.g. MAX, YUKI, PIP, or ZAP</p>
+    <div class="nameslots">
+      <div class="nameslot" id="slot0"></div>
+      <div class="nameslot" id="slot1"></div>
+      <div class="nameslot" id="slot2"></div>
+      <div class="nameslot" id="slot3"></div>
+      <div class="nameslot" id="slot4"></div>
+    </div>
+    <div class="keys" id="keys"></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="btn-name-back">← Back</button>
+      <button class="btn" id="btn-name-go">Next →</button>
+    </div>
+  </div>
+
+  <!-- RUNNER SELECT -->
+  <div class="screen hidden" id="s-flo">
+    <h2>Who holds the leash?</h2>
+    <div class="breedgrid" id="kidgrid"></div>
+    <div class="btnrow">
+      <button class="btn ghost" id="btn-flo-back">← Back</button>
+      <button class="btn big neon" id="btn-flo-go">Tokyo Subway Rush!</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER / TROPHY -->
+  <div class="screen hidden" id="s-over" style="background:linear-gradient(180deg,#1C0A36 0%,#341258 50%,#0F081E 100%);">
+    <h2 id="over-title">Tokyo Champion!</h2>
+    <canvas id="over-pals" width="340" height="140" style="width:min(56vw,220px);height:auto;display:block;filter:drop-shadow(0 0 12px rgba(0,240,255,.5))"></canvas>
+    <canvas id="over-trophy" width="260" height="220" style="width:min(34vw,130px);height:auto;display:block;filter:drop-shadow(0 0 15px rgba(255,184,0,.6))"></canvas>
+    <div class="scorecard">
+      <div class="lbl">Tokyo Biscuits &amp; Treats Munched</div>
+      <div class="big" id="over-score">0</div>
+      <div id="over-name" style="font-family:var(--display);font-size:17px;margin-top:4px;color:var(--neon-yellow);"></div>
+    </div>
+    <div class="newbest" id="newbest">🌟 TOKYO RECORD! 🌟</div>
+    <table class="lb"><thead><tr><th colspan="3">🏆 Top Tokyo Puppies</th></tr></thead><tbody id="over-lb"></tbody></table>
+    <div class="btnrow">
+      <button class="btn big neon" id="btn-again">Play Tokyo Again!</button>
+    </div>
+    <div class="btnrow">
+      <a href="puppy-biscuit-eater.html" class="btn ghost" style="text-decoration:none;">🌳 Level 1 (Park)</a>
+      <a href="index.html" class="btn ghost" style="text-decoration:none;">🏠 Home</a>
+    </div>
+  </div>
+
+  <!-- HIGH SCORES -->
+  <div class="screen hidden" id="s-scores">
+    <h2>🏆 Tokyo High Scores</h2>
+    <table class="lb"><thead><tr><th colspan="3">Top Puppies</th></tr></thead><tbody id="scores-lb"></tbody></table>
+    <div class="backbtn"><button class="btn ghost" id="btn-scores-back">← Back</button></div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div class="screen hidden" id="s-set">
+    <h2>⚙️ Settings</h2>
+    <div class="setrow"><span class="sname">🎵 Tokyo Synth Music</span><button class="toggle on" id="set-music"></button></div>
+    <div class="setrow"><span class="sname">🔊 Sound FX &amp; Chimes</span><button class="toggle on" id="set-sound"></button></div>
+    <div class="setrow"><span class="sname">📳 Buzz (vibrate)</span><button class="toggle on" id="set-buzz"></button></div>
+    <div class="setrow"><span class="sname">✨ Neon Sparkles</span><button class="toggle on" id="set-spark"></button></div>
+    <div class="backbtn"><button class="btn ghost" id="btn-set-back">← Back</button></div>
+  </div>
+</div></div>
+
+<script src="tokyo-audio.js"></script>
+<script src="tokyo-scenery.js"></script>
+<script src="scenery.js"></script>
+<script>
+'use strict';
+/* =====================================================================
+   Florence's Puppy Biscuit Eater — Level 2: Tokyo Subway Rush
+   ===================================================================== */
+
+const $ = id => document.getElementById(id);
+const clamp = (v,a,b) => v<a?a:v>b?b:v;
+const rand = (a,b) => a + Math.random()*(b-a);
+const lerp = (a,b,f) => a+(b-a)*f;
+const RAINBOW = ['#FF2A85','#FFB800','#FFE600','#05FFA1','#00F0FF','#B026FF'];
+
+// Storage
+const memStore = {};
+const store = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return memStore[k]??d; } },
+  set(k,v){ memStore[k]=v; try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} },
+};
+
+const settings = Object.assign(
+  {music:true, sound:true, buzz:true, spark:true},
+  store.get('pbe-tokyo-settings',{})
+);
+function saveSettings(){
+  store.set('pbe-tokyo-settings', settings);
+  applyAudioSettings();
+}
+function buzz(ms){ if(settings.buzz && navigator.vibrate) navigator.vibrate(ms); }
+
+const AU = window.TokyoPBEAudio || window.PBEAudio || null;
+function applyAudioSettings(){
+  if(!AU) return;
+  AU.setEnabled(settings.sound || settings.music);
+  AU.setMusicEnabled(settings.music);
+}
+const S = new Proxy({}, {
+  get(_,name){
+    return ()=>{ if(AU && settings.sound){ try{ AU.sfx[name] && AU.sfx[name](); }catch(e){} } };
+  }
+});
+function audioInit(){ if(AU){ try{ AU.init(); applyAudioSettings(); }catch(e){} } }
+function musicStart(){ if(AU && settings.music){ try{ AU.music.start(); }catch(e){} } }
+function musicStop(){ if(AU){ try{ AU.music.stop(); }catch(e){} } }
+function musicMood(m){ if(AU){ try{ AU.music.setMood(m); }catch(e){} } }
+
+// Dog Breeds
+const BREEDS = [
+  {id:'golden',   name:'Golden Retriever', trait:'Cheerful & energetic — happy all-rounder',
+   body:'#E8B04B', ear:'#C98E2E', belly:'#F6D89A', collar:'#FF2A85', speed:1.0,  magnet:0, boost:3, phase:5.5, stunMul:1},
+  {id:'beagle',   name:'Beagle (Tokyo Sniffer)', trait:'Super Sniffer — pulls in nearby biscuits & Taiyaki!',
+   body:'#B5762F', ear:'#5C3A1E', belly:'#F3E4C8', collar:'#00F0FF', speed:1.0,  magnet:1, boost:3, phase:5.5, stunMul:1, patch:true},
+  {id:'frenchie', name:'French Bulldog', trait:'Tokyo Sprinter — speedy paws through ticket gates',
+   body:'#9AA0A8', ear:'#6E747C', belly:'#E8E4DC', collar:'#05FFA1', speed:1.12, magnet:0, boost:3, phase:5.5, stunMul:1},
+  {id:'poodle',   name:'Poodle (Harajuku Bow)', trait:'Agile & bouncy — shakes off bumps quickly',
+   body:'#F0E6DA', ear:'#DACDBB', belly:'#FFFFFF', collar:'#FF2A85', speed:1.0,  magnet:0, boost:3, phase:5.5, stunMul:0.5},
+  {id:'dalmatian',name:'Dalmatian', trait:'Neon Stamina — speed boosts & shields last longer',
+   body:'#F5F2EC', ear:'#2B2B2B', belly:'#FFFFFF', collar:'#FF2A85', speed:1.0,  magnet:0, boost:4.8, phase:5.5, stunMul:1, spots:true},
+  {id:'husky',    name:'Husky (Cyber Eyes)', trait:'Tokyo Overdrive — rainbow phase lasts longer',
+   body:'#7C8894', ear:'#55606B', belly:'#EDF1F4', collar:'#B026FF', speed:1.0,  magnet:0, boost:3, phase:7.0, stunMul:1},
+];
+
+// Side-view puppy helper for menus
+function drawPupSide(ctx, b, x, y, s, t, opts){
+  opts = opts || {};
+  const walk = opts.moving ? Math.sin(t*14)*1 : 0;
+  const wag  = Math.sin(t*(opts.moving?16:5)) * 0.5;
+  ctx.save();
+  ctx.translate(x, y + walk*s*0.5);
+  ctx.scale(s, s);
+  ctx.strokeStyle = b.ear; ctx.lineWidth = 4; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(-15,-4);
+  ctx.quadraticCurveTo(-22,-10+wag*6, -25,-14+wag*10); ctx.stroke();
+  ctx.fillStyle = b.body;
+  const lw = 4.5;
+  const legSwing = opts.moving ? Math.sin(t*14)*3 : 0;
+  [[-10,legSwing],[-4,-legSwing],[5,-legSwing],[11,legSwing]].forEach(([lx,off])=>{
+    ctx.beginPath();
+    ctx.roundRect(lx-lw/2+off*0.3, 4, lw, 9, 2.5);
+    ctx.fill();
+  });
+  ctx.beginPath(); ctx.ellipse(-2,-2, 16,10, 0,0,7); ctx.fill();
+  ctx.fillStyle = b.belly;
+  ctx.beginPath(); ctx.ellipse(-2,3, 11,5.5, 0,0,7); ctx.fill();
+  if(b.spots){
+    ctx.fillStyle='#2B2B2B';
+    [[-8,-6,2.4],[2,-4,2],[-1,-8,1.6],[7,-6,1.8],[-12,-1,1.7]].forEach(([sx,sy,r])=>{
+      ctx.beginPath(); ctx.arc(sx,sy,r,0,7); ctx.fill();
+    });
+  }
+  ctx.strokeStyle = b.collar || '#FF2A85';
+  ctx.lineWidth = 3.2; ctx.lineCap='round';
+  ctx.beginPath(); ctx.arc(11,-8, 8.5, Math.PI*0.28, Math.PI*0.78); ctx.stroke();
+  ctx.fillStyle='#FFE600';
+  ctx.beginPath(); ctx.arc(11,0.8, 1.7, 0, 7); ctx.fill();
+  ctx.fillStyle = b.body;
+  ctx.beginPath(); ctx.arc(13,-12, 11, 0, 7); ctx.fill();
+  if(b.patch){
+    ctx.fillStyle=b.ear;
+    ctx.beginPath(); ctx.arc(16,-15, 4.6, 0, 7); ctx.fill();
+  }
+  ctx.fillStyle = b.belly;
+  ctx.beginPath(); ctx.ellipse(20,-8.5, 6,4.6, 0,0,7); ctx.fill();
+  ctx.fillStyle = '#1C1526';
+  ctx.beginPath(); ctx.arc(24,-10, 2.2, 0, 7); ctx.fill();
+  ctx.fillStyle = b.ear;
+  ctx.beginPath();
+  if(b.id==='frenchie' || b.id==='husky'){
+    ctx.moveTo(7,-19); ctx.lineTo(10,-29); ctx.lineTo(15,-19);
+    ctx.moveTo(13,-20); ctx.lineTo(17,-28); ctx.lineTo(20,-18);
+  } else {
+    ctx.ellipse(8,-14, 4.4,7.8, 0.5, 0, 7);
+  }
+  ctx.fill();
+  if(b.id==='poodle'){
+    ctx.fillStyle=b.body;
+    ctx.beginPath(); ctx.arc(10,-21,5,0,7); ctx.arc(16,-22,4.4,0,7); ctx.arc(5,-17,4,0,7); ctx.fill();
+  }
+  ctx.fillStyle = b.id==='husky' ? '#00F0FF' : '#1C1526';
+  ctx.beginPath(); ctx.arc(16,-14.5, 2.4, 0, 7); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(16.8,-15.3, 0.9, 0, 7); ctx.fill();
+  if(opts.moving){
+    ctx.fillStyle='#FF7B9C';
+    ctx.beginPath(); ctx.ellipse(21,-4.5,2,3.2,0.3,0,7); ctx.fill();
+  }
+  ctx.restore();
+}
+
+// Screen Management
+const screens = ['s-title','s-breed','s-name','s-flo','s-over','s-scores','s-set'];
+function show(id){
+  screens.forEach(s=>$(s).classList.toggle('hidden', s!==id));
+  $('hud').classList.toggle('on', id==='GAME');
+  if(id==='GAME') screens.forEach(s=>$(s).classList.add('hidden'));
+}
+
+// Title Stars
+(function(){
+  const host=$('titlestars');
+  const glyphs=['🗼','⭐','🌟','🍱','🧲','🌈','⚡','✨','🐗','🍜'];
+  for(let i=0;i<16;i++){
+    const el=document.createElement('div');
+    el.className='st'; el.textContent=glyphs[i%glyphs.length];
+    el.style.left=rand(2,92)+'%';
+    el.style.top=rand(2,90)+'%';
+    el.style.animationDelay=rand(0,2)+'s';
+    el.style.fontSize=rand(14,24)+'px';
+    host.appendChild(el);
+  }
+})();
+
+// Title Florence + Pup running
+(function(){
+  const c=$('title-pup'), x=c.getContext('2d');
+  let start=performance.now();
+  (function loop(now){
+    const t=(now-start)/1000;
+    x.clearRect(0,0,c.width,c.height);
+    // Ground glow
+    x.fillStyle='rgba(0,240,255,.15)';
+    x.beginPath(); x.ellipse(145, 200, 48, 10, 0, 0, 7); x.fill();
+    x.beginPath(); x.ellipse(310, 200, 52, 11, 0, 0, 7); x.fill();
+    let hand = {handX:210, handY:175};
+    if(window.PBEScenery && PBEScenery.drawFlorenceSide){
+      hand = PBEScenery.drawFlorenceSide(x, 145, 178, 3.8, t, {moving:true}) || hand;
+    }
+    const pupCollarX = 292, pupCollarY = 178 + Math.sin(t*14)*2;
+    if(window.PBEScenery && PBEScenery.drawLeash){
+      PBEScenery.drawLeash(x, pupCollarX, pupCollarY, hand.handX, hand.handY, t, {scale:1.0});
+    }
+    drawPupSide(x, BREEDS[0], 300, 178, 3.8, t, {moving:true});
+    if(window.TokyoScenery && TokyoScenery.drawTaiyaki){
+      TokyoScenery.drawTaiyaki(x, 430+Math.sin(t*2)*6, 75+Math.cos(t*2.4)*8, 20, t);
+    }
+    requestAnimationFrame(loop);
+  })(start);
+})();
+
+// Selection State
+let chosenBreed = 0;
+const KIDMETA = {
+  florence: {name:'Florence', label:'FLO', chip:'#FF2A85', chipEdge:'#9E104E',
+             trait:'The game designer — pushes over dog walkers like a boss!', speed:1},
+  luca:     {name:'Luca',     label:'LUCA', chip:'#00F0FF', chipEdge:'#0077B6',
+             trait:'Quick on his feet — cyber sprinter in subway corridors', speed:1},
+  pippa:    {name:'Pippa',    label:'PIPPA', chip:'#FFB800', chipEdge:'#B37A00',
+             trait:'Gentle subway tour — relaxing pace for younger pups', speed:0.85},
+  solo:     {name:'Solo Puppy', label:'', chip:'', chipEdge:'',
+             trait:'Off the leash — puppy runs completely solo in Tokyo!', speed:1},
+};
+let kidPick = 'florence';
+let bringFlo = true;
+
+// Grid Builders
+(function(){
+  const grid=$('kidgrid'); if(!grid) return;
+  const order=['florence','luca','pippa','solo'];
+  order.forEach(id=>{
+    const k=KIDMETA[id];
+    const card=document.createElement('div');
+    card.className='breedcard'+(id===kidPick?' picked':'');
+    card.innerHTML=`<canvas width="176" height="136"></canvas>
+      <div class="bname">${k.name}</div>
+      <div class="btrait">${k.trait}</div>`;
+    grid.appendChild(card);
+    const cc=card.querySelector('canvas'), cx=cc.getContext('2d');
+    card._draw = t => {
+      cx.clearRect(0,0,176,136);
+      cx.fillStyle='rgba(0,240,255,.12)';
+      cx.beginPath(); cx.ellipse(88,110,40,8,0,0,7); cx.fill();
+      const moving = id===kidPick;
+      if(id==='solo'){
+        drawPupSide(cx, BREEDS[chosenBreed], 88, 90, 2.9, t, {moving});
+      } else if(window.PBEScenery && PBEScenery.drawKidSide){
+        PBEScenery.drawKidSide(cx, id, 88, 86, 2.7, t, {moving});
+      }
+    };
+    card.addEventListener('pointerdown',()=>{
+      kidPick=id; S.ui(); buzz(15);
+      [...grid.children].forEach((el,i)=>el.classList.toggle('picked',order[i]===id));
+    });
+  });
+  let start=performance.now();
+  (function loop(now){
+    if(!$('s-flo').classList.contains('hidden'))
+      [...grid.children].forEach(el=>el._draw((now-start)/1000));
+    requestAnimationFrame(loop);
+  })(start);
+})();
+
+(function(){
+  const grid=$('breedgrid');
+  BREEDS.forEach((b,idx)=>{
+    const card=document.createElement('div');
+    card.className='breedcard'+(idx===0?' picked':'');
+    card.innerHTML=`<canvas width="176" height="136"></canvas>
+      <div class="bname">${b.name}</div>
+      <div class="btrait">${b.trait}</div>`;
+    grid.appendChild(card);
+    const cc=card.querySelector('canvas'), cx=cc.getContext('2d');
+    card._draw = t => { cx.clearRect(0,0,176,136); drawPupSide(cx,b,82,80,2.9,t,{moving:idx===chosenBreed}); };
+    card.addEventListener('pointerdown',()=>{
+      chosenBreed=idx; S.ui(); buzz(15);
+      [...grid.children].forEach((el,i)=>el.classList.toggle('picked',i===idx));
+    });
+  });
+  let start=performance.now();
+  (function loop(now){
+    if(!$('s-breed').classList.contains('hidden'))
+      [...grid.children].forEach(el=>el._draw((now-start)/1000));
+    requestAnimationFrame(loop);
+  })(start);
+})();
+
+// Name Entry
+const NAMELEN = 5;
+let pupName = ['','','','',''];
+let slotIdx = 0;
+function renderSlots(){
+  for(let i=0;i<NAMELEN;i++){
+    $('slot'+i).textContent = pupName[i]||'';
+    $('slot'+i).classList.toggle('active', i===slotIdx);
+  }
+}
+(function(){
+  const host=$('keys');
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(L=>{
+    const k=document.createElement('button');
+    k.className='key'; k.textContent=L;
+    k.addEventListener('pointerdown',()=>{
+      if(slotIdx<NAMELEN){ pupName[slotIdx]=L; slotIdx=Math.min(slotIdx+1,NAMELEN); S.ui(); buzz(10); renderSlots(); }
+    });
+    host.appendChild(k);
+  });
+  const del=document.createElement('button');
+  del.className='key wide'; del.textContent='⌫';
+  del.addEventListener('pointerdown',()=>{
+    slotIdx=Math.max(0,slotIdx-1); pupName[slotIdx]=''; S.ui(); renderSlots();
+  });
+  host.appendChild(del);
+  [0,1,2,3,4].forEach(i=>$('slot'+i).addEventListener('pointerdown',()=>{slotIdx=i;renderSlots();}));
+  renderSlots();
+})();
+
+// Leaderboard
+function getScores(){ return store.get('pbe-tokyo-scores',[]); }
+function addScore(name,breed,score){
+  const list=getScores();
+  list.push({name,breed,score});
+  list.sort((a,b)=>b.score-a.score);
+  const top=list.slice(0,5);
+  store.set('pbe-tokyo-scores',top);
+  return top;
+}
+function renderLB(tbodyId, list){
+  const tb=$(tbodyId);
+  if(!list.length){ tb.innerHTML='<tr><td colspan="3" style="color:#8a7a60">No Tokyo records yet — be first!</td></tr>'; return; }
+  tb.innerHTML=list.map((r,i)=>
+    `<tr><td class="rank">${['🥇','🥈','🥉','4.','5.'][i]}</td><td>${r.name} <span style="font-size:12px;color:#8a7a60">${r.breed}</span></td><td class="pts">🦴 ${r.score}</td></tr>`
+  ).join('');
+}
+
+/* =====================================================================
+   2.5D TOKYO SUBWAY RUNNER ENGINE
+   ===================================================================== */
+const cv=$('game'), ctx=cv.getContext('2d');
+let W=420, H=740, DPR=1, UNIT=1;
+function resize(){
+  const f=$('frame');
+  DPR=Math.min(2,window.devicePixelRatio||1);
+  W=f.clientWidth; H=f.clientHeight;
+  UNIT=W/390;
+  cv.width=W*DPR; cv.height=H*DPR;
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+window.addEventListener('resize',resize);
+
+const ZMAX=60, PK=0.16;
+let HORIZON=0.36, PLAYERY=0.80;
+function persp(z){ return 1/(1+Math.max(-0.5,z)*PK); }
+function projY(z){ const p=persp(z); return H*HORIZON + (H*PLAYERY - H*HORIZON)*p; }
+function projX(lane,z){ const p=persp(z); return W/2 + lane*laneW()*p; }
+function laneW(){ return W*0.30; }
+
+let G=null;
+const JUMP_V=620, GRAV=1950, JUMP_H=96;
+const FIN={BR0:9, BR1:21, TRO:25.5, ELEV:36};
+
+function newGame(){
+  const b=BREEDS[chosenBreed];
+  bringFlo = kidPick!=='solo';
+  const km=KIDMETA[kidPick]||KIDMETA.florence;
+  G = {
+    breed:b,
+    name:(pupName.filter(Boolean).join('')||'TOKYO_PUP'),
+    kid: bringFlo ? kidPick : null,
+    t:0, timeLeft:75, running:false, countdown:3.4,
+    score:0, chain:0, chainT:0, rush:false, bannerT:0,
+    dist:0, baseSpeed:13.5*b.speed*km.speed,
+    lane:0, laneTarget:0,
+    jy:0, jvy:0, air:false,
+    speedT:0, sickT:0, phaseT:0, stunT:0,
+    magT:0, twoxT:0, boostT:0, shieldT:0,
+    // Tokyo Special Mechanics:
+    ceiling:false, ceilingT:0,   // Upside-down ceiling running!
+    blackout:false, blackoutT:0, // Dynamic subway tunnel blackout!
+    ambushT:0,                   // Rival dog walker ambush alert!
+    zone:null,                   // 'star' | 'bonanza' | 'ceiling' | 'blackout'
+    finale:false, finStart:0, celebT:-1, champion:false,
+    items:[], props:[], parts:[], pops:[],
+    nextItemZ:14, nextPropZ:2,
+    lastTickSec:99, barkT:rand(4,7),
+    shake:0,
+    mood:'normal',
+    bringFlo: bringFlo,
+  };
+  show('GAME');
+  $('hud').classList.add('on');
+  $('hint').textContent = bringFlo
+    ? `${km.name} & ${G.name} in Tokyo! • Swipe ⬅➡ • Swipe ⬆ or tap to JUMP • Tackle Walkers!`
+    : 'Swipe ⬅➡ to steer • Swipe ⬆ or tap to JUMP • Hit 🌀 for Ceiling Run!';
+  $('hint').style.display='block';
+  updateHUD();
+  musicStart(); musicMood('normal');
+  S.stationChime();
+}
+
+function pushItem(zOff,lane,type,extra){
+  G.items.push(Object.assign({z:G.dist+zOff, lane, type, t:rand(0,6)},extra||{}));
+}
+
+// Tokyo Chunk Spawner with frequent powerups, boars, ambushes & gravity pads
+function spawnChunk(){
+  const elapsed = 75 - G.timeLeft;
+  const hard = clamp(elapsed/45, 0, 1);
+  const r = Math.random();
+  const base = ZMAX + 2;
+  const anyLane = ()=>[-1,0,1][Math.floor(rand(0,3))];
+  let len = 8;
+
+  // Zone Overrides
+  if(G.zone==='bonanza'){
+    for(let row=0;row<3;row++){
+      for(const ln of [-1,0,1]){
+        const pType = Math.random()<0.35 ? 'taiyaki' : (Math.random()<0.2 ? 'ramen' : 'std');
+        pushItem(base+row*1.7, ln, pType);
+      }
+    }
+    pushItem(base+3.5, 0, 'bento');
+    G.nextItemZ = 3*1.7 + 4;
+    return;
+  }
+
+  // Regular Dynamic Tokyo Spawning
+  if(r < 0.18){ // Taiyaki & Biscuit trail
+    const ln = anyLane();
+    pushItem(base, ln, 'taiyaki');
+    pushItem(base+1.4, ln, 'std');
+    pushItem(base+2.8, ln, 'taiyaki');
+    pushItem(base+4.2, ln, 'std');
+    len = 9;
+  } else if(r < 0.32){ // Tokyo Wild Boar encounter! (Jump or dodge)
+    const boarLane = anyLane();
+    pushItem(base, boarLane, 'boar');
+    // Reward biscuits over the boar
+    pushItem(base-1.2, boarLane, 'std');
+    pushItem(base, boarLane, 'taiyaki', {hy:58});
+    pushItem(base+1.2, boarLane, 'std');
+    len = 10;
+  } else if(r < 0.44){ // Rival Dog Walker Ambush! (Push them over!)
+    const walkerLane = anyLane();
+    const v = ['fashion','commuter','shibuya'][Math.floor(rand(0,3))];
+    pushItem(base, walkerLane, 'walker', {variant:v});
+    // Biscuit reward line right behind them
+    for(let i=1;i<=3;i++) pushItem(base+i*1.4, walkerLane, 'std');
+    len = 10;
+  } else if(r < 0.55){ // Anti-Gravity Inversion / Ceiling Flip Launch Pad!
+    const padLane = anyLane();
+    pushItem(base, padLane, 'gravityPad');
+    // Elevated ceiling star & biscuit path
+    for(let i=1;i<=4;i++) pushItem(base+i*1.8, padLane, 'gem', {hy:65});
+    len = 12;
+  } else if(r < 0.68){ // Hyper Magnet & Multiplier Combo
+    pushItem(base, anyLane(), 'magnet');
+    if(Math.random()<0.5) pushItem(base+2.5, anyLane(), 'twox');
+    len = 9;
+  } else if(r < 0.78){ // Tokyo Subway Ticket Turnstile (Jump!)
+    const gateLane = anyLane();
+    pushItem(base, gateLane, 'turnstile');
+    pushItem(base, gateLane, 'ramen', {hy:62});
+    len = 9;
+  } else if(r < 0.88){ // Mystery Bento Box & Laser Shield
+    pushItem(base, anyLane(), Math.random()<0.5 ? 'bento' : 'shield');
+    pushItem(base+2.2, anyLane(), 'pad');
+    len = 10;
+  } else if(r < 0.94){ // Rainbow Overdrive Bone!
+    pushItem(base, anyLane(), 'rainbow');
+    len = 9;
+  } else { // Wasabi challenge + Ramen treat
+    const ln = anyLane();
+    pushItem(base, ln, 'wasabi');
+    pushItem(base+2, ln===-1?1:-1, 'ramen');
+    len = 8;
+  }
+
+  G.nextItemZ = len * lerp(1.0, 0.72, hard);
+}
+
+// Input Handlers
+let touch=null;
+cv.addEventListener('pointerdown',e=>{
+  if(!G) return;
+  touch={x:e.clientX,y:e.clientY,t:performance.now(),usedX:false,usedY:false,id:e.pointerId};
+});
+cv.addEventListener('pointermove',e=>{
+  if(!G||!touch||e.pointerId!==touch.id) return;
+  const dx=e.clientX-touch.x, dy=e.clientY-touch.y;
+  if(!touch.usedX && Math.abs(dx)>26 && Math.abs(dx)>Math.abs(dy)){
+    steer(dx>0?1:-1);
+    touch.usedX=true; touch.x=e.clientX;
+    setTimeout(()=>{ if(touch) touch.usedX=false; },90);
+  }
+  if(!touch.usedY && dy<-32 && Math.abs(dy)>Math.abs(dx)){
+    jump(); touch.usedY=true;
+  }
+});
+cv.addEventListener('pointerup',e=>{
+  if(!G||!touch||e.pointerId!==touch.id){ touch=null; return; }
+  const dt=performance.now()-touch.t;
+  const dx=Math.abs(e.clientX-touch.x), dy=Math.abs(e.clientY-touch.y);
+  if(dt<260 && dx<12 && dy<12 && !touch.usedX && !touch.usedY) jump();
+  touch=null;
+});
+cv.addEventListener('pointercancel',()=>{touch=null;});
+
+window.addEventListener('keydown',e=>{
+  if(!G||!G.running) return;
+  if(e.key==='ArrowLeft'||e.key==='a') steer(-1);
+  else if(e.key==='ArrowRight'||e.key==='d') steer(1);
+  else if(e.key==='ArrowUp'||e.key==='w'||e.key===' ') jump();
+});
+
+function steer(dir){
+  if(!G.running || G.stunT>0 || G.celebT>=0) return;
+  const nt = clamp(G.laneTarget+dir,-1,1);
+  if(nt!==G.laneTarget){ G.laneTarget=nt; S.ui(); buzz(8); }
+}
+function jump(){
+  if(!G.running || G.stunT>0 || G.celebT>=0) return;
+  if(G.air) return;
+  G.air=true; G.jvy=JUMP_V; S.jump(); S.bark(); buzz(12);
+}
+
+function physStep(dt){
+  if(G.air){
+    G.jy += G.jvy*dt;
+    G.jvy -= GRAV*dt;
+    if(G.jvy<0 && G.jy<=0){ G.jy=0; G.jvy=0; G.air=false; S.land(); }
+  } else {
+    G.jy=0;
+  }
+}
+
+function pop(sx,sy,txt,color){ G.pops.push({x:sx,y:sy,txt,color,life:0.9}); }
+function burst(sx,sy,color,n,starShape){
+  if(!settings.spark) n=Math.min(n,4);
+  for(let i=0;i<n;i++){
+    const a=rand(0,7), sp=rand(70,240)*UNIT;
+    G.parts.push({x:sx,y:sy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-80*UNIT,life:rand(0.4,0.8),color,star:starShape,r:rand(2.5,5)*UNIT});
+  }
+}
+
+// Update Loop
+function update(dt){
+  G.t+=dt;
+
+  if(G.countdown>0){
+    G.countdown-=dt;
+    const n=Math.ceil(G.countdown-0.4);
+    const banner=$('banner');
+    if(G.countdown>0.4){
+      banner.style.display='block';
+      if(banner.textContent!==String(n)){ banner.textContent=n; S.tick(); }
+    } else if(banner.textContent!=='TOKYO GO!'){
+      banner.textContent='TOKYO GO!'; S.zoom(); S.bark();
+    }
+    if(G.countdown<=0){
+      banner.style.display='none';
+      $('hint').style.display='none';
+      G.running=true;
+    }
+    return;
+  }
+
+  if(G.finale){ updateFinale(dt); return; }
+
+  G.timeLeft-=dt;
+  const sec=Math.ceil(G.timeLeft);
+  if(sec<=5 && sec>=1 && sec!==G.lastTickSec){ G.lastTickSec=sec; S.tick(); }
+  if(G.timeLeft<=0){ startFinale(); return; }
+
+  // Tokyo Level Progression Timeline
+  const elapsed=75-G.timeLeft;
+
+  // 1. Blackout Zone (20s -> 32s)
+  const isBlackout = (elapsed>=22 && elapsed<32);
+  if(isBlackout !== G.blackout){
+    G.blackout = isBlackout;
+    if(G.blackout){
+      $('banner').textContent='⚡ TUNNEL BLACKOUT! ⚡';
+      $('banner').style.display='block'; G.bannerT=2.0;
+      S.blackout(); buzz([50,50,50]);
+      musicMood('blackout');
+    } else {
+      $('banner').textContent='💡 POWER RESTORED! 💡';
+      $('banner').style.display='block'; G.bannerT=1.8;
+      S.powerRestored(); S.gem(); buzz([30,30]);
+      musicMood('normal');
+    }
+  }
+
+  // 2. Tokyo Biscuit Bonanza (46s -> 58s)
+  const isBonanza = (elapsed>=46 && elapsed<58);
+  if(isBonanza && G.zone!=='bonanza'){
+    G.zone='bonanza';
+    $('banner').textContent='🦴 TOKYO BISCUIT BONANZA! 🦴';
+    $('banner').style.display='block'; G.bannerT=2.2;
+    S.gem(); S.bento(); buzz([40,40,40]);
+  } else if(!isBonanza && G.zone==='bonanza'){
+    G.zone=null;
+  }
+
+  // 3. Finale Rainbow Rush (last 14s)
+  if(!G.rush && G.timeLeft<=14){
+    G.rush=true; G.bannerT=1.6;
+    $('banner').textContent='🌈 TOKYO RAINBOW RUSH! 🌈';
+    $('banner').style.display='block';
+    S.gem(); S.phase(); buzz([40,40,40]);
+    musicMood('rush');
+  }
+
+  if(G.bannerT>0){
+    G.bannerT-=dt;
+    if(G.bannerT<=0 && G.running) $('banner').style.display='none';
+  }
+
+  // Ceiling run timer countdown
+  if(G.ceilingT>0){
+    G.ceilingT-=dt;
+    if(G.ceilingT<=0){
+      G.ceiling=false;
+      $('hud-ceiling').style.display='none';
+      S.gravityLand();
+      pop(projX(G.lane,0.4), projY(0.4)-80*UNIT, 'TRACK LANDING!','#00F0FF');
+      musicMood(G.rush?'rush':'normal');
+    }
+  }
+
+  // Timers
+  G.chainT-=dt; if(G.chainT<=0) G.chain=0;
+  G.speedT=Math.max(0,G.speedT-dt);
+  G.sickT=Math.max(0,G.sickT-dt);
+  G.phaseT=Math.max(0,G.phaseT-dt);
+  G.stunT=Math.max(0,G.stunT-dt);
+  G.magT=Math.max(0,G.magT-dt);
+  G.twoxT=Math.max(0,G.twoxT-dt);
+  G.boostT=Math.max(0,G.boostT-dt);
+  G.shieldT=Math.max(0,G.shieldT-dt);
+  G.shake=Math.max(0,G.shake-dt*3);
+
+  // Speed
+  let speed = (G.baseSpeed + elapsed*0.065);
+  if(G.phaseT>0) speed*=1.9;
+  else if(G.speedT>0) speed*=1.7;
+  else if(G.sickT>0) speed*=0.55;
+  if(G.boostT>0) speed*=1.4;
+  if(G.stunT>0) speed*=0.25;
+  if(G.rush) speed*=1.15;
+  G.speed=speed;
+  G.dist+=speed*dt;
+
+  G.lane=lerp(G.lane, G.laneTarget, Math.min(1,11*dt));
+  physStep(dt);
+
+  G.nextItemZ-=speed*dt;
+  if(G.nextItemZ<=0) spawnChunk();
+
+  // Collisions
+  const jumpPx = G.jy*UNIT;
+  for(let i=G.items.length-1;i>=0;i--){
+    const it=G.items[i];
+    it.t+=dt;
+    let rel=it.z - G.dist;
+    const pullable = (it.type==='std'||it.type==='taiyaki'||it.type==='ramen'||it.type==='gem');
+
+    // Hyper Magnet Pull
+    if((G.magT>0 || G.breed.magnet) && pullable && rel<8 && rel>0){
+      it.lane = lerp(it.lane, G.lane, Math.min(1,7*dt));
+      if(it.hy && rel<2.5) it.hy = lerp(it.hy, G.jy, Math.min(1,7*dt));
+    }
+    if(G.phaseT>0 && pullable && rel<5 && rel>0){
+      it.lane = lerp(it.lane, G.lane, Math.min(1,9*dt));
+    }
+
+    if(rel + (it.len||0) < -2.5){ G.items.splice(i,1); continue; }
+    if(rel > 1 || rel < -1) continue;
+
+    const laneHit = Math.abs(it.lane - G.lane) < 0.52;
+
+    switch(it.type){
+      case 'std': case 'taiyaki': case 'ramen': case 'gem': case 'magnet':
+      case 'twox': case 'rainbow': case 'bento': case 'shield': case 'wasabi': {
+        const itemH = (it.hy||0)*UNIT;
+        if(laneHit && Math.abs(jumpPx-itemH) < 58*UNIT && rel<0.65 && rel>-0.8){
+          G.items.splice(i,1); eat(it);
+        }
+        break;
+      }
+      case 'boar': {
+        if(!it.hit && laneHit && rel<0.4 && rel>-0.5){
+          if(jumpPx > 48*UNIT){
+            // Jumped cleanly over boar!
+            it.hit=true;
+            pop(projX(G.lane,0.4), projY(0.4)-90*UNIT, '🐗 LEAP! +10','#FFE600');
+            G.score+=10; S.bark();
+          } else if(G.phaseT>0 || G.shieldT>0){
+            it.hit=true;
+            S.boarBonk(); buzz(30);
+            pop(projX(G.lane,0.4), projY(0.4)-80*UNIT, '💥 BOAR TACKLE! +20','#FF2A85');
+            burst(projX(G.lane,0.4), projY(0.4)-40*UNIT, '#FFB800', 12, true);
+            G.score+=20;
+          } else {
+            it.hit=true;
+            bonk(); S.boar();
+          }
+        }
+        break;
+      }
+      case 'walker': {
+        if(!it.hit && laneHit && rel<0.45 && rel>-0.6){
+          // PUSH OVER! Ambush cleared!
+          it.hit=true;
+          S.push(); buzz(35);
+          const pts = (G.twoxT>0?30:15);
+          G.score+=pts;
+          pop(projX(G.lane,0.4), projY(0.4)-85*UNIT, `💥 PUSH OVER! +${pts}`, '#05FFA1');
+          burst(projX(G.lane,0.4), projY(0.4)-40*UNIT, '#FF2A85', 14, true);
+          // Spawn bonus treat shower
+          for(let k=0;k<3;k++) pushItem(1.5+k*1.2, G.lane, 'taiyaki');
+        }
+        break;
+      }
+      case 'gravityPad': {
+        if(!it.hit && laneHit && rel<0.45 && rel>-0.6){
+          it.hit=true;
+          activateCeilingMode();
+        }
+        break;
+      }
+      case 'turnstile': {
+        if(!it.hit && laneHit && rel<0.35 && rel>-0.5 && jumpPx<48*UNIT){
+          it.hit=true;
+          if(G.phaseT>0 || G.shieldT>0){
+            pop(projX(G.lane,0.4), projY(0.4)-80*UNIT, 'GATE SMASH!', '#B026FF');
+            burst(projX(G.lane,0.4), projY(0.4)-40*UNIT, '#00F0FF', 10, true);
+          } else {
+            bonk();
+          }
+        }
+        break;
+      }
+      case 'pad': {
+        if(!it.hit && laneHit && rel<0.4 && rel>-0.6 && jumpPx<32*UNIT){
+          it.hit=true;
+          G.boostT=1.8; S.zoom(); buzz(25);
+          pop(projX(G.lane,1), projY(1)-90*UNIT, '⚡ TOKYO BOOST!','#00F0FF');
+        }
+        break;
+      }
+    }
+  }
+
+  // Particles & Popups
+  G.parts.forEach(p=>{ p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=500*UNIT*dt; });
+  G.parts=G.parts.filter(p=>p.life>0);
+  G.pops.forEach(p=>{ p.life-=dt; p.y-=55*UNIT*dt; });
+  G.pops=G.pops.filter(p=>p.life>0);
+
+  updateHUD();
+}
+
+function activateCeilingMode(){
+  G.ceiling=true;
+  G.ceilingT=7.5;
+  $('hud-ceiling').style.display='block';
+  $('banner').textContent='🌀 CEILING RUN! 🌀';
+  $('banner').style.display='block'; G.bannerT=2.0;
+  S.gravityFlip(); buzz([40,30,40]);
+  musicMood('ceiling');
+  pop(projX(G.lane,0.4), projY(0.4)-80*UNIT, 'GRAVITY FLIP!', '#00F0FF');
+  burst(projX(G.lane,0.4), projY(0.4)-40*UNIT, '#B026FF', 16, true);
+}
+
+function eat(it){
+  const b=G.breed;
+  const sx=projX(G.lane,0.4), sy=projY(0.4)-60*UNIT;
+  switch(it.type){
+    case 'std': {
+      if(G.sickT>0){ pop(sx,sy,'urp…','#5e8f3e'); return; }
+      G.chain++; G.chainT=1.8;
+      const mult = G.chain>=10?3 : G.chain>=5?2 : 1;
+      let pts = (G.rush?2:1)*mult;
+      if(G.twoxT>0) pts*=2;
+      G.score+=pts; S.munch(); buzz(12);
+      pop(sx,sy, mult>1?`x${mult}! +${pts}`:'+'+pts, mult>1?'#05FFA1':'#FFB800');
+      burst(sx,sy,'#FFB800',6);
+      break;
+    }
+    case 'taiyaki': {
+      if(G.sickT>0){ pop(sx,sy,'urp…','#5e8f3e'); return; }
+      G.chain++; G.chainT=1.8;
+      const pts = (G.twoxT>0?10:5);
+      G.score+=pts; S.taiyaki(); buzz(20);
+      pop(sx,sy,`🐟 TAIYAKI +${pts}`,'#FF2A85');
+      burst(sx,sy,'#FFB7D5',10,true);
+      break;
+    }
+    case 'ramen': {
+      if(G.sickT>0){ pop(sx,sy,'urp…','#5e8f3e'); return; }
+      G.chain++; G.chainT=1.8;
+      const pts = (G.twoxT>0?20:10);
+      G.score+=pts; S.taiyaki(); S.bark(); buzz(25);
+      pop(sx,sy,`🍜 RAMEN BONE +${pts}`,'#FFE600');
+      burst(sx,sy,'#FFE600',12,true);
+      break;
+    }
+    case 'gem': {
+      G.chain++; G.chainT=1.8;
+      const pts = (G.twoxT>0?20:10);
+      G.score+=pts; S.gem(); buzz(25);
+      pop(sx,sy,`⭐ TOKYO STAR +${pts}`,'#00F0FF');
+      burst(sx,sy,'#00F0FF',12,true);
+      break;
+    }
+    case 'magnet':
+      G.magT=8; S.magnet(); buzz([25,25,25]);
+      pop(sx,sy,'🧲 HYPER MAGNET!','#FF1A1A');
+      burst(sx,sy,'#00F0FF',10,true);
+      break;
+    case 'twox':
+      G.twoxT=9; S.gem(); buzz([20,20,20]);
+      pop(sx,sy,'✨ DOUBLE POINTS!','#FFB800');
+      burst(sx,sy,'#FFE600',10,true);
+      break;
+    case 'bento':
+      G.twoxT=7; G.magT=7;
+      G.score+=25;
+      S.bento(); S.bark(); buzz([40,30,40]);
+      pop(sx,sy,'🍱 MYSTERY BENTO! +25','#FF2A85');
+      burst(sx,sy,'#FFE6A7',16,true);
+      break;
+    case 'shield':
+      G.shieldT=9; S.shield(); buzz([30,30]);
+      pop(sx,sy,'🛡️ LASER SHIELD!','#00B0FF');
+      burst(sx,sy,'#00F0FF',12,true);
+      break;
+    case 'rainbow':
+      startPhase();
+      break;
+    case 'wasabi':
+      if(G.phaseT>0 || G.shieldT>0) return;
+      G.sickT=3.2; G.chain=0;
+      S.hit(); buzz(120);
+      pop(sx,sy,'SPICY WASABI!','#4CAF50');
+      burst(sx,sy,'#4CAF50',8);
+      break;
+  }
+}
+
+function startPhase(){
+  G.phaseT=G.breed.phase; G.sickT=0; G.speedT=0; G.stunT=0;
+  S.phase(); S.bark(); buzz([40,30,40]);
+  musicMood('phase');
+  const sx=projX(G.lane,0.4), sy=projY(0.4)-70*UNIT;
+  pop(sx,sy,'🌈 RAINBOW OVERDRIVE!','#B026FF');
+  RAINBOW.forEach(c=>burst(sx,sy,c,4,true));
+}
+
+function bonk(){
+  G.stunT=0.8*G.breed.stunMul;
+  G.chain=0; G.shake=1.2;
+  S.hit(); buzz(80);
+  pop(projX(G.lane,0.5), projY(0.5)-80*UNIT, 'OUCH!', '#FF2A85');
+  burst(projX(G.lane,0.5), projY(0.5)-40*UNIT, '#FFE600', 8, true);
+}
+
+// Finale
+function startFinale(){
+  G.finale=true; G.timeLeft=0; G.running=true;
+  G.items.length=0; G.zone=null;
+  G.phaseT=G.speedT=G.sickT=G.stunT=G.magT=G.twoxT=G.boostT=G.shieldT=0;
+  G.ceiling=false; $('hud-ceiling').style.display='none';
+  G.finStart=G.dist; G.celebT=-1;
+  G.laneTarget=0;
+  $('banner').textContent='TOKYO GRAND CENTRAL!';
+  $('banner').style.display='block'; G.bannerT=2.4;
+  musicMood('rush'); S.stationChime(); buzz([30,30,30]);
+}
+
+function updateFinale(dt){
+  if(G.bannerT>0){
+    G.bannerT-=dt;
+    if(G.bannerT<=0 && G.celebT<0) $('banner').style.display='none';
+  }
+  if(G.celebT>=0){
+    G.celebT+=dt;
+    G.speed=0;
+    if(G.celebT>3.5){ endGame(); return; }
+  } else {
+    const speed=13.5;
+    G.speed=speed; G.dist+=speed*dt;
+    G.lane=lerp(G.lane,G.laneTarget,Math.min(1,10*dt));
+    physStep(dt);
+    if(G.dist-G.finStart>=FIN.TRO-1.7){
+      G.celebT=0; G.champion=true;
+      G.jy=0; G.jvy=0; G.air=false;
+      $('banner').textContent='TOKYO CHAMPION!';
+      $('banner').style.display='block'; G.bannerT=3.2;
+      S.phase(); S.bark(); S.stationChime(); buzz([60,40,60]);
+    }
+  }
+  G.parts.forEach(p=>{ p.life-=dt; p.x+=p.vx*dt; p.y+=p.vy*dt; p.vy+=500*UNIT*dt; });
+  G.parts=G.parts.filter(p=>p.life>0);
+  G.pops.forEach(p=>{ p.life-=dt; p.y-=55*UNIT*dt; });
+  G.pops=G.pops.filter(p=>p.life>0);
+  updateHUD();
+}
+
+function updateHUD(){
+  const sec=Math.max(0,Math.ceil(G.timeLeft));
+  const m=Math.floor(sec/60), ss=String(sec%60).padStart(2,'0');
+  const timerEl=$('hud-timer');
+  timerEl.textContent=`${m}:${ss}`;
+  timerEl.classList.toggle('low', sec<=10 && G.running);
+  $('hud-score').textContent=`🦴 ${G.score}`;
+
+  const pw=$('hud-power'), txt=$('hud-power-txt'), bar=$('hud-power-bar');
+  pw.className='hudchip';
+  if(G.phaseT>0){
+    pw.classList.add('phase');
+    txt.textContent=`🌈 RAINBOW ${G.phaseT.toFixed(1)}s`;
+    bar.style.width=(G.phaseT/G.breed.phase*100)+'%';
+  } else if(G.shieldT>0){
+    pw.classList.add('shield');
+    txt.textContent=`🛡️ LASER SHIELD ${G.shieldT.toFixed(1)}s`;
+    bar.style.width=(G.shieldT/9*100)+'%';
+  } else if(G.magT>0){
+    pw.classList.add('magnet');
+    txt.textContent=`🧲 HYPER MAGNET ${G.magT.toFixed(1)}s`;
+    bar.style.width=(G.magT/8*100)+'%';
+  } else if(G.twoxT>0){
+    pw.classList.add('twox');
+    txt.textContent=`✨ x2 POINTS ${G.twoxT.toFixed(1)}s`;
+    bar.style.width=(G.twoxT/9*100)+'%';
+  } else if(G.speedT>0){
+    pw.classList.add('speed');
+    txt.textContent=`⚡ TOKYO ZOOM ${G.speedT.toFixed(1)}s`;
+    bar.style.width=(G.speedT/G.breed.boost*100)+'%';
+  } else if(G.sickT>0){
+    pw.classList.add('sick');
+    txt.textContent=`🤢 SPICY ${G.sickT.toFixed(1)}s`;
+    bar.style.width=(G.sickT/3.2*100)+'%';
+  }
+}
+
+// Render
+function render(){
+  const t=G.t;
+  const mood = G.phaseT>0?'phase' : G.ceiling?'ceiling' : G.rush?'rush' : 'normal';
+  const horizonY=H*HORIZON;
+
+  ctx.save();
+  if(G.shake>0) ctx.translate(rand(-4,4)*G.shake, rand(-3,3)*G.shake);
+
+  // Ceiling flip transformation for upside down camera!
+  if(G.ceiling){
+    ctx.translate(W/2, H/2);
+    ctx.rotate(Math.PI);
+    ctx.translate(-W/2, -H/2);
+  }
+
+  // 1. Sky & Tunnel
+  if(window.TokyoScenery && TokyoScenery.drawTokyoSky){
+    TokyoScenery.drawTokyoSky(ctx, W, H, horizonY, t, {mood, blackout:G.blackout, ceiling:G.ceiling});
+  }
+
+  // 2. Track & Station Ground
+  if(window.TokyoScenery && TokyoScenery.drawTokyoTrack){
+    TokyoScenery.drawTokyoTrack(ctx, W, H, horizonY, projY, persp, laneW(), ZMAX, G.dist, {blackout:G.blackout, ceiling:G.ceiling});
+  }
+
+  // 3. Finale Trophy
+  if(G.finale){
+    const d=G.dist-G.finStart;
+    const trel=FIN.TRO-d;
+    if(trel>-0.4 && trel<ZMAX){
+      const zt=Math.max(trel,0.35);
+      const p=persp(zt);
+      if(window.TokyoScenery && TokyoScenery.drawTokyoTrophyWorld){
+        TokyoScenery.drawTokyoTrophyWorld(ctx, W/2, projY(zt), p*UNIT*2.3, G.name);
+      }
+    }
+  }
+
+  // 4. Depth sorted items
+  const world=[];
+  for(const it of G.items) world.push({kind:'item', rel:it.z-G.dist, o:it});
+  world.sort((a,b)=>b.rel-a.rel);
+
+  for(const w of world){
+    const rel=w.rel;
+    if(rel>ZMAX || rel<-2) continue;
+    const p=persp(rel), y=projY(rel);
+    const it=w.o;
+    const x=W/2 + it.lane*laneW()*p;
+    const bob=Math.sin(it.t*3)*4*p*UNIT;
+    const r=18*p*UNIT*2;
+    const lift = -(it.hy||0)*p*UNIT;
+
+    ctx.globalAlpha = rel<0 ? clamp(1+rel/1.5,0,1) : 1;
+
+    switch(it.type){
+      case 'std':
+        if(window.PBEScenery && PBEScenery.drawBone){
+          PBEScenery.drawBone(ctx,x,y-22*p*UNIT+bob+lift,r,'#FFB800','#B37A00',{dots:true});
+        }
+        break;
+      case 'taiyaki':
+        if(window.TokyoScenery && TokyoScenery.drawTaiyaki){
+          TokyoScenery.drawTaiyaki(ctx,x,y-24*p*UNIT+bob+lift,r*0.9,it.t);
+        }
+        break;
+      case 'ramen':
+        if(window.TokyoScenery && TokyoScenery.drawRamenBone){
+          TokyoScenery.drawRamenBone(ctx,x,y-24*p*UNIT+bob+lift,r,it.t);
+        }
+        break;
+      case 'gem':
+        if(window.PBEScenery && PBEScenery.drawGem){
+          PBEScenery.drawGem(ctx,x,y-26*p*UNIT+bob+lift,r*0.8,it.t);
+        }
+        break;
+      case 'magnet':
+        if(window.TokyoScenery && TokyoScenery.drawHyperMagnet){
+          TokyoScenery.drawHyperMagnet(ctx,x,y-26*p*UNIT+bob,r*0.9,it.t);
+        }
+        break;
+      case 'twox':
+        if(window.PBEScenery && PBEScenery.drawStar){
+          PBEScenery.drawStar(ctx,x,y-26*p*UNIT+bob,r*0.95,'#FFE600',it.t);
+        }
+        break;
+      case 'bento':
+        if(window.TokyoScenery && TokyoScenery.drawBentoBox){
+          TokyoScenery.drawBentoBox(ctx,x,y-26*p*UNIT+bob,r,it.t);
+        }
+        break;
+      case 'shield':
+        if(window.TokyoScenery && TokyoScenery.drawLaserShield){
+          TokyoScenery.drawLaserShield(ctx,x,y-26*p*UNIT+bob,r,it.t);
+        }
+        break;
+      case 'boar':
+        if(window.TokyoScenery && TokyoScenery.drawWildBoar){
+          TokyoScenery.drawWildBoar(ctx,x,y,p*1.3*UNIT,t+it.t, {hit:it.hit});
+        }
+        break;
+      case 'walker':
+        if(window.TokyoScenery && TokyoScenery.drawDogWalker){
+          TokyoScenery.drawDogWalker(ctx,it.variant||'fashion',x,y,p*1.25*UNIT,t+it.t, {hit:it.hit});
+        }
+        break;
+      case 'turnstile':
+        if(window.TokyoScenery && TokyoScenery.drawTurnstile){
+          TokyoScenery.drawTurnstile(ctx,x,y,laneW()*p*0.9,46*p*UNIT,p);
+        }
+        break;
+      case 'gravityPad':
+        if(window.TokyoScenery && TokyoScenery.drawGravityPad){
+          TokyoScenery.drawGravityPad(ctx,x,y,laneW()*p*0.9,p,t);
+        }
+        break;
+      case 'pad':
+        ctx.fillStyle='#00F0FF';
+        ctx.beginPath(); ctx.ellipse(x,y,laneW()*p*0.4,12*p*UNIT,0,0,7); ctx.fill();
+        break;
+      case 'rainbow':
+        if(window.PBEScenery && PBEScenery.drawBone){
+          PBEScenery.drawBone(ctx,x,y-24*p*UNIT+bob,r*1.15,'#FF2A85','#00F0FF',{rot:Math.sin(it.t*2)*0.2});
+        }
+        break;
+      case 'wasabi':
+        if(window.PBEScenery && PBEScenery.drawBone){
+          PBEScenery.drawBone(ctx,x,y-22*p*UNIT+bob,r,'#4CAF50','#2E7D32',{stink:true,t:it.t});
+        }
+        break;
+    }
+  }
+
+  ctx.globalAlpha=1;
+
+  // 5. Player & Runner Characters
+  const jumpN = clamp(G.jy/JUMP_H, 0, 1);
+  const hop = G.celebT>=0 ? Math.abs(Math.sin(G.celebT*7))*36*UNIT : 0;
+  const px=projX(G.lane,0), py=projY(0) - G.jy*UNIT - hop;
+  const pupS=1.15*UNIT, floS=1.18*UNIT;
+  const withFlo = !!G.bringFlo;
+  const floSide = G.lane>0.35 ? -1 : 1;
+  const floX = px + floSide*62*UNIT;
+  const floY = py;
+
+  // Shadows
+  ctx.fillStyle='rgba(10,5,20,.35)';
+  ctx.beginPath(); ctx.ellipse(projX(G.lane,0),projY(0)+6*UNIT,34*UNIT*(1-jumpN*0.35),10*UNIT*(1-jumpN*0.35),0,0,7); ctx.fill();
+  if(withFlo){
+    ctx.beginPath(); ctx.ellipse(floX,projY(0)+6*UNIT,22*UNIT*(1-jumpN*0.35),8*UNIT*(1-jumpN*0.35),0,0,7); ctx.fill();
+  }
+
+  const airN = clamp(G.jy/JUMP_H,0,1);
+  const state={
+    run: G.running?1:0,
+    jumpArc: G.air ? (G.jvy>=0 ? Math.asin(airN)/Math.PI : 1-Math.asin(airN)/Math.PI) : null,
+    lean: clamp(G.laneTarget-G.lane,-1,1),
+    sick: G.sickT>0,
+    speed: G.speedT>0 || G.boostT>0,
+    phase: G.phaseT>0,
+    stun: G.stunT>0,
+    side: floSide,
+  };
+
+  // Draw Pup
+  if(window.PBEScenery && PBEScenery.drawPupRunner){
+    PBEScenery.drawPupRunner(ctx, G.breed, px, py, pupS, t, state);
+  }
+
+  // Draw Laser Shield Orb around pup if active
+  if(G.shieldT>0){
+    ctx.save();
+    ctx.strokeStyle='#00F0FF'; ctx.lineWidth=3*UNIT;
+    ctx.fillStyle='rgba(0,240,255,0.2)';
+    ctx.beginPath(); ctx.arc(px, py-30*UNIT, 46*UNIT, 0, 7); ctx.fill(); ctx.stroke();
+    ctx.restore();
+  }
+
+  // Draw Leash & Kid
+  if(withFlo && window.PBEScenery && PBEScenery.drawKidRunner){
+    PBEScenery.drawKidRunner(ctx, G.kid, floX, floY, floS, t, state);
+  }
+  if(withFlo && window.PBEScenery && PBEScenery.drawLeash && PBEScenery.leashEnds){
+    const ends=PBEScenery.leashEnds(px,py,pupS,floX,floY,floS,t,state);
+    PBEScenery.drawLeash(ctx, ends.x0, ends.y0, ends.x1, ends.y1, t, {jump:jumpN, scale:UNIT*1.15});
+  }
+
+  // Name Tag
+  ctx.font=`800 ${13*UNIT}px Trebuchet MS`;
+  ctx.textAlign='center';
+  const nw=ctx.measureText(G.name).width+16*UNIT;
+  const nbx= withFlo ? px - floSide*18*UNIT : px;
+  const ny=py-128*UNIT;
+  ctx.fillStyle='#1C1526'; ctx.strokeStyle='#00F0FF'; ctx.lineWidth=2*UNIT;
+  ctx.beginPath(); ctx.roundRect(nbx-nw/2,ny,nw,19*UNIT,7*UNIT); ctx.fill(); ctx.stroke();
+  ctx.fillStyle='#FFE600';
+  ctx.fillText(G.name,nbx,ny+14*UNIT);
+
+  // Particles & Popups
+  for(const p of G.parts){
+    ctx.globalAlpha=Math.min(1,p.life*2);
+    if(p.star && window.PBEScenery && PBEScenery.drawStar){
+      PBEScenery.drawStar(ctx,p.x,p.y,p.r+2,p.color,p.life*8);
+    } else {
+      ctx.fillStyle=p.color; ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill();
+    }
+    ctx.globalAlpha=1;
+  }
+  for(const p of G.pops){
+    ctx.globalAlpha=Math.min(1,p.life*2.5);
+    ctx.font=`800 ${20*UNIT}px ${getComputedStyle(document.body).getPropertyValue('--display')}`;
+    ctx.textAlign='center';
+    ctx.lineWidth=4*UNIT; ctx.strokeStyle='#0F0A1A';
+    ctx.strokeText(p.txt,p.x,p.y);
+    ctx.fillStyle=p.color;
+    ctx.fillText(p.txt,p.x,p.y);
+    ctx.globalAlpha=1;
+  }
+
+  ctx.restore();
+}
+
+// Game Over
+function endGame(){
+  G.running=false;
+  $('banner').style.display='none';
+  musicStop();
+  S.whistle();
+  buzz([80,60,80]);
+  $('hud').classList.remove('on');
+  const list=addScore(G.name, G.breed.name, G.score);
+  const isBest = list.length && list[0].score===G.score && list[0].name===G.name;
+  if(window.TokyoScenery && TokyoScenery.drawTokyoTrophyBody){
+    TokyoScenery.drawTokyoTrophyBody($('over-trophy').getContext('2d'), G.name);
+  }
+  $('over-score').textContent=G.score;
+  const kmName = bringFlo ? (KIDMETA[G.kid]||KIDMETA.florence).name : null;
+  $('over-name').textContent= (kmName?`${kmName} & `:'') + `${G.name} the ${G.breed.name}`;
+  $('newbest').style.display = (isBest && G.score>0) ? 'inline-block' : 'none';
+  $('over-title').textContent = G.champion ? 'TOKYO CHAMPION! 🗼✨' : 'Tokyo Rush Complete!';
+  renderLB('over-lb', list);
+  G=null;
+  show('s-over');
+}
+
+// Frame Loop
+let last=performance.now();
+function frame(now){
+  const dt=Math.min(0.05,(now-last)/1000); last=now;
+  if(G){ update(dt); if(G) render(); }
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// Event Wiring
+$('btn-play').addEventListener('pointerdown',()=>{ audioInit(); S.ui(); show('s-breed'); });
+$('btn-breed-back').addEventListener('pointerdown',()=>{ S.ui(); show('s-title'); });
+$('btn-breed-next').addEventListener('pointerdown',()=>{ S.ui(); show('s-name'); renderSlots(); });
+$('btn-name-back').addEventListener('pointerdown',()=>{ S.ui(); show('s-breed'); });
+$('btn-name-go').addEventListener('pointerdown',()=>{
+  const typed=pupName.filter(Boolean);
+  if(typed.length<3){
+    const defaults=['MAX','YUK','PIP','ZAP','SAM','BUD'];
+    const d=defaults[Math.floor(Math.random()*defaults.length)];
+    pupName=[d[0],d[1],d[2],'',''];
+  } else {
+    pupName=typed.concat(['','','','','']).slice(0,NAMELEN);
+  }
+  slotIdx=Math.min(pupName.filter(Boolean).length,NAMELEN-1);
+  renderSlots();
+  S.ui(); show('s-flo');
+});
+$('btn-flo-back').addEventListener('pointerdown',()=>{ S.ui(); show('s-name'); renderSlots(); });
+$('btn-flo-go').addEventListener('pointerdown',()=>{ audioInit(); S.zoom(); newGame(); });
+$('btn-again').addEventListener('pointerdown',()=>{ S.ui(); newGame(); });
+$('btn-scores').addEventListener('pointerdown',()=>{ S.ui(); renderLB('scores-lb',getScores()); show('s-scores'); });
+$('btn-scores-back').addEventListener('pointerdown',()=>{ S.ui(); show('s-title'); });
+$('btn-settings').addEventListener('pointerdown',()=>{ S.ui(); show('s-set'); });
+$('btn-set-back').addEventListener('pointerdown',()=>{ S.ui(); saveSettings(); show('s-title'); });
+
+function wireToggle(id,key){
+  const el=$(id);
+  el.classList.toggle('on',settings[key]);
+  el.addEventListener('pointerdown',()=>{
+    settings[key]=!settings[key];
+    el.classList.toggle('on',settings[key]);
+    saveSettings(); S.ui(); buzz(15);
+  });
+}
+wireToggle('set-music','music');
+wireToggle('set-sound','sound');
+wireToggle('set-buzz','buzz');
+wireToggle('set-spark','spark');
+
+resize();
+applyAudioSettings();
+show('s-title');
+</script>
+</body>
+</html>

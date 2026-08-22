@@ -1,0 +1,2976 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>The Moving House Game — A Game by Florence</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📦</text></svg>">
+<style>
+  /* ==========================================================================
+     THE MOVING HOUSE GAME — Designed by Florence
+     Play as Mum, Dad, Sister, Brother, or Teenager!
+     10 Quick & Fun Levels with Real Illustrated Furniture!
+     ========================================================================== */
+  :root {
+    --sky: #4EA8DE;
+    --sky-light: #BEE1E6;
+    --grass: #52B788;
+    --grass-deep: #2D6A4F;
+    --gold: #FFB703;
+    --gold-deep: #D48B00;
+    --coral: #FF5D73;
+    --coral-deep: #D9254C;
+    --purple: #7209B7;
+    --cream: #FFFDF7;
+    --panel: #FFFFFF;
+    --ink: #2C221E;
+    --ink-soft: #6A5B52;
+    --font-display: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Marker Felt', 'Nunito', 'Segoe UI', cursive, sans-serif;
+    --font-body: 'Trebuchet MS', 'Segoe UI', -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #1D3557;
+    font-family: var(--font-body);
+    color: var(--ink);
+    user-select: none; -webkit-user-select: none;
+    touch-action: none;
+    position: fixed; inset: 0;
+  }
+
+  #stage {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 25%, #4ea8de 0%, #1d3557 70%, #0d1b2a 100%);
+  }
+
+  #frame {
+    position: relative;
+    width: min(100vw, 76vh);
+    height: min(100vh, 132vw);
+    max-width: 600px;
+    max-height: 940px;
+    background: #4ea8de;
+    overflow: hidden;
+    box-shadow: 0 0 0 100vmax rgba(13, 27, 42, 0.45), 0 16px 48px rgba(0,0,0,0.5);
+    border-radius: clamp(0px, 2.5vw, 26px);
+  }
+
+  canvas#game-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+    z-index: 1;
+    cursor: pointer;
+    touch-action: none;
+  }
+  canvas#confetti-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    pointer-events: none !important;
+    z-index: 20;
+  }
+
+  /* Screens & UI layers */
+  .screen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: max(16px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
+    text-align: center;
+    overflow-y: auto; scrollbar-width: none;
+    z-index: 30;
+    background: linear-gradient(180deg, #56cfe1 0%, #72efdd 35%, #fde4cf 80%, #ffcad4 100%);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .screen::-webkit-scrollbar { display: none; }
+  .screen.hidden {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: scale(0.95);
+  }
+
+  /* Eyebrows & Badges */
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: clamp(13px, 3.8vw, 16px);
+    color: #fff;
+    background: var(--coral);
+    padding: 6px 18px;
+    border-radius: 999px;
+    box-shadow: 0 3px 0 var(--coral-deep);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 6px;
+    transform: rotate(-1.5deg);
+  }
+
+  h1.game-title {
+    font-family: var(--font-display);
+    font-size: clamp(26px, 7.8vw, 42px);
+    line-height: 1.05;
+    color: #FFF;
+    text-shadow: 0 3px 0 #D48B00, 0 6px 14px rgba(44, 34, 30, 0.35);
+    margin: 8px 0 4px;
+    text-wrap: balance;
+  }
+  h1.game-title span { color: #FFE66D; }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 6vw, 30px);
+    color: #FFF;
+    text-shadow: 0 2px 0 rgba(44, 34, 30, 0.4);
+    margin: 4px 0 8px;
+  }
+
+  p.tagline {
+    font-family: var(--font-display);
+    font-size: clamp(13px, 3.8vw, 17px);
+    color: #2C221E;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 6px 16px;
+    border-radius: 14px;
+    margin: 4px 0 10px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+  }
+
+  /* Buttons */
+  .btn {
+    font-family: var(--font-display);
+    font-size: clamp(16px, 4.8vw, 21px);
+    color: #fff;
+    background: linear-gradient(180deg, #FFAE03, #FB8500);
+    border: none; border-radius: 20px;
+    padding: 12px 30px;
+    box-shadow: 0 5px 0 #C96B00, 0 8px 14px rgba(44, 34, 30, 0.25);
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+    touch-action: manipulation;
+  }
+  .btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #C96B00, 0 3px 6px rgba(44, 34, 30, 0.2);
+  }
+  .btn.big {
+    font-size: clamp(20px, 6.5vw, 28px);
+    padding: 15px 44px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #FF6B8B, #FF3366);
+    box-shadow: 0 6px 0 #B81943, 0 10px 18px rgba(255, 51, 102, 0.35);
+  }
+  .btn.big:active {
+    transform: translateY(5px);
+    box-shadow: 0 1px 0 #B81943;
+  }
+  .btn.teal {
+    background: linear-gradient(180deg, #2EC4B6, #0F8B8D);
+    box-shadow: 0 5px 0 #09595A;
+  }
+  .btn.teal:active {
+    box-shadow: 0 1px 0 #09595A;
+  }
+  .btn.ghost {
+    background: #FFF;
+    color: var(--ink);
+    box-shadow: 0 4px 0 #D4C9B8;
+    font-size: clamp(14px, 3.8vw, 17px);
+    padding: 9px 20px;
+  }
+  .btn.ghost:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #D4C9B8;
+  }
+  .btn-row {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; width: 100%;
+  }
+
+  .card-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border: 3px solid #FFD166;
+    border-radius: 22px;
+    padding: 16px 14px;
+    width: 100%;
+    max-width: 480px;
+    box-shadow: 0 6px 0 #E2C063, 0 10px 24px rgba(0,0,0,0.12);
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+
+  /* Character Select Screen Grid */
+  .char-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    width: 100%;
+    max-width: 540px;
+    margin: 8px 0;
+  }
+  @media (max-width: 480px) {
+    .char-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  .char-card {
+    background: #FFF;
+    border: 3px solid #E2D5BE;
+    border-radius: 16px;
+    padding: 8px 4px;
+    display: flex; flex-direction: column; align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #D8C7A8;
+    transition: transform 0.1s ease, border-color 0.1s ease, background 0.1s ease;
+  }
+  .char-card:hover, .char-card:active {
+    transform: translateY(-2px);
+    border-color: #FFB703;
+  }
+  .char-card.selected {
+    background: linear-gradient(180deg, #FFF9E6, #FFEAA7);
+    border-color: #FF5376;
+    box-shadow: 0 5px 0 #D9254C, 0 0 0 3px rgba(255, 83, 118, 0.35);
+    transform: translateY(-4px) scale(1.04);
+  }
+  .char-avatar {
+    width: 52px; height: 52px;
+    display: flex; align-items: center; justify-content: center;
+    background: #F0F8FF;
+    border-radius: 50%;
+    margin-bottom: 4px;
+    border: 2.5px solid #E2D5BE;
+  }
+  .char-name {
+    font-family: var(--font-display);
+    font-size: 13px; font-weight: bold; color: var(--ink);
+  }
+  .char-role {
+    font-size: 10.5px; color: var(--ink-soft); line-height: 1.1; margin-top: 2px;
+  }
+  .char-tag {
+    background: #FF5376; color: #FFF; font-size: 9px; font-weight: bold;
+    padding: 2px 6px; border-radius: 6px; margin-top: 4px;
+  }
+
+  /* Level Select */
+  .level-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 9px;
+    width: 100%;
+    max-width: 500px;
+    margin: 6px 0;
+  }
+  .level-btn {
+    background: #FFF;
+    border: 2.5px solid #E2D5BE;
+    border-radius: 14px;
+    padding: 8px 10px;
+    display: flex; align-items: center; gap: 8px;
+    text-align: left;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #D8C7A8;
+    transition: transform 0.08s ease;
+  }
+  .level-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #D8C7A8;
+  }
+  .level-btn.active-lvl {
+    border-color: #FF5376;
+    background: #FFF5F7;
+    box-shadow: 0 3px 0 #D9254C;
+  }
+  .level-btn .num-badge {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: #FFB703;
+    color: #fff;
+    font-family: var(--font-display);
+    font-size: 14px; font-weight: bold;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .level-btn .lvl-info { display: flex; flex-direction: column; }
+  .level-btn .lvl-title { font-family: var(--font-display); font-size: 12.5px; font-weight: bold; color: var(--ink); line-height: 1.1; }
+  .level-btn .lvl-sub { font-size: 10.5px; color: var(--ink-soft); }
+
+  /* Top HUD Overlay with Quick Switcher */
+  #hud {
+    position: absolute; top: max(8px, env(safe-area-inset-top)); left: 10px; right: 10px;
+    display: flex; flex-direction: column; gap: 6px;
+    pointer-events: none;
+    z-index: 10;
+  }
+  .hud-top-row {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%;
+  }
+  .hud-chip {
+    font-family: var(--font-display);
+    font-size: clamp(12px, 3.4vw, 15px);
+    background: rgba(255, 255, 255, 0.94);
+    color: var(--ink);
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 2px solid #FFD166;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+    font-weight: bold;
+    display: inline-flex; align-items: center; gap: 5px;
+    pointer-events: auto;
+  }
+  .hud-actions {
+    display: flex; gap: 6px; pointer-events: auto;
+  }
+  .icon-btn {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 2.5px solid #FFD166;
+    background: #FFF;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+    font-size: 17px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .icon-btn:active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.15);
+  }
+
+  /* In-Game Quick Character Switcher Bar */
+  #hud-char-bar {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    background: rgba(255, 255, 255, 0.92);
+    border: 2px solid #56CFE1;
+    border-radius: 999px;
+    padding: 3px 8px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+    pointer-events: auto;
+    width: fit-content; margin: 0 auto;
+  }
+  .hud-char-btn {
+    background: #FFF;
+    border: 2px solid #E2D5BE;
+    border-radius: 999px;
+    padding: 3px 8px;
+    font-family: var(--font-display);
+    font-size: 11.5px;
+    font-weight: bold;
+    color: var(--ink);
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: transform 0.08s ease, background 0.08s ease;
+    touch-action: manipulation;
+  }
+  .hud-char-btn:active { transform: translateY(1px); }
+  .hud-char-btn.active {
+    background: #FFEAA7;
+    border-color: #FF5376;
+    color: #D9254C;
+    box-shadow: 0 0 0 2px #FF5376;
+  }
+
+  /* Mission Banner bar below HUD */
+  #hud-banner {
+    position: absolute;
+    top: calc(max(8px, env(safe-area-inset-top)) + 74px);
+    left: 10px; right: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 5px 10px;
+    font-family: var(--font-display);
+    font-size: clamp(11.5px, 3.1vw, 13.5px);
+    color: #2C221E;
+    border: 2px solid #72EFDD;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    display: flex; align-items: center; justify-content: space-between;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* Interactive On-screen Bottom Dock */
+  #bottom-dock {
+    position: absolute; bottom: max(8px, env(safe-area-inset-bottom)); left: 10px; right: 10px;
+    background: rgba(255, 255, 255, 0.94);
+    backdrop-filter: blur(8px);
+    border-radius: 18px;
+    border: 2.5px solid #FFD166;
+    padding: 8px 10px;
+    display: flex; align-items: center; gap: 8px;
+    overflow-x: auto; scrollbar-width: none;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.2);
+    z-index: 15;
+  }
+  #bottom-dock::-webkit-scrollbar { display: none; }
+  .dock-item {
+    flex-shrink: 0;
+    background: #FFF;
+    border: 2px solid #E2D5BE;
+    border-radius: 12px;
+    padding: 6px 12px;
+    display: flex; align-items: center; gap: 6px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    cursor: pointer;
+    box-shadow: 0 2px 0 #D8C7A8;
+    transition: transform 0.08s ease, background 0.08s ease;
+    touch-action: manipulation;
+  }
+  .dock-item:active {
+    transform: translateY(2px);
+    background: #FFF9E6;
+  }
+  .dock-item.carried {
+    background: #FFEAA7;
+    border-color: #FF5376;
+    box-shadow: 0 0 0 2px #FF5376;
+  }
+  .dock-item.placed {
+    opacity: 0.45;
+    background: #E8F5E9;
+    border-color: #81C784;
+    text-decoration: line-through;
+    pointer-events: none;
+  }
+
+  /* Mobile / On-screen Touch D-Pad Controls */
+  #touch-controls {
+    position: absolute;
+    bottom: calc(max(8px, env(safe-area-inset-bottom)) + 72px);
+    left: 12px; right: 12px;
+    display: flex; justify-content: space-between; align-items: flex-end;
+    pointer-events: none;
+    z-index: 16;
+  }
+  .touch-dpad {
+    display: grid;
+    grid-template-columns: repeat(3, 46px);
+    grid-template-rows: repeat(3, 46px);
+    gap: 4px;
+    pointer-events: auto;
+  }
+  .touch-btn {
+    background: rgba(255, 255, 255, 0.92);
+    border: 2.5px solid #56CFE1;
+    border-radius: 14px;
+    font-size: 20px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 3px 0 #0EA5E9;
+    color: var(--ink);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+  }
+  .touch-btn:active, .touch-btn.active {
+    transform: translateY(2px);
+    box-shadow: 0 1px 0 #0EA5E9;
+    background: #BAE6FD;
+  }
+  .touch-btn.action-btn {
+    width: 68px; height: 68px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #FFB703, #FB8500);
+    border-color: #FFD166;
+    color: #FFF;
+    font-family: var(--font-display);
+    font-size: 15px; font-weight: bold;
+    box-shadow: 0 4px 0 #C96B00;
+    pointer-events: auto;
+  }
+  .touch-btn.action-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #C96B00;
+  }
+
+  /* Level Cleared Banner Flash */
+  #level-cue-banner {
+    position: absolute; top: 38%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: linear-gradient(180deg, #FFD166, #FFB703);
+    border: 4px solid #FFF;
+    border-radius: 24px;
+    padding: 14px 28px;
+    font-family: var(--font-display);
+    font-size: clamp(22px, 6vw, 32px);
+    color: #2C221E;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    z-index: 25;
+    pointer-events: none;
+    transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    white-space: nowrap;
+    text-align: center;
+  }
+  #level-cue-banner.show {
+    transform: translate(-50%, -50%) scale(1);
+  }
+
+  .kb-hint {
+    font-size: 11px;
+    color: var(--ink-soft);
+    background: #F0F4F8;
+    padding: 2px 6px;
+    border-radius: 6px;
+    border: 1px solid #CBD5E1;
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="frame">
+    <!-- Game Canvases -->
+    <canvas id="game-canvas" width="600" height="840"></canvas>
+    <canvas id="confetti-canvas" width="600" height="840"></canvas>
+
+    <!-- Top HUD Overlay -->
+    <div id="hud">
+      <div class="hud-top-row">
+        <div id="hud-level" class="hud-chip">📦 Level 1</div>
+        <div id="hud-counter" class="hud-chip">🚚 0 / 6</div>
+        <div class="hud-actions">
+          <button class="icon-btn" id="btn-char-switch" title="Pick Character Screen">👤</button>
+          <button class="icon-btn" id="btn-sound" title="Toggle Sound">🔊</button>
+        </div>
+      </div>
+      <!-- In-Game Instant Character Switcher -->
+      <div id="hud-char-bar">
+        <button class="hud-char-btn active" data-char="mum">👩 Mum</button>
+        <button class="hud-char-btn" data-char="sister">👧 Sister</button>
+        <button class="hud-char-btn" data-char="brother">👦 Brother</button>
+        <button class="hud-char-btn" data-char="teenager">🎧 Teen</button>
+        <button class="hud-char-btn" data-char="dad">👨 Dad</button>
+      </div>
+    </div>
+
+    <!-- HUD Mission Banner -->
+    <div id="hud-banner">
+      <span id="hud-task-text">Pack all 6 boxes into the moving van!</span>
+      <span class="kb-hint" id="hud-controls-hint">Arrow Keys / WASD / Tap Screen</span>
+    </div>
+
+    <!-- Interactive Bottom Dock -->
+    <div id="bottom-dock"></div>
+
+    <!-- Touch D-Pad & Action for Mobile/Click -->
+    <div id="touch-controls">
+      <div class="touch-dpad">
+        <div></div>
+        <button class="touch-btn" id="t-up" title="Move Up">▲</button>
+        <div></div>
+        <button class="touch-btn" id="t-left" title="Move Left">◀</button>
+        <button class="touch-btn" id="t-center" style="font-size:10px;font-weight:bold;">WALK</button>
+        <button class="touch-btn" id="t-right" title="Move Right">▶</button>
+        <div></div>
+        <button class="touch-btn" id="t-down" title="Move Down">▼</button>
+        <div></div>
+      </div>
+      <button class="touch-btn action-btn" id="t-action" title="Pick Up / Place Furniture">CARRY</button>
+    </div>
+
+    <!-- Dynamic Pop Banner -->
+    <div id="level-cue-banner">⭐ Room Complete! ⭐</div>
+
+    <!-- SCREEN 1: TITLE / START -->
+    <div class="screen" id="s-title">
+      <div style="margin-top: 6px;">
+        <div class="eyebrow">📦 A Game Designed by Florence 🚚</div>
+        <h1 class="game-title">The Moving <span>House Game</span></h1>
+        <p class="tagline">10 Quick &amp; Fun Levels! Pack the Van, Move In &amp; Win the Trophy!</p>
+      </div>
+
+      <div class="card-panel">
+        <canvas id="title-preview-canvas" width="340" height="175" style="width:100%;max-width:340px;border-radius:16px;background:#EAF6FF;box-shadow:inset 0 2px 6px rgba(0,0,0,0.1);"></canvas>
+        <div style="font-family:var(--font-display);font-size:14.5px;color:var(--ink);line-height:1.35;">
+          Choose your mover: <strong>Mum, Sister, Brother, Teenager, or Dad</strong> and move the whole house!
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn big" id="btn-play">CHOOSE CHARACTER &amp; PLAY! 👤</button>
+      </div>
+      <div class="btn-row" style="margin-bottom:4px;">
+        <button class="btn ghost" id="btn-levels-open">🗺️ Level Select</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: CHARACTER SELECTION -->
+    <div class="screen hidden" id="s-character">
+      <div>
+        <div class="eyebrow">Who Do You Want to Be?</div>
+        <h2>Choose Your Mover</h2>
+      </div>
+
+      <div class="char-grid" id="character-cards-container"></div>
+
+      <div class="card-panel" id="char-bio-panel" style="padding:10px 14px;">
+        <canvas id="char-select-preview-canvas" width="300" height="110" style="width:100%;max-width:300px;border-radius:12px;background:#F0F8FF;box-shadow:inset 0 2px 6px rgba(0,0,0,0.08);"></canvas>
+        <div id="char-bio-name" style="font-family:var(--font-display);font-size:16px;font-weight:bold;color:#FF5376;">Mum — The Super Organiser</div>
+        <div id="char-bio-desc" style="font-size:12.5px;color:var(--ink-soft);">Packed with energy, keeps all the furniture tidy and leads the moving crew!</div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn big teal" id="btn-char-confirm">PLAY WITH THIS MOVER! 🚀</button>
+      </div>
+      <div class="btn-row" style="margin-bottom:4px;">
+        <button class="btn ghost" id="btn-char-back">← Back</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: LEVEL SELECT -->
+    <div class="screen hidden" id="s-levels">
+      <div>
+        <div class="eyebrow">Moving Checklist</div>
+        <h2>Choose a Room</h2>
+      </div>
+
+      <div class="level-grid" id="level-buttons-container"></div>
+
+      <div class="btn-row" style="margin-bottom:6px;">
+        <button class="btn ghost" id="btn-levels-back">← Back</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: LEVEL INTRO / HOW TO PLAY -->
+    <div class="screen hidden" id="s-intro">
+      <div>
+        <div class="eyebrow" id="intro-badge">Level 1 of 10</div>
+        <h2 id="intro-title">Pack the Moving Van!</h2>
+      </div>
+
+      <div class="card-panel">
+        <canvas id="intro-canvas" width="320" height="160" style="width:100%;max-width:320px;border-radius:14px;background:#F0F8FF;box-shadow:inset 0 2px 6px rgba(0,0,0,0.08);"></canvas>
+        <div id="intro-desc" style="font-family:var(--font-display);font-size:15px;line-height:1.35;color:var(--ink);text-align:center;">
+          Get all 6 boxes into the car and moving van!
+        </div>
+        <div id="intro-controls-tip" style="font-size:12px;color:var(--ink-soft);background:#FFF9E6;padding:6px 12px;border-radius:12px;border:1.5px dashed #FFB703;">
+          💡 <strong>How to Move:</strong> Use <strong>Arrow Keys / WASD</strong>, tap anywhere on screen to walk, or use the on-screen buttons!
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:10px;">
+        <button class="btn big" id="btn-intro-go">START ROOM! 📦</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: LEVEL COMPLETE -->
+    <div class="screen hidden" id="s-complete">
+      <div>
+        <div class="eyebrow">Room Cleared! ⭐</div>
+        <h2 id="complete-title">All Moved In!</h2>
+      </div>
+
+      <div class="card-panel">
+        <div style="font-size:52px;margin:2px 0;" id="complete-emoji">🛋️✨</div>
+        <p id="complete-msg" style="font-family:var(--font-display);font-size:17px;color:var(--ink);line-height:1.35;">
+          Fantastic job! The room is fully furnished and cozy.
+        </p>
+        <div style="font-size:22px;letter-spacing:6px;color:#FFB703;">⭐⭐⭐⭐⭐</div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:10px;">
+        <button class="btn big" id="btn-next-level">Next Level →</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 6: GRAND FINALE / LEVEL 10 TROPHY CELEBRATION -->
+    <div class="screen hidden" id="s-trophy">
+      <div>
+        <div class="eyebrow" style="background:#FFB703;color:#7A4600;box-shadow:0 3px 0 #C96B00;">🏆 HOORAY! MOVING CHAMPION 🏆</div>
+        <h1 class="game-title" style="font-size:clamp(26px,7.5vw,40px);margin:4px 0;">HOORAY! YOU DID IT!</h1>
+        <p class="tagline">The Moving House Game is Complete!</p>
+      </div>
+
+      <div class="card-panel" style="background:linear-gradient(180deg,#FFFDF7,#FFF6D6);border:3px solid #FFD166;">
+        <canvas id="trophy-canvas" width="300" height="180" style="width:100%;max-width:300px;border-radius:16px;"></canvas>
+        <div style="font-family:var(--font-display);font-size:17px;color:#C96B00;font-weight:bold;">
+          🌟 Golden House Mover Trophy Won! 🌟
+        </div>
+        <p id="trophy-char-praise" style="font-size:13px;color:var(--ink-soft);line-height:1.35;">
+          You packed the boxes, furnished all 9 rooms, and claimed the Living Room Trophy!
+        </p>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:6px;">
+        <button class="btn big" id="btn-play-again">Play Again! 🏡</button>
+      </div>
+      <div class="btn-row" style="margin-bottom:4px;">
+        <button class="btn ghost" id="btn-tour-house">✨ Free-Play House Tour</button>
+        <button class="btn ghost" id="btn-trophy-home">🏠 Main Menu</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ============================================================================
+   THE MOVING HOUSE GAME ENGINE
+   - WebAudio procedural synth
+   - 5 Distinct Playable characters (Mum, Sister, Brother, Teenager, Dad)
+   - Real illustrated 2D furniture artwork
+   - 10 Quick, snappy & satisfying levels
+   - Responsive multi-input movement (WASD, Arrows, Direct Screen Tap, On-screen D-Pad)
+   - In-game quick character switcher
+   ============================================================================ */
+
+// 1. WEBAUDIO SYNTH
+const Synth = (() => {
+  let ctx = null;
+  let muted = false;
+
+  function init() {
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (AC) ctx = new AC();
+    }
+    if (ctx && ctx.state === 'suspended') ctx.resume();
+  }
+
+  function playTone(freq, type = 'sine', duration = 0.15, vol = 0.3, slide = 0) {
+    if (muted) return;
+    init();
+    if (!ctx) return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, ctx.currentTime);
+      if (slide) osc.frequency.exponentialRampToValueAtTime(Math.max(20, freq + slide), ctx.currentTime + duration);
+      gain.gain.setValueAtTime(vol, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + duration);
+    } catch(e) {}
+  }
+
+  function playNoise(duration = 0.1, vol = 0.2) {
+    if (muted) return;
+    init();
+    if (!ctx) return;
+    try {
+      const bufSize = ctx.sampleRate * duration;
+      const buffer = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      const gain = ctx.createGain();
+      gain.gain.setValueAtTime(vol, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + duration);
+      src.connect(gain);
+      gain.connect(ctx.destination);
+      src.start();
+    } catch(e) {}
+  }
+
+  return {
+    init,
+    toggleMute: () => { muted = !muted; return muted; },
+    isMuted: () => muted,
+    sfx: {
+      step: () => playTone(160 + Math.random()*20, 'triangle', 0.04, 0.08),
+      pickup: () => playTone(380, 'sine', 0.1, 0.25, 180),
+      drop: () => playTone(240, 'triangle', 0.1, 0.2, -50),
+      snap: () => {
+        playTone(523.25, 'sine', 0.12, 0.25);
+        setTimeout(() => playTone(659.25, 'sine', 0.15, 0.25), 60);
+        setTimeout(() => playTone(783.99, 'sine', 0.22, 0.3), 120);
+      },
+      boxThud: () => {
+        playNoise(0.07, 0.22);
+        playTone(130, 'sine', 0.14, 0.35, -40);
+      },
+      levelClear: () => {
+        const notes = [523.25, 659.25, 783.99, 1046.5];
+        notes.forEach((n, i) => setTimeout(() => playTone(n, 'triangle', 0.22, 0.35), i * 100));
+      },
+      trophyFanfare: () => {
+        const arpeggio = [440, 554.37, 659.25, 880, 1108.73, 1318.51, 1760];
+        arpeggio.forEach((n, i) => setTimeout(() => playTone(n, 'sine', 0.35, 0.4), i * 85));
+        setTimeout(() => {
+          playTone(880, 'triangle', 0.6, 0.45);
+          playTone(1318.51, 'triangle', 0.6, 0.45);
+          playTone(1760, 'sine', 0.8, 0.5);
+        }, arpeggio.length * 85 + 40);
+      },
+      click: () => playTone(480, 'sine', 0.05, 0.15),
+      hooray: () => {
+        playTone(600, 'sine', 0.18, 0.3, 280);
+        setTimeout(() => playTone(900, 'triangle', 0.28, 0.35, 180), 110);
+      }
+    }
+  };
+})();
+
+// 2. 5 DISTINCT CHARACTERS
+const CHARACTERS = {
+  mum: {
+    id: 'mum',
+    name: 'Mum',
+    title: 'Mum — The Super Organiser',
+    desc: 'Quick on her feet, keeps all the furniture tidy and leads the moving crew!',
+    emoji: '👩',
+    color: '#FF5376',
+    hairColor: '#8D5B4C',
+    outfitColor: '#FF6B8B',
+    pantsColor: '#3A86FF',
+    accentColor: '#FFD166',
+    tag: 'Quick & Tidy'
+  },
+  sister: {
+    id: 'sister',
+    name: 'Sister',
+    title: 'Sister — The Speedy Helper',
+    desc: 'Fast runner with bouncy golden pigtails, zooms across the house carrying furniture!',
+    emoji: '👧',
+    color: '#FFB703',
+    hairColor: '#E0A96D',
+    outfitColor: '#FFD166',
+    pantsColor: '#06D6A0',
+    accentColor: '#FF5376',
+    tag: 'Speedy Star'
+  },
+  brother: {
+    id: 'brother',
+    name: 'Brother',
+    title: 'Brother — The Energetic Champ',
+    desc: 'Bouncing with energy in his cool teal hoodie, never gets tired moving things in!',
+    emoji: '👦',
+    color: '#06D6A0',
+    hairColor: '#2D3142',
+    outfitColor: '#06D6A0',
+    pantsColor: '#118AB2',
+    accentColor: '#FFD166',
+    tag: 'Full of Energy'
+  },
+  teenager: {
+    id: 'teenager',
+    name: 'Teenager',
+    title: 'Teenager — The Cool Cruiser',
+    desc: 'Carries sofas and gaming screens to the beat of his neon headphones with style!',
+    emoji: '🎧',
+    color: '#8338EC',
+    hairColor: '#474973',
+    outfitColor: '#7209B7',
+    pantsColor: '#161A1D',
+    accentColor: '#4CC9F0',
+    tag: 'Cool & Chill'
+  },
+  dad: {
+    id: 'dad',
+    name: 'Dad',
+    title: 'Dad — The Heavy Lifter',
+    desc: 'Strong mover in his favourite cap, ready to carry the heaviest furniture!',
+    emoji: '👨',
+    color: '#3A86FF',
+    hairColor: '#4A3728',
+    outfitColor: '#FB5607',
+    pantsColor: '#2B2D42',
+    accentColor: '#3A86FF',
+    tag: 'Super Strong'
+  }
+};
+
+// 3. 10 STREAMLINED LEVELS
+const LEVELS = [
+  // LEVEL 1: Pack the Moving Van (6 Moving Boxes)
+  {
+    num: 1,
+    title: "Pack the Moving Van!",
+    roomName: "Old House Driveway",
+    badge: "Level 1: Packing Up",
+    icon: "🚚",
+    taskDesc: "Get all 6 boxes into the car and moving van!",
+    type: "pack_van",
+    items: [
+      { id: 'b1', type: 'box', name: "Kitchen Plates", emoji: "🍽️", label: "KITCHEN", w: 58, h: 50, tx: 460, ty: 410 },
+      { id: 'b2', type: 'box', name: "Story Books", emoji: "📚", label: "BOOKS", w: 56, h: 48, tx: 520, ty: 410 },
+      { id: 'b3', type: 'box', name: "Dad's Tools", emoji: "🔧", label: "TOOLS", w: 60, h: 52, tx: 460, ty: 355 },
+      { id: 'b4', type: 'box', name: "Teddy Bears", emoji: "🧸", label: "TOYS", w: 54, h: 48, tx: 520, ty: 355 },
+      { id: 'b5', type: 'box', name: "Board Games", emoji: "🎲", label: "GAMES", w: 58, h: 50, tx: 460, ty: 300 },
+      { id: 'b6', type: 'box', name: "Warm Blankets", emoji: "🧶", label: "BEDDING", w: 60, h: 52, tx: 520, ty: 300 }
+    ]
+  },
+  // LEVEL 2: Living Room (2 Boxes + Sofa, TV Unit, Coffee Table) = 5 items
+  {
+    num: 2,
+    title: "The Living Room",
+    roomName: "New House: Living Room",
+    badge: "Level 2: Living Room",
+    icon: "🛋️",
+    taskDesc: "Get 2 boxes and all the furniture into the living room!",
+    type: "room",
+    theme: "living",
+    items: [
+      { id: 'sofa', type: 'sofa', name: "Comfy Sofa", emoji: "🛋️", w: 160, h: 80, tx: 300, ty: 480 },
+      { id: 'tv_unit', type: 'tv_unit', name: "Smart TV & Stand", emoji: "📺", w: 140, h: 74, tx: 300, ty: 250 },
+      { id: 'coffee_table', type: 'coffee_table', name: "Coffee Table", emoji: "☕", w: 96, h: 54, tx: 300, ty: 385 },
+      { id: 'box_lr1', type: 'box', name: "Remotes Box", emoji: "📦", label: "REMOTES", w: 54, h: 46, tx: 130, ty: 440 },
+      { id: 'box_lr2', type: 'box', name: "Cushions Box", emoji: "📦", label: "CUSHIONS", w: 56, h: 48, tx: 470, ty: 440 }
+    ]
+  },
+  // LEVEL 3: Kitchen (Fridge, Dining Table, Cooker/Stove, Kitchen Island) = 4 items
+  {
+    num: 3,
+    title: "The Kitchen",
+    roomName: "New House: Kitchen",
+    badge: "Level 3: Kitchen",
+    icon: "🍳",
+    taskDesc: "Get all the furniture into the kitchen!",
+    type: "room",
+    theme: "kitchen",
+    items: [
+      { id: 'fridge', type: 'fridge', name: "Smart Fridge", emoji: "🧊", w: 84, h: 120, tx: 140, ty: 270 },
+      { id: 'cooker', type: 'cooker', name: "Oven & Stove", emoji: "🍳", w: 90, h: 80, tx: 460, ty: 270 },
+      { id: 'dining_table', type: 'dining_table', name: "Dining Table", emoji: "🍽️", w: 140, h: 80, tx: 300, ty: 470 },
+      { id: 'island', type: 'island', name: "Kitchen Island", emoji: "🗄️", w: 120, h: 66, tx: 300, ty: 350 }
+    ]
+  },
+  // LEVEL 4: Child's Room 1 (Bed, Toy Chest, Craft Desk, Rocket Lamp) = 4 items
+  {
+    num: 4,
+    title: "Child's Room",
+    roomName: "New House: Child 1 Room",
+    badge: "Level 4: Child's Room",
+    icon: "🧸",
+    taskDesc: "Get all the stuff into the child's room!",
+    type: "room",
+    theme: "child1",
+    items: [
+      { id: 'kid_bed', type: 'kid_bed', name: "Cosy Star Bed", emoji: "🛏️", w: 100, h: 130, tx: 150, ty: 330 },
+      { id: 'toy_chest', type: 'toy_chest', name: "Teddy Toy Box", emoji: "🧸", w: 90, h: 64, tx: 150, ty: 490 },
+      { id: 'kid_desk', type: 'kid_desk', name: "Craft & Art Desk", emoji: "🎨", w: 100, h: 68, tx: 450, ty: 280 },
+      { id: 'rocket_lamp', type: 'rocket_lamp', name: "Rocket Nightlight", emoji: "🚀", w: 50, h: 70, tx: 450, ty: 450 }
+    ]
+  },
+  // LEVEL 5: Bathroom (Bathtub, Vanity Sink Mirror, Laundry Hamper) = 3 items
+  {
+    num: 5,
+    title: "The Bathroom",
+    roomName: "New House: Bathroom",
+    badge: "Level 5: Bathroom",
+    icon: "🛁",
+    taskDesc: "Get some furniture into the bathroom!",
+    type: "room",
+    theme: "bathroom",
+    items: [
+      { id: 'bathtub', type: 'bathtub', name: "Bubble Bathtub", emoji: "🛁", w: 150, h: 84, tx: 200, ty: 310 },
+      { id: 'vanity_sink', type: 'vanity_sink', name: "Vanity Sink & Mirror", emoji: "🪞", w: 90, h: 94, tx: 450, ty: 290 },
+      { id: 'hamper', type: 'hamper', name: "Laundry Hamper", emoji: "🧺", w: 60, h: 62, tx: 450, ty: 470 }
+    ]
+  },
+  // LEVEL 6: Child's Room 2 (Loft Bunk Bed, Art Easel, Blocks Table, Beanbag) = 4 items
+  {
+    num: 6,
+    title: "Child's Room 2",
+    roomName: "New House: Child 2 Room",
+    badge: "Level 6: Child's Room 2",
+    icon: "🎨",
+    taskDesc: "Put all the furniture into the second child's room!",
+    type: "room",
+    theme: "child2",
+    items: [
+      { id: 'bunk_bed', type: 'bunk_bed', name: "Loft Bunk Bed", emoji: "🏰", w: 104, h: 140, tx: 150, ty: 320 },
+      { id: 'art_easel', type: 'art_easel', name: "Art Easel", emoji: "🎨", w: 70, h: 90, tx: 450, ty: 280 },
+      { id: 'blocks_table', type: 'blocks_table', name: "Lego Play Table", emoji: "🧱", w: 110, h: 68, tx: 310, ty: 460 },
+      { id: 'beanbag', type: 'beanbag', name: "Purple Beanbag", emoji: "🟣", w: 76, h: 70, tx: 150, ty: 500 }
+    ]
+  },
+  // LEVEL 7: Mum's Room (King Bed, Hollywood Vanity, Wardrobe, Monstera Plant) = 4 items
+  {
+    num: 7,
+    title: "Mum's Room",
+    roomName: "New House: Mum's Room",
+    badge: "Level 7: Mum's Room",
+    icon: "👑",
+    taskDesc: "Put all the stuff into the Mum's room!",
+    type: "room",
+    theme: "mum",
+    items: [
+      { id: 'king_bed', type: 'king_bed', name: "Luxury King Bed", emoji: "👑", w: 136, h: 130, tx: 300, ty: 310 },
+      { id: 'hollywood_vanity', type: 'hollywood_vanity', name: "Hollywood Vanity", emoji: "💄", w: 94, h: 86, tx: 130, ty: 290 },
+      { id: 'mum_wardrobe', type: 'mum_wardrobe', name: "Mum's Wardrobe", emoji: "🚪", w: 90, h: 120, tx: 470, ty: 310 },
+      { id: 'monstera_plant', type: 'monstera_plant', name: "Monstera Plant", emoji: "🌿", w: 56, h: 80, tx: 470, ty: 480 }
+    ]
+  },
+  // LEVEL 8: Dad's Room (Oak Work Desk, Daybed, Tool Cabinet, Electric Guitar) = 4 items
+  {
+    num: 8,
+    title: "Dad's Room",
+    roomName: "New House: Dad's Room",
+    badge: "Level 8: Dad's Room",
+    icon: "🔧",
+    taskDesc: "Get all the stuff into the Dad's room!",
+    type: "room",
+    theme: "dad",
+    items: [
+      { id: 'dad_desk', type: 'dad_desk', name: "Oak Work Desk", emoji: "💻", w: 120, h: 72, tx: 300, ty: 280 },
+      { id: 'dad_daybed', type: 'dad_daybed', name: "Comfy Daybed", emoji: "🛏️", w: 90, h: 124, tx: 130, ty: 330 },
+      { id: 'tool_cabinet', type: 'tool_cabinet', name: "Tool Cabinet", emoji: "🔧", w: 84, h: 96, tx: 470, ty: 300 },
+      { id: 'guitar', type: 'guitar', name: "Electric Guitar", emoji: "🎸", w: 50, h: 84, tx: 140, ty: 490 }
+    ]
+  },
+  // LEVEL 9: Teenager's Room (RGB Gaming Rig, Lo-Fi Bed, Sound Amp, Skateboard Wall) = 4 items
+  {
+    num: 9,
+    title: "Teenager's Room",
+    roomName: "New House: Teenager's Room",
+    badge: "Level 9: Teenager's Room",
+    icon: "🎮",
+    taskDesc: "Put all the furniture into the teenager's room!",
+    type: "room",
+    theme: "teen",
+    items: [
+      { id: 'gaming_rig', type: 'gaming_rig', name: "RGB Gaming Rig", emoji: "🎮", w: 130, h: 74, tx: 300, ty: 280 },
+      { id: 'teen_bed', type: 'teen_bed', name: "Lo-Fi Chill Bed", emoji: "🛏️", w: 92, h: 126, tx: 130, ty: 330 },
+      { id: 'sound_amp', type: 'sound_amp', name: "DJ Sound Amp", emoji: "🔊", w: 78, h: 86, tx: 470, ty: 300 },
+      { id: 'skateboard_wall', type: 'skateboard_wall', name: "Skateboard Wall", emoji: "🛹", w: 60, h: 86, tx: 140, ty: 490 }
+    ]
+  },
+  // LEVEL 10: Grand Victory & Trophy
+  {
+    num: 10,
+    title: "The Living Room Trophy!",
+    roomName: "Finished Living Room",
+    badge: "Level 10: The Grand Trophy",
+    icon: "🏆",
+    taskDesc: "Go into the living room and get the Grand Moving Trophy!",
+    type: "trophy",
+    theme: "trophy_room",
+    items: [
+      { id: 'grand_trophy', type: 'trophy', name: "Golden Trophy", emoji: "🏆", w: 90, h: 110, tx: 300, ty: 370 }
+    ]
+  }
+];
+
+// 4. GAME STATE
+const State = {
+  currentLevelIndex: 0,
+  selectedCharId: 'mum',
+  player: {
+    x: 240, y: 520,
+    targetX: 240, targetY: 520,
+    vx: 0, vy: 0,
+    speed: 7.2, // Fast, crisp movement for every character
+    facing: 1,
+    animTime: 0,
+    isMoving: false,
+    carryingItem: null
+  },
+  placedItems: new Set(),
+  activeDragItem: null,
+  dragOffset: { x: 0, y: 0 },
+  confettiParticles: [],
+  roomStars: [],
+  keys: {}
+};
+
+// 5. CANVAS & RESIZE
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+const cCanvas = document.getElementById('confetti-canvas');
+const cCtx = cCanvas.getContext('2d');
+
+function resizeCanvas() {
+  const rect = canvas.getBoundingClientRect();
+  canvas.width = rect.width * (window.devicePixelRatio || 1);
+  canvas.height = rect.height * (window.devicePixelRatio || 1);
+  cCanvas.width = canvas.width;
+  cCanvas.height = canvas.height;
+}
+window.addEventListener('resize', resizeCanvas);
+resizeCanvas();
+
+function getScale() {
+  return {
+    sx: canvas.width / 600,
+    sy: canvas.height / 840
+  };
+}
+
+// 6. CHARACTER DRAWING ROUTINES (HIGH DETAIL FOR ALL 5 CHARACTERS)
+function drawCharacter(c, x, y, charData, isMoving, facing, carryingItem = null, animTime = 0, scale = 1) {
+  c.save();
+  c.translate(x, y);
+  c.scale(facing * scale, scale);
+
+  const bob = isMoving ? Math.sin(animTime * 14) * 3 : Math.sin(animTime * 3) * 1.5;
+  const legSwing = isMoving ? Math.sin(animTime * 14) * 18 : 0;
+  const armSwing = isMoving ? Math.cos(animTime * 14) * 20 : 0;
+
+  // Shadow
+  c.beginPath();
+  c.ellipse(0, 18, 18, 7, 0, 0, Math.PI * 2);
+  c.fillStyle = 'rgba(0,0,0,0.22)';
+  c.fill();
+
+  c.translate(0, -bob);
+
+  // Legs / Shoes
+  c.fillStyle = charData.pantsColor;
+  // Left leg
+  c.save();
+  c.translate(-7, 2);
+  c.rotate((-legSwing * Math.PI) / 180);
+  c.fillRect(-4, 0, 8, 16);
+  c.fillStyle = '#FFFFFF';
+  c.fillRect(-5, 12, 10, 6);
+  c.fillStyle = charData.color;
+  c.fillRect(-4, 15, 9, 3);
+  c.restore();
+
+  // Right leg
+  c.fillStyle = charData.pantsColor;
+  c.save();
+  c.translate(7, 2);
+  c.rotate((legSwing * Math.PI) / 180);
+  c.fillRect(-4, 0, 8, 16);
+  c.fillStyle = '#FFFFFF';
+  c.fillRect(-5, 12, 10, 6);
+  c.fillStyle = charData.color;
+  c.fillRect(-4, 15, 9, 3);
+  c.restore();
+
+  // Torso / Outfit
+  c.fillStyle = charData.outfitColor;
+  c.beginPath();
+  c.roundRect(-14, -20, 28, 24, 6);
+  c.fill();
+  c.strokeStyle = 'rgba(0,0,0,0.15)';
+  c.lineWidth = 1.5;
+  c.stroke();
+
+  // Distinct Outfit Details
+  if (charData.id === 'mum') {
+    // Elegant cardigan & necklace
+    c.fillStyle = '#FFD166';
+    c.beginPath(); c.arc(0, -18, 6, 0, Math.PI); c.stroke();
+  } else if (charData.id === 'sister') {
+    // Cute overalls straps
+    c.fillStyle = '#06D6A0';
+    c.fillRect(-10, -20, 4, 22);
+    c.fillRect(6, -20, 4, 22);
+  } else if (charData.id === 'brother') {
+    // Hoodie pocket & drawstrings
+    c.fillStyle = '#05B386';
+    c.fillRect(-8, -8, 16, 8);
+    c.fillStyle = '#FFD166';
+    c.fillRect(-4, -18, 2, 7);
+    c.fillRect(2, -18, 2, 7);
+  } else if (charData.id === 'teenager') {
+    // Graphic lightning print
+    c.fillStyle = '#4CC9F0';
+    c.font = 'bold 12px var(--font-display)';
+    c.textAlign = 'center';
+    c.fillText('⚡', 0, -6);
+  } else if (charData.id === 'dad') {
+    // Checked mover shirt
+    c.fillStyle = '#2B2D42';
+    c.fillRect(-12, -20, 5, 24);
+    c.fillRect(7, -20, 5, 24);
+  }
+
+  // Head
+  c.fillStyle = '#FFE0BD';
+  c.beginPath();
+  c.arc(0, -32, 13, 0, Math.PI * 2);
+  c.fill();
+
+  // Distinct Hair & Headwear
+  c.fillStyle = charData.hairColor;
+  if (charData.id === 'mum') {
+    // Stylish chestnut bun with gold pin
+    c.beginPath();
+    c.arc(0, -35, 14, Math.PI, Math.PI * 2);
+    c.arc(-11, -33, 6, 0, Math.PI * 2);
+    c.arc(11, -33, 6, 0, Math.PI * 2);
+    c.arc(0, -46, 7.5, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = '#FFD166';
+    c.fillRect(-4, -48, 8, 3);
+  } else if (charData.id === 'sister') {
+    // Golden pigtails with big red ribbon bows
+    c.beginPath();
+    c.arc(0, -35, 13.5, Math.PI * 0.8, Math.PI * 2.2);
+    c.arc(-13, -38, 6.5, 0, Math.PI * 2);
+    c.arc(13, -38, 6.5, 0, Math.PI * 2);
+    c.fill();
+    c.fillStyle = '#FF5376';
+    c.fillRect(-16, -35, 5, 5);
+    c.fillRect(11, -35, 5, 5);
+  } else if (charData.id === 'brother') {
+    // Cool spiky hair
+    c.beginPath();
+    c.arc(0, -34, 13.5, Math.PI * 0.8, Math.PI * 2.2);
+    c.fill();
+    c.beginPath();
+    c.moveTo(-10, -42); c.lineTo(-4, -49); c.lineTo(0, -42);
+    c.lineTo(6, -50); c.lineTo(11, -41);
+    c.fill();
+  } else if (charData.id === 'teenager') {
+    // Purple swooped hair + Glowing Cyan Headphones
+    c.beginPath();
+    c.arc(2, -35, 14, Math.PI * 0.7, Math.PI * 2.3);
+    c.fill();
+    c.strokeStyle = '#4CC9F0';
+    c.lineWidth = 3.5;
+    c.beginPath();
+    c.arc(0, -35, 15, Math.PI * 0.85, Math.PI * 2.15);
+    c.stroke();
+    c.fillStyle = '#7209B7';
+    c.beginPath();
+    c.ellipse(-13, -33, 4, 7, 0, 0, Math.PI*2);
+    c.ellipse(13, -33, 4, 7, 0, 0, Math.PI*2);
+    c.fill();
+  } else if (charData.id === 'dad') {
+    // Baseball cap with visor
+    c.beginPath();
+    c.arc(0, -34, 13.5, Math.PI * 0.9, Math.PI * 2.1);
+    c.fill();
+    c.fillStyle = '#3A86FF';
+    c.beginPath();
+    c.arc(0, -37, 13, Math.PI, Math.PI * 2);
+    c.fill();
+    c.fillRect(4, -38, 12, 4);
+  }
+
+  // Face Eyes & Cheeks
+  c.fillStyle = '#2C221E';
+  c.beginPath();
+  c.arc(4, -32, 2, 0, Math.PI * 2);
+  c.arc(9, -32, 2, 0, Math.PI * 2);
+  c.fill();
+
+  c.fillStyle = 'rgba(255, 107, 139, 0.4)';
+  c.beginPath();
+  c.arc(3, -28, 2.5, 0, Math.PI * 2);
+  c.arc(10, -28, 2.5, 0, Math.PI * 2);
+  c.fill();
+
+  c.strokeStyle = '#2C221E';
+  c.lineWidth = 1.6;
+  c.beginPath();
+  c.arc(6, -29, 3.5, 0.1 * Math.PI, 0.9 * Math.PI);
+  c.stroke();
+
+  // Arms & Carrying Item
+  c.fillStyle = charData.outfitColor;
+  if (carryingItem) {
+    c.save();
+    c.translate(-14, -14);
+    c.rotate(-1.2);
+    c.fillRect(0, -3, 16, 7);
+    c.restore();
+
+    c.save();
+    c.translate(14, -14);
+    c.rotate(1.2);
+    c.fillRect(-16, -3, 16, 7);
+    c.restore();
+
+    c.save();
+    c.translate(0, -64);
+    drawRealFurniture(c, carryingItem, false, 0.65);
+    c.restore();
+  } else {
+    c.save();
+    c.translate(-13, -12);
+    c.rotate((armSwing * Math.PI) / 180);
+    c.fillRect(-3, 0, 7, 16);
+    c.fillStyle = '#FFE0BD';
+    c.beginPath(); c.arc(0, 16, 3.5, 0, Math.PI * 2); c.fill();
+    c.restore();
+
+    c.save();
+    c.translate(13, -12);
+    c.rotate((-armSwing * Math.PI) / 180);
+    c.fillStyle = charData.outfitColor;
+    c.fillRect(-3, 0, 7, 16);
+    c.fillStyle = '#FFE0BD';
+    c.beginPath(); c.arc(0, 16, 3.5, 0, Math.PI * 2); c.fill();
+    c.restore();
+  }
+
+  c.restore();
+}
+
+// 7. REAL ILLUSTRATED FURNITURE RENDERING ENGINE
+function drawRealFurniture(c, item, isGhost = false, scale = 1) {
+  c.save();
+  c.scale(scale, scale);
+
+  const w = item.w;
+  const h = item.h;
+  const t = item.type;
+
+  if (isGhost) {
+    c.save();
+    c.globalAlpha = 0.35;
+    c.fillStyle = '#FF5376';
+    c.strokeStyle = '#FF5376';
+    c.lineWidth = 3;
+    c.setLineDash([8, 6]);
+
+    c.beginPath();
+    c.roundRect(-w/2, -h/2, w, h, 14);
+    c.fill();
+    c.stroke();
+
+    c.globalAlpha = 0.85;
+    c.font = 'bold 22px var(--font-display)';
+    c.fillStyle = '#2C221E';
+    c.textAlign = 'center';
+    c.textBaseline = 'middle';
+    c.fillText(item.emoji, 0, -8);
+    c.font = 'bold 12px var(--font-display)';
+    c.fillText(item.name, 0, 16);
+
+    c.restore();
+    c.restore();
+    return;
+  }
+
+  // Shadow
+  c.beginPath();
+  c.ellipse(0, h/2 + 4, w * 0.48, Math.min(14, h * 0.2), 0, 0, Math.PI * 2);
+  c.fillStyle = 'rgba(0,0,0,0.2)';
+  c.fill();
+
+  switch(t) {
+    case 'box': {
+      c.fillStyle = '#C8965E';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2, w, h, 8);
+      c.fill();
+      c.strokeStyle = '#8C5E32'; c.lineWidth = 2; c.stroke();
+
+      c.fillStyle = '#B8824C';
+      c.fillRect(-w/2, -h/2, w, h * 0.28);
+      c.beginPath();
+      c.moveTo(0, -h/2); c.lineTo(0, -h/2 + h * 0.28);
+      c.strokeStyle = '#6E4522'; c.stroke();
+
+      c.fillStyle = '#9E6A38';
+      c.fillRect(-6, -h/2, 12, h);
+      c.fillRect(-w/2, -h/2 + h * 0.28, w, 8);
+
+      c.fillStyle = '#5A3718';
+      c.beginPath();
+      c.roundRect(-w/2 + 6, -2, 10, 5, 2);
+      c.roundRect(w/2 - 16, -2, 10, 5, 2);
+      c.fill();
+
+      c.fillStyle = '#FFFFFF';
+      c.fillRect(-18, 4, 36, 20);
+      c.strokeStyle = '#D8C7A8';
+      c.strokeRect(-18, 4, 36, 20);
+
+      c.font = '14px var(--font-display)';
+      c.textAlign = 'center';
+      c.fillText(item.emoji, 0, 18);
+      break;
+    }
+
+    case 'sofa': {
+      c.fillStyle = '#8D5B4C';
+      c.fillRect(-w/2 + 8, h/2 - 6, 12, 10);
+      c.fillRect(w/2 - 20, h/2 - 6, 12, 10);
+
+      c.fillStyle = '#E76F51';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2 + 18, w, h - 22, 14);
+      c.fill();
+      c.strokeStyle = '#BC4749'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#F4A261';
+      for (let i = -1; i <= 1; i++) {
+        c.beginPath();
+        c.roundRect(i * (w/3.2) - (w/6.8), -h/2, w/3.4, h * 0.52, 10);
+        c.fill();
+        c.stroke();
+      }
+
+      c.fillStyle = '#E76F51';
+      for (let i = -1; i <= 1; i++) {
+        c.beginPath();
+        c.roundRect(i * (w/3.2) - (w/6.8), -h/2 + h * 0.42, w/3.4, h * 0.36, 8);
+        c.fill();
+        c.stroke();
+      }
+
+      c.fillStyle = '#D95D39';
+      c.beginPath();
+      c.roundRect(-w/2 - 4, -h/2 + 10, 18, h * 0.68, 8);
+      c.roundRect(w/2 - 14, -h/2 + 10, 18, h * 0.68, 8);
+      c.fill();
+      c.stroke();
+
+      c.fillStyle = '#FFD166';
+      c.beginPath(); c.arc(-w/2 + 28, 4, 12, 0, Math.PI*2); c.fill(); c.stroke();
+      break;
+    }
+
+    case 'tv_unit': {
+      c.fillStyle = '#3D405B';
+      c.beginPath();
+      c.roundRect(-w/2, 4, w, h/2 - 4, 6);
+      c.fill();
+      c.strokeStyle = '#1D2D44'; c.lineWidth = 2; c.stroke();
+
+      c.fillStyle = '#E07A5F';
+      c.fillRect(-w/2 + 8, 12, w * 0.4, 18);
+      c.fillRect(8, 12, w * 0.4, 18);
+
+      c.fillStyle = '#1D2D44';
+      c.fillRect(-16, -2, 32, 8);
+      c.fillRect(-6, -14, 12, 14);
+
+      c.fillStyle = '#111827';
+      c.beginPath();
+      c.roundRect(-w * 0.44, -h/2, w * 0.88, h * 0.62, 6);
+      c.fill();
+      c.strokeStyle = '#374151'; c.stroke();
+
+      const scrGrad = c.createLinearGradient(0, -h/2, 0, 0);
+      scrGrad.addColorStop(0, '#38BDF8');
+      scrGrad.addColorStop(1, '#818CF8');
+      c.fillStyle = scrGrad;
+      c.fillRect(-w * 0.44 + 4, -h/2 + 4, w * 0.88 - 8, h * 0.62 - 8);
+
+      c.font = '22px var(--font-display)';
+      c.textAlign = 'center';
+      c.fillText("🏡✨", 0, -h * 0.2);
+      break;
+    }
+
+    case 'coffee_table': {
+      c.fillStyle = '#8C5E32';
+      c.fillRect(-w/2 + 10, h/2 - 12, 8, 14);
+      c.fillRect(w/2 - 18, h/2 - 12, 8, 14);
+
+      c.fillStyle = '#E9C46A';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2 + 8, w, h * 0.42, 10);
+      c.fill();
+      c.strokeStyle = '#C99E32'; c.lineWidth = 2; c.stroke();
+
+      c.fillStyle = 'rgba(186, 230, 253, 0.7)';
+      c.beginPath();
+      c.roundRect(-8, -h/2 - 8, 16, 18, 4);
+      c.fill();
+      c.strokeStyle = '#38BDF8'; c.stroke();
+
+      c.fillStyle = '#FF5376';
+      c.beginPath(); c.arc(0, -h/2 - 12, 7, 0, Math.PI*2); c.fill();
+      c.fillStyle = '#FFD166';
+      c.beginPath(); c.arc(0, -h/2 - 12, 3, 0, Math.PI*2); c.fill();
+      break;
+    }
+
+    case 'fridge': {
+      c.fillStyle = '#94D2BD';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2, w, h, 10);
+      c.fill();
+      c.strokeStyle = '#0A9396'; c.lineWidth = 2.5; c.stroke();
+
+      c.beginPath();
+      c.moveTo(-w/2, -h * 0.08); c.lineTo(w/2, -h * 0.08);
+      c.stroke();
+
+      c.fillStyle = '#E9D8A6';
+      c.fillRect(w/2 - 14, -h * 0.35, 6, 24);
+      c.fillRect(w/2 - 14, 6, 6, 36);
+
+      c.font = '14px var(--font-display)';
+      c.fillText('❤️', -w/4, -h * 0.28);
+      c.fillText('🥑', -w/5, h * 0.15);
+      break;
+    }
+
+    case 'dining_table': {
+      c.fillStyle = '#8C5E32';
+      c.fillRect(-w/2 + 12, h/2 - 16, 12, 18);
+      c.fillRect(w/2 - 24, h/2 - 16, 12, 18);
+
+      c.fillStyle = '#DDA15E';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2 + 8, w, h * 0.48, 12);
+      c.fill();
+      c.strokeStyle = '#BC6C25'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#E76F51';
+      c.fillRect(-22, -h/2 + 8, 44, h * 0.48);
+
+      c.fillStyle = '#FFFFFF';
+      c.beginPath(); c.arc(0, -h * 0.12, 14, 0, Math.PI); c.fill(); c.stroke();
+      c.font = '14px var(--font-display)';
+      c.fillText('🍎', 0, -h * 0.18);
+      break;
+    }
+
+    case 'cooker': {
+      c.fillStyle = '#0A9396';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2, w, h, 8);
+      c.fill();
+      c.strokeStyle = '#005F73'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#1D2D44';
+      c.beginPath();
+      c.arc(-w/4, -h/2 + 12, 10, 0, Math.PI*2);
+      c.arc(w/4, -h/2 + 12, 10, 0, Math.PI*2);
+      c.fill();
+
+      c.fillStyle = '#EE9B00';
+      for (let i = -2; i <= 2; i++) {
+        c.beginPath(); c.arc(i * 14, -h * 0.15, 3.5, 0, Math.PI*2); c.fill();
+      }
+
+      c.fillStyle = '#001219';
+      c.beginPath();
+      c.roundRect(-w/2 + 12, 4, w - 24, h * 0.45, 6);
+      c.fill();
+      c.strokeStyle = '#94D2BD'; c.stroke();
+
+      c.font = '16px var(--font-display)';
+      c.fillText('🍪', 0, h * 0.26);
+      break;
+    }
+
+    case 'island': {
+      c.fillStyle = '#EE9B00';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2 + 10, w, h - 10, 8);
+      c.fill();
+      c.strokeStyle = '#CA6702'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#F8F9FA';
+      c.beginPath();
+      c.roundRect(-w/2 - 4, -h/2, w + 8, 16, 6);
+      c.fill();
+      c.strokeStyle = '#CBD5E1'; c.stroke();
+
+      c.fillStyle = '#CA6702';
+      c.fillRect(-w/2 + 10, 4, w/2 - 16, 20);
+      c.fillRect(6, 4, w/2 - 16, 20);
+      c.fillStyle = '#FFD166';
+      c.fillRect(-w/4 - 4, 12, 8, 4);
+      c.fillRect(w/4 - 4, 12, 8, 4);
+      break;
+    }
+
+    case 'kid_bed': {
+      c.fillStyle = '#38B000';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2, w, h, 10);
+      c.fill();
+      c.strokeStyle = '#007200'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#FFFFFF';
+      c.beginPath();
+      c.roundRect(-w/2 + 12, -h/2 + 10, w - 24, 28, 8);
+      c.fill();
+      c.strokeStyle = '#CBD5E1'; c.stroke();
+
+      c.fillStyle = '#80ED99';
+      c.beginPath();
+      c.roundRect(-w/2 + 6, -h * 0.15, w - 12, h * 0.62, 8);
+      c.fill();
+      c.strokeStyle = '#57CC99'; c.stroke();
+
+      c.font = '18px var(--font-display)';
+      c.fillText('⭐', -18, h * 0.15);
+      c.fillText('🦖', 18, h * 0.2);
+      break;
+    }
+
+    case 'toy_chest': {
+      c.fillStyle = '#FFB703';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2 + 14, w, h - 14, 8);
+      c.fill();
+      c.strokeStyle = '#D48B00'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#FFAA00';
+      c.beginPath();
+      c.roundRect(-w/2 - 2, -h/2, w + 4, 16, 6);
+      c.fill();
+      c.stroke();
+
+      c.font = '32px var(--font-display)';
+      c.textAlign = 'center';
+      c.fillText('🧸', 0, -4);
+      break;
+    }
+
+    case 'kid_desk': {
+      c.fillStyle = '#70D6FF';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2 + 8, w, h * 0.5, 8);
+      c.fill();
+      c.strokeStyle = '#38B000'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#38B000';
+      c.fillRect(-w/2 + 8, 4, 8, h/2 - 4);
+      c.fillRect(w/2 - 16, 4, 8, h/2 - 4);
+
+      c.fillStyle = '#FFFFFF';
+      c.fillRect(-18, -h/2 + 14, 36, 20);
+      c.font = '16px var(--font-display)';
+      c.fillText('🎨', 0, -h/2 + 28);
+      break;
+    }
+
+    case 'rocket_lamp': {
+      c.fillStyle = '#FF9F1C';
+      c.beginPath();
+      c.moveTo(0, -h/2);
+      c.lineTo(w * 0.35, h * 0.2);
+      c.lineTo(-w * 0.35, h * 0.2);
+      c.closePath();
+      c.fill();
+      c.strokeStyle = '#D90429'; c.lineWidth = 2; c.stroke();
+
+      c.fillStyle = '#D90429';
+      c.fillRect(-w/2 + 2, 0, 10, 14);
+      c.fillRect(w/2 - 12, 0, 10, 14);
+
+      c.fillStyle = '#FFD166';
+      c.beginPath(); c.arc(0, -6, 9, 0, Math.PI*2); c.fill();
+      c.strokeStyle = '#FFF'; c.stroke();
+      break;
+    }
+
+    case 'bathtub': {
+      c.fillStyle = '#90E0EF';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2, w, h * 0.8, [12, 12, 28, 28]);
+      c.fill();
+      c.strokeStyle = '#0077B6'; c.lineWidth = 3; c.stroke();
+
+      c.fillStyle = '#ADB5BD';
+      c.fillRect(-w/2 + 14, h * 0.28, 12, 14);
+      c.fillRect(w/2 - 26, h * 0.28, 12, 14);
+
+      c.fillStyle = '#CAF0F8';
+      c.beginPath();
+      c.roundRect(-w/2 + 10, -h/2 + 10, w - 20, h * 0.48, 12);
+      c.fill();
+
+      c.fillStyle = '#FFFFFF';
+      for (let i = -3; i <= 3; i++) {
+        c.beginPath(); c.arc(i * 16, -h * 0.1, 7, 0, Math.PI*2); c.fill();
+      }
+
+      c.font = '24px var(--font-display)';
+      c.textAlign = 'center';
+      c.fillText('🦆', 0, -h * 0.12);
+      break;
+    }
+
+    case 'vanity_sink': {
+      c.fillStyle = '#E0FBFC';
+      c.beginPath(); c.arc(0, -h * 0.22, 24, 0, Math.PI*2); c.fill();
+      c.strokeStyle = '#00B4D8'; c.lineWidth = 3; c.stroke();
+
+      c.fillStyle = '#0077B6';
+      c.beginPath();
+      c.roundRect(-w/2, 4, w, h/2 - 4, 8);
+      c.fill();
+      c.strokeStyle = '#023E8A'; c.stroke();
+
+      c.fillStyle = '#FFFFFF';
+      c.beginPath(); c.ellipse(0, 10, 20, 8, 0, 0, Math.PI*2); c.fill();
+      c.strokeStyle = '#CBD5E1'; c.stroke();
+      break;
+    }
+
+    case 'hamper': {
+      c.fillStyle = '#E0A96D';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2 + 6, w, h - 6, [8, 8, 16, 16]);
+      c.fill();
+      c.strokeStyle = '#9C6644'; c.lineWidth = 2.5; c.stroke();
+
+      c.strokeStyle = 'rgba(156, 102, 68, 0.4)';
+      for (let y = -h/2 + 14; y < h/2; y += 10) {
+        c.beginPath(); c.moveTo(-w/2 + 4, y); c.lineTo(w/2 - 4, y); c.stroke();
+      }
+
+      c.fillStyle = '#FFCAD4';
+      c.beginPath();
+      c.roundRect(-w/2 + 8, -h/2, w - 16, 12, 6);
+      c.fill();
+      break;
+    }
+
+    case 'bunk_bed': {
+      c.fillStyle = '#9D4EDD';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2, w, h, 10);
+      c.fill();
+      c.strokeStyle = '#5A189A'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#7B2CBF';
+      c.fillRect(-w/2 + 6, -h/2 + 6, w - 32, 28);
+      c.fillStyle = '#FFF';
+      c.fillRect(-w/2 + 10, -h/2 + 10, 26, 14);
+
+      c.fillStyle = '#C77DFF';
+      c.fillRect(-w/2 + 6, h * 0.18, w - 32, 34);
+
+      c.fillStyle = '#FFD166';
+      c.fillRect(w/2 - 20, -h/2 + 6, 14, h - 12);
+      c.strokeStyle = '#D48B00';
+      for (let y = -h/2 + 16; y < h/2; y += 18) {
+        c.beginPath(); c.moveTo(w/2 - 20, y); c.lineTo(w/2 - 6, y); c.stroke();
+      }
+      break;
+    }
+
+    case 'art_easel': {
+      c.strokeStyle = '#B08968'; c.lineWidth = 4;
+      c.beginPath();
+      c.moveTo(0, -h/2); c.lineTo(-w/2 + 6, h/2);
+      c.moveTo(0, -h/2); c.lineTo(w/2 - 6, h/2);
+      c.stroke();
+
+      c.fillStyle = '#FFFFFF';
+      c.beginPath();
+      c.roundRect(-w * 0.4, -h * 0.35, w * 0.8, h * 0.55, 6);
+      c.fill();
+      c.strokeStyle = '#8D5B4C'; c.lineWidth = 2; c.stroke();
+
+      c.font = '26px var(--font-display)';
+      c.textAlign = 'center';
+      c.fillText('🌈', 0, -h * 0.05);
+      break;
+    }
+
+    case 'blocks_table': {
+      c.fillStyle = '#3A86FF';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2 + 10, w, h - 10, 10);
+      c.fill();
+      c.strokeStyle = '#004B87'; c.lineWidth = 2.5; c.stroke();
+
+      const colors = ['#EF233C', '#FFD166', '#06D6A0', '#8338EC'];
+      for (let i = -2; i <= 2; i++) {
+        c.fillStyle = colors[(i + 4) % colors.length];
+        c.fillRect(i * 18 - 8, -h/2, 16, 12);
+      }
+      break;
+    }
+
+    case 'beanbag': {
+      c.fillStyle = '#C77DFF';
+      c.beginPath();
+      c.ellipse(0, 4, w * 0.46, h * 0.44, 0, 0, Math.PI*2);
+      c.fill();
+      c.strokeStyle = '#7B2CBF'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#7B2CBF';
+      c.beginPath(); c.arc(0, -h * 0.38, 8, 0, Math.PI*2); c.fill();
+      break;
+    }
+
+    case 'king_bed': {
+      c.fillStyle = '#FF8FA3';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2, w, 40, [14, 14, 4, 4]);
+      c.fill();
+      c.strokeStyle = '#C9184A'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#FFD166';
+      for (let x = -w/2 + 20; x < w/2; x += 28) {
+        c.beginPath(); c.arc(x, -h/2 + 18, 3, 0, Math.PI*2); c.fill();
+      }
+
+      c.fillStyle = '#FFFFFF';
+      c.beginPath();
+      c.roundRect(-w/2 + 10, -h * 0.18, w/2 - 16, 22, 6);
+      c.roundRect(6, -h * 0.18, w/2 - 16, 22, 6);
+      c.fill();
+      c.strokeStyle = '#FFB3C1'; c.stroke();
+
+      c.fillStyle = '#FFCCD5';
+      c.beginPath();
+      c.roundRect(-w/2 + 4, 2, w - 8, h/2 - 4, 10);
+      c.fill();
+      c.stroke();
+
+      c.fillStyle = '#C9184A';
+      c.fillRect(-w/2 + 4, h * 0.3, w - 8, 16);
+      break;
+    }
+
+    case 'hollywood_vanity': {
+      c.fillStyle = '#E0FBFC';
+      c.beginPath();
+      c.roundRect(-w * 0.34, -h/2, w * 0.68, h * 0.55, 10);
+      c.fill();
+      c.strokeStyle = '#FF5376'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#FFD166';
+      for (let y = -h/2 + 6; y < 4; y += 14) {
+        c.beginPath();
+        c.arc(-w * 0.34 + 5, y, 3.5, 0, Math.PI*2);
+        c.arc(w * 0.34 - 5, y, 3.5, 0, Math.PI*2);
+        c.fill();
+      }
+
+      c.fillStyle = '#FFB3C1';
+      c.beginPath();
+      c.roundRect(-w/2, 8, w, h/2 - 8, 8);
+      c.fill();
+      c.strokeStyle = '#C9184A'; c.stroke();
+      break;
+    }
+
+    case 'mum_wardrobe': {
+      c.fillStyle = '#590D22';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2, w, h, 8);
+      c.fill();
+      c.strokeStyle = '#2B0912'; c.lineWidth = 2.5; c.stroke();
+
+      c.beginPath();
+      c.moveTo(0, -h/2); c.lineTo(0, h/2);
+      c.strokeStyle = '#2B0912'; c.stroke();
+
+      c.fillStyle = '#800F2F';
+      c.fillRect(-w/2 + 8, -h/2 + 12, w/2 - 12, h - 24);
+      c.fillRect(4, -h/2 + 12, w/2 - 12, h - 24);
+
+      c.fillStyle = '#FFD166';
+      c.beginPath();
+      c.arc(-6, 0, 4, 0, Math.PI*2);
+      c.arc(6, 0, 4, 0, Math.PI*2);
+      c.fill();
+      break;
+    }
+
+    case 'monstera_plant': {
+      c.fillStyle = '#E07A5F';
+      c.beginPath();
+      c.moveTo(-w/3, 0); c.lineTo(w/3, 0);
+      c.lineTo(w/4, h/2); c.lineTo(-w/4, h/2);
+      c.closePath();
+      c.fill();
+      c.strokeStyle = '#8D5B4C'; c.lineWidth = 2; c.stroke();
+
+      c.font = '34px var(--font-display)';
+      c.textAlign = 'center';
+      c.fillText('🌿', 0, -8);
+      break;
+    }
+
+    case 'dad_desk': {
+      c.fillStyle = '#7F5539';
+      c.beginPath();
+      c.roundRect(-w/2, 2, w, h/2 - 2, 8);
+      c.fill();
+      c.strokeStyle = '#582F0E'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#B08968';
+      c.fillRect(-w/2 - 2, -h * 0.1, w + 4, 14);
+
+      c.fillStyle = '#111827';
+      c.fillRect(-w * 0.38, -h/2, w * 0.36, h * 0.42);
+      c.fillRect(2, -h/2, w * 0.36, h * 0.42);
+
+      c.fillStyle = '#38BDF8';
+      c.fillRect(-w * 0.38 + 3, -h/2 + 3, w * 0.36 - 6, h * 0.42 - 6);
+      c.fillStyle = '#34D399';
+      c.fillRect(5, -h/2 + 3, w * 0.36 - 6, h * 0.42 - 6);
+
+      c.font = '16px var(--font-display)';
+      c.fillText('☕', w/2 - 16, 0);
+      break;
+    }
+
+    case 'dad_daybed': {
+      c.fillStyle = '#415A77';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2, w, h, 10);
+      c.fill();
+      c.strokeStyle = '#1B263B'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#E0E1DD';
+      c.beginPath();
+      c.roundRect(-w/2 + 8, -h/2 + 10, w - 16, 24, 6);
+      c.fill();
+      c.strokeStyle = '#778DA9'; c.stroke();
+
+      c.fillStyle = '#E63946';
+      c.fillRect(-w/2 + 6, 10, w - 12, h/2 - 16);
+      break;
+    }
+
+    case 'tool_cabinet': {
+      c.fillStyle = '#D90429';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2, w, h, 8);
+      c.fill();
+      c.strokeStyle = '#9B0017'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#EDF2F4';
+      for (let y = -h/2 + 14; y < h/2 - 10; y += 16) {
+        c.fillRect(-w/2 + 10, y, w - 20, 8);
+        c.fillStyle = '#2B2D42';
+        c.fillRect(-12, y + 2, 24, 4);
+        c.fillStyle = '#EDF2F4';
+      }
+      break;
+    }
+
+    case 'guitar': {
+      c.font = '48px var(--font-display)';
+      c.textAlign = 'center';
+      c.fillText('🎸', 0, 8);
+      break;
+    }
+
+    case 'gaming_rig': {
+      c.fillStyle = '#1E1B4B';
+      c.beginPath();
+      c.roundRect(-w/2, 4, w, h/2 - 4, 8);
+      c.fill();
+      c.strokeStyle = '#4CC9F0'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#0F172A';
+      c.fillRect(-w * 0.44, -h/2, w * 0.88, h * 0.52);
+
+      const rgbGrad = c.createLinearGradient(-w * 0.4, 0, w * 0.4, 0);
+      rgbGrad.addColorStop(0, '#F72585');
+      rgbGrad.addColorStop(0.5, '#7209B7');
+      rgbGrad.addColorStop(1, '#4CC9F0');
+      c.fillStyle = rgbGrad;
+      c.fillRect(-w * 0.44 + 4, -h/2 + 4, w * 0.88 - 8, h * 0.52 - 8);
+
+      c.fillStyle = '#4CC9F0';
+      c.fillRect(-22, 10, 44, 10);
+      break;
+    }
+
+    case 'teen_bed': {
+      c.fillStyle = '#7209B7';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2, w, h, 10);
+      c.fill();
+      c.strokeStyle = '#480CA8'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#1E1B4B';
+      c.beginPath();
+      c.roundRect(-w/2 + 8, -h/2 + 10, w - 16, 26, 6);
+      c.fill();
+
+      c.fillStyle = '#3A0CA3';
+      c.beginPath();
+      c.roundRect(-w/2 + 4, 0, w - 8, h/2 - 4, 8);
+      c.fill();
+
+      c.font = '20px var(--font-display)';
+      c.fillText('⚡', -12, 24);
+      c.fillText('🎧', 14, 24);
+      break;
+    }
+
+    case 'sound_amp': {
+      c.fillStyle = '#111827';
+      c.beginPath();
+      c.roundRect(-w/2, -h/2, w, h, 8);
+      c.fill();
+      c.strokeStyle = '#F72585'; c.lineWidth = 2.5; c.stroke();
+
+      c.fillStyle = '#374151';
+      c.beginPath();
+      c.arc(0, -6, 18, 0, Math.PI*2);
+      c.arc(0, 24, 14, 0, Math.PI*2);
+      c.fill();
+      c.fillStyle = '#F72585';
+      c.beginPath();
+      c.arc(0, -6, 6, 0, Math.PI*2);
+      c.arc(0, 24, 4, 0, Math.PI*2);
+      c.fill();
+      break;
+    }
+
+    case 'skateboard_wall': {
+      c.font = '42px var(--font-display)';
+      c.textAlign = 'center';
+      c.fillText('🛹', 0, -4);
+      c.font = '22px var(--font-display)';
+      c.fillText('🔥', 0, 26);
+      break;
+    }
+
+    case 'trophy': {
+      c.font = '64px var(--font-display)';
+      c.textAlign = 'center';
+      c.fillText('🏆', 0, 4);
+      c.font = '20px var(--font-display)';
+      c.fillText('✨', -32, -26);
+      c.fillText('⭐', 32, -26);
+      break;
+    }
+
+    default: {
+      c.font = `${Math.min(w * 0.5, 36)}px var(--font-display)`;
+      c.textAlign = 'center';
+      c.fillText(item.emoji, 0, 0);
+    }
+  }
+
+  // Label text under item
+  c.font = 'bold 11px var(--font-display)';
+  c.fillStyle = '#2C221E';
+  c.textAlign = 'center';
+  c.fillText(item.name, 0, h/2 + 16);
+
+  c.restore();
+}
+
+// 8. SCENE DRAWING ROUTINES
+function drawDrivewayScene(c) {
+  const skyGrad = c.createLinearGradient(0, 0, 0, 300);
+  skyGrad.addColorStop(0, '#56CFE1');
+  skyGrad.addColorStop(1, '#BEE1E6');
+  c.fillStyle = skyGrad;
+  c.fillRect(0, 0, 600, 320);
+
+  c.fillStyle = '#52B788';
+  c.beginPath();
+  c.arc(80, 260, 90, 0, Math.PI*2);
+  c.arc(220, 270, 70, 0, Math.PI*2);
+  c.fill();
+
+  c.fillStyle = '#E07A5F';
+  c.fillRect(0, 80, 240, 200);
+  c.fillStyle = '#F4F1DE';
+  c.fillRect(70, 160, 60, 120);
+  c.fillStyle = '#3D405B';
+  c.fillRect(78, 170, 44, 110);
+
+  c.fillStyle = '#52B788';
+  c.fillRect(0, 280, 600, 560);
+  c.fillStyle = '#94D2BD';
+  c.fillRect(60, 280, 80, 560);
+
+  c.fillStyle = '#6C757D';
+  c.beginPath();
+  c.roundRect(240, 180, 340, 480, 16);
+  c.fill();
+
+  // Big Moving Van
+  c.save();
+  c.translate(330, 190);
+
+  c.fillStyle = '#3A86FF';
+  c.beginPath();
+  c.roundRect(140, 20, 100, 120, [0, 20, 20, 0]);
+  c.fill();
+  c.strokeStyle = '#1D3557'; c.lineWidth = 3; c.stroke();
+  c.fillStyle = '#E0FBFC';
+  c.fillRect(170, 35, 60, 50);
+
+  c.fillStyle = '#FFD166';
+  c.beginPath();
+  c.roundRect(0, 0, 160, 260, 12);
+  c.fill();
+  c.stroke();
+
+  c.font = 'bold 15px var(--font-display)';
+  c.fillStyle = '#2C221E';
+  c.textAlign = 'center';
+  c.fillText("FLORENCE", 80, 30);
+  c.font = 'bold 11px var(--font-display)';
+  c.fillStyle = '#D9254C';
+  c.fillText("★ REMOVALS ★", 80, 46);
+
+  c.fillStyle = '#2B2D42';
+  c.beginPath();
+  c.roundRect(15, 60, 130, 185, 8);
+  c.fill();
+  c.strokeStyle = '#FFB703'; c.lineWidth = 2.5; c.stroke();
+
+  c.fillStyle = '#ADB5BD';
+  c.beginPath();
+  c.moveTo(25, 245); c.lineTo(135, 245); c.lineTo(150, 300); c.lineTo(10, 300);
+  c.closePath();
+  c.fill();
+  c.strokeStyle = '#6C757D'; c.stroke();
+
+  c.setLineDash([6, 4]);
+  c.strokeStyle = '#FF5376';
+  c.strokeRect(25, 75, 110, 160);
+  c.setLineDash([]);
+  c.font = 'bold 13px var(--font-display)';
+  c.fillStyle = '#FFEAA7';
+  c.fillText("VAN BOOT", 80, 150);
+  c.font = '11px var(--font-display)';
+  c.fillText("Drop Boxes Here! 📦", 80, 170);
+
+  c.restore();
+}
+
+function drawRoomScene(c, theme) {
+  let wallColor1 = '#FFE5D9', wallColor2 = '#FFCAD4', floorColor = '#DDB892';
+  let decorType = 'window';
+
+  if (theme === 'living') {
+    wallColor1 = '#E8F5E9'; wallColor2 = '#C8E6C9'; floorColor = '#BC6C25';
+  } else if (theme === 'kitchen') {
+    wallColor1 = '#FFF9E6'; wallColor2 = '#FFEAA7'; floorColor = '#E0E7E9';
+    decorType = 'tiles';
+  } else if (theme === 'child1') {
+    wallColor1 = '#E0F2FE'; wallColor2 = '#BAE6FD'; floorColor = '#E9D5A1';
+    decorType = 'clouds';
+  } else if (theme === 'bathroom') {
+    wallColor1 = '#E0F7FA'; wallColor2 = '#B2EBF2'; floorColor = '#80DEEA';
+    decorType = 'bath_tiles';
+  } else if (theme === 'child2') {
+    wallColor1 = '#F3E8FF'; wallColor2 = '#E9D5FF'; floorColor = '#D8B4E2';
+    decorType = 'stars';
+  } else if (theme === 'mum') {
+    wallColor1 = '#FCE7F3'; wallColor2 = '#FBCFE8'; floorColor = '#D4A373';
+    decorType = 'crown';
+  } else if (theme === 'dad') {
+    wallColor1 = '#FEF3C7'; wallColor2 = '#FDE68A'; floorColor = '#8D5B4C';
+    decorType = 'wood';
+  } else if (theme === 'teen') {
+    wallColor1 = '#1E1B4B'; wallColor2 = '#2E1065'; floorColor = '#334155';
+    decorType = 'neon';
+  } else if (theme === 'trophy_room') {
+    wallColor1 = '#FFFBEB'; wallColor2 = '#FEF3C7'; floorColor = '#B45309';
+    decorType = 'trophy_spotlight';
+  }
+
+  const wallGrad = c.createLinearGradient(0, 0, 0, 240);
+  wallGrad.addColorStop(0, wallColor1);
+  wallGrad.addColorStop(1, wallColor2);
+  c.fillStyle = wallGrad;
+  c.fillRect(0, 0, 600, 240);
+
+  c.fillStyle = floorColor;
+  c.fillRect(0, 240, 600, 600);
+
+  c.strokeStyle = 'rgba(0,0,0,0.06)';
+  c.lineWidth = 2;
+  if (decorType === 'tiles' || decorType === 'bath_tiles') {
+    for (let x = 0; x < 600; x += 40) {
+      c.beginPath(); c.moveTo(x, 240); c.lineTo(x, 840); c.stroke();
+    }
+    for (let y = 240; y < 840; y += 40) {
+      c.beginPath(); c.moveTo(0, y); c.lineTo(600, y); c.stroke();
+    }
+  } else {
+    for (let y = 240; y < 840; y += 36) {
+      c.beginPath(); c.moveTo(0, y); c.lineTo(600, y); c.stroke();
+    }
+  }
+
+  c.fillStyle = '#FFFFFF';
+  c.fillRect(0, 232, 600, 12);
+  c.fillStyle = '#E2D5BE';
+  c.fillRect(0, 242, 600, 4);
+
+  if (decorType === 'window' || decorType === 'crown' || decorType === 'wood') {
+    c.fillStyle = '#FFFFFF';
+    c.fillRect(210, 40, 180, 140);
+    c.fillStyle = '#87CEEB';
+    c.fillRect(218, 48, 164, 124);
+    c.fillStyle = '#FFD166';
+    c.beginPath(); c.arc(340, 80, 20, 0, Math.PI*2); c.fill();
+    c.fillStyle = '#FFFFFF';
+    c.fillRect(296, 48, 8, 124);
+    c.fillRect(218, 106, 164, 8);
+    c.fillStyle = theme === 'mum' ? '#FF6B8B' : '#FFD166';
+    c.fillRect(196, 32, 22, 160);
+    c.fillRect(382, 32, 22, 160);
+  } else if (decorType === 'clouds') {
+    c.fillStyle = 'rgba(255,255,255,0.75)';
+    [ [100, 80], [280, 60], [480, 90], [200, 140], [400, 150] ].forEach(([cx, cy]) => {
+      c.beginPath();
+      c.arc(cx, cy, 22, 0, Math.PI*2);
+      c.arc(cx+20, cy-6, 26, 0, Math.PI*2);
+      c.arc(cx+42, cy, 22, 0, Math.PI*2);
+      c.fill();
+    });
+  } else if (decorType === 'neon') {
+    c.fillStyle = '#FF007F';
+    c.shadowColor = '#FF007F';
+    c.shadowBlur = 15;
+    c.font = 'bold 20px var(--font-display)';
+    c.textAlign = 'center';
+    c.fillText("★ CHILL ZONE ★", 300, 70);
+    c.shadowBlur = 0;
+  } else if (decorType === 'trophy_spotlight') {
+    const spotGrad = c.createRadialGradient(300, 370, 30, 300, 370, 240);
+    spotGrad.addColorStop(0, 'rgba(255, 215, 0, 0.45)');
+    spotGrad.addColorStop(0.5, 'rgba(255, 235, 120, 0.2)');
+    spotGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+    c.fillStyle = spotGrad;
+    c.beginPath(); c.arc(300, 370, 240, 0, Math.PI*2); c.fill();
+
+    c.fillStyle = '#D90429';
+    c.fillRect(240, 320, 120, 520);
+    c.fillStyle = '#FFD166';
+    c.fillRect(236, 320, 4, 520);
+    c.fillRect(360, 320, 4, 520);
+
+    c.fillStyle = '#EDF2F4';
+    c.beginPath();
+    c.roundRect(240, 360, 120, 60, 10);
+    c.fill();
+    c.strokeStyle = '#FFD166'; c.lineWidth = 3; c.stroke();
+    c.font = 'bold 12px var(--font-display)';
+    c.fillStyle = '#B8860B';
+    c.textAlign = 'center';
+    c.fillText("★ WINNER ★", 300, 395);
+  }
+}
+
+// 9. LEVEL MECHANICS
+function initLevel(levelIndex) {
+  State.currentLevelIndex = levelIndex;
+  const lvl = LEVELS[levelIndex];
+  State.placedItems.clear();
+  State.activeDragItem = null;
+  State.player.carryingItem = null;
+  State.player.x = 240;
+  State.player.y = 520;
+  State.player.targetX = 240;
+  State.player.targetY = 520;
+  State.keys = {};
+
+  // Position items on ground
+  lvl.items.forEach((item, i) => {
+    if (lvl.type === 'pack_van') {
+      item.curX = 85 + (i % 2) * 95;
+      item.curY = 360 + Math.floor(i / 2) * 80;
+    } else {
+      item.curX = 100 + (i % 3) * 160;
+      item.curY = 650 + Math.floor(i / 3) * 75;
+    }
+  });
+
+  // Update HUD
+  document.getElementById('hud-level').innerText = `${lvl.icon} Level ${lvl.num}`;
+  document.getElementById('hud-counter').innerText = `${lvl.icon} 0 / ${lvl.items.length}`;
+  document.getElementById('hud-task-text').innerText = lvl.taskDesc;
+
+  updateHudCharBar();
+  renderDock();
+}
+
+function updateHudCharBar() {
+  document.querySelectorAll('.hud-char-btn').forEach(btn => {
+    const cid = btn.getAttribute('data-char');
+    if (cid === State.selectedCharId) {
+      btn.classList.add('active');
+    } else {
+      btn.classList.remove('active');
+    }
+  });
+}
+
+function renderDock() {
+  const lvl = LEVELS[State.currentLevelIndex];
+  const dock = document.getElementById('bottom-dock');
+  dock.innerHTML = '';
+
+  lvl.items.forEach(item => {
+    const isPlaced = State.placedItems.has(item.id);
+    const isCarried = State.player.carryingItem && State.player.carryingItem.id === item.id;
+
+    const el = document.createElement('div');
+    el.className = `dock-item ${isPlaced ? 'placed' : ''} ${isCarried ? 'carried' : ''}`;
+    el.innerHTML = `<span>${item.emoji}</span> <span>${item.name}</span>`;
+    el.onclick = (e) => {
+      e.stopPropagation();
+      if (isPlaced) return;
+      Synth.init();
+      if (State.player.carryingItem && State.player.carryingItem.id === item.id) {
+        attemptPlaceItem(item);
+      } else {
+        State.player.carryingItem = item;
+        Synth.sfx.pickup();
+        showBanner(`Carrying ${item.name}!`);
+      }
+      renderDock();
+    };
+    dock.appendChild(el);
+  });
+}
+
+function attemptPlaceItem(item) {
+  const lvl = LEVELS[State.currentLevelIndex];
+
+  if (lvl.type === 'pack_van') {
+    State.placedItems.add(item.id);
+    State.player.carryingItem = null;
+    Synth.sfx.boxThud();
+    createSparkles(item.tx, item.ty, '#FFD166');
+    showBanner(`Packed ${item.name}! 📦`);
+  } else if (lvl.type === 'room') {
+    State.placedItems.add(item.id);
+    State.player.carryingItem = null;
+    Synth.sfx.snap();
+    createSparkles(item.tx, item.ty, '#52B788');
+    showBanner(`Placed ${item.name}! ✨`);
+  } else if (lvl.type === 'trophy') {
+    State.placedItems.add(item.id);
+    State.player.carryingItem = item;
+    winGame();
+    return;
+  }
+
+  document.getElementById('hud-counter').innerText = `${lvl.icon} ${State.placedItems.size} / ${lvl.items.length}`;
+  renderDock();
+
+  if (State.placedItems.size >= lvl.items.length) {
+    setTimeout(levelComplete, 400);
+  }
+}
+
+function showBanner(text) {
+  const b = document.getElementById('level-cue-banner');
+  b.innerText = text;
+  b.classList.add('show');
+  clearTimeout(b._timer);
+  b._timer = setTimeout(() => b.classList.remove('show'), 1200);
+}
+
+function createSparkles(x, y, color = '#FFD166') {
+  for (let i = 0; i < 20; i++) {
+    State.roomStars.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 7,
+      vy: (Math.random() - 0.5) * 7 - 2,
+      size: Math.random() * 8 + 4,
+      color,
+      alpha: 1,
+      life: 1
+    });
+  }
+}
+
+function createConfetti() {
+  for (let i = 0; i < 120; i++) {
+    State.confettiParticles.push({
+      x: Math.random() * 600,
+      y: -20 - Math.random() * 300,
+      vx: (Math.random() - 0.5) * 4,
+      vy: Math.random() * 4 + 3,
+      size: Math.random() * 8 + 6,
+      color: ['#FF5376', '#FFB703', '#3A86FF', '#06D6A0', '#8338EC', '#FFF'][Math.floor(Math.random() * 6)],
+      rot: Math.random() * 360,
+      vRot: (Math.random() - 0.5) * 10
+    });
+  }
+}
+
+function levelComplete() {
+  const lvl = LEVELS[State.currentLevelIndex];
+  Synth.sfx.levelClear();
+  createConfetti();
+
+  if (lvl.num === 10) {
+    winGame();
+    return;
+  }
+
+  document.getElementById('complete-title').innerText = `${lvl.title} Complete!`;
+  document.getElementById('complete-emoji').innerText = `${lvl.icon}✨`;
+  document.getElementById('complete-msg').innerText = `Awesome job! All moved in!`;
+  showScreen('s-complete');
+}
+
+function winGame() {
+  Synth.sfx.trophyFanfare();
+  createConfetti();
+  const char = CHARACTERS[State.selectedCharId];
+  document.getElementById('trophy-char-praise').innerHTML = `
+    <strong>${char.name}</strong> moved all the real furniture into all 9 rooms and won the Grand Golden Trophy!
+  `;
+  showScreen('s-trophy');
+  drawTrophyPreview();
+}
+
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  if (screenId) {
+    const el = document.getElementById(screenId);
+    if (el) el.classList.remove('hidden');
+  }
+}
+
+// 10. MULTI-INPUT MOVEMENT & CONTROLS SETUP
+function setupControls() {
+  document.getElementById('btn-sound').onclick = () => {
+    const isMuted = Synth.toggleMute();
+    document.getElementById('btn-sound').innerText = isMuted ? '🔇' : '🔊';
+  };
+
+  // Start button opens Character Select screen directly!
+  document.getElementById('btn-play').onclick = () => {
+    Synth.init(); Synth.sfx.click();
+    showScreen('s-character');
+  };
+
+  document.getElementById('btn-char-switch').onclick = () => {
+    Synth.init(); Synth.sfx.click();
+    showScreen('s-character');
+  };
+
+  document.getElementById('btn-char-back').onclick = () => {
+    Synth.sfx.click(); showScreen('s-title');
+  };
+
+  document.getElementById('btn-char-confirm').onclick = () => {
+    Synth.init(); Synth.sfx.hooray();
+    showLevelIntro(0);
+  };
+
+  // In-Game Quick Switcher
+  document.querySelectorAll('.hud-char-btn').forEach(btn => {
+    btn.onclick = () => {
+      const cid = btn.getAttribute('data-char');
+      if (CHARACTERS[cid]) {
+        State.selectedCharId = cid;
+        Synth.init(); Synth.sfx.hooray();
+        updateHudCharBar();
+        showBanner(`Playing as ${CHARACTERS[cid].name}! ✨`);
+      }
+    };
+  });
+
+  document.getElementById('btn-levels-open').onclick = () => {
+    Synth.init(); Synth.sfx.click();
+    buildLevelSelect();
+    showScreen('s-levels');
+  };
+
+  document.getElementById('btn-levels-back').onclick = () => {
+    Synth.sfx.click(); showScreen('s-title');
+  };
+
+  document.getElementById('btn-intro-go').onclick = () => {
+    Synth.init(); Synth.sfx.click();
+    showScreen(null); // Active Game Canvas!
+    initLevel(State.currentLevelIndex);
+  };
+
+  document.getElementById('btn-next-level').onclick = () => {
+    Synth.init(); Synth.sfx.click();
+    const nextIndex = State.currentLevelIndex + 1;
+    if (nextIndex < LEVELS.length) {
+      showLevelIntro(nextIndex);
+    } else {
+      winGame();
+    }
+  };
+
+  document.getElementById('btn-play-again').onclick = () => {
+    Synth.init(); Synth.sfx.click();
+    showScreen('s-title');
+  };
+
+  document.getElementById('btn-trophy-home').onclick = () => {
+    Synth.init(); Synth.sfx.click();
+    showScreen('s-title');
+  };
+
+  document.getElementById('btn-tour-house').onclick = () => {
+    Synth.init(); Synth.sfx.hooray();
+    showScreen(null);
+    initLevel(9);
+  };
+
+  // Keyboard Event Listeners (WASD + Arrow Keys + Space)
+  window.addEventListener('keydown', e => {
+    State.keys[e.key] = true;
+    State.keys[e.code] = true;
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Space'].includes(e.key) || ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(e.code)) {
+      e.preventDefault();
+    }
+    if (e.key === ' ' || e.key === 'e' || e.key === 'E' || e.key === 'Enter' || e.code === 'Space') {
+      handleActionPress();
+    }
+  });
+
+  window.addEventListener('keyup', e => {
+    State.keys[e.key] = false;
+    State.keys[e.code] = false;
+  });
+
+  // On-Screen D-Pad Touch & Mouse events
+  const bindDpadBtn = (id, keyName) => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const start = (e) => {
+      e.preventDefault();
+      Synth.init();
+      State.keys[keyName] = true;
+      el.classList.add('active');
+    };
+    const end = (e) => {
+      e.preventDefault();
+      State.keys[keyName] = false;
+      el.classList.remove('active');
+    };
+    el.addEventListener('pointerdown', start);
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+    el.addEventListener('pointerleave', end);
+  };
+
+  bindDpadBtn('t-up', 'ArrowUp');
+  bindDpadBtn('t-down', 'ArrowDown');
+  bindDpadBtn('t-left', 'ArrowLeft');
+  bindDpadBtn('t-right', 'ArrowRight');
+
+  document.getElementById('t-action').addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    Synth.init();
+    handleActionPress();
+  });
+
+  // Direct Screen Pointer / Tap to Walk / Drag and Drop
+  let isPointerDown = false;
+
+  function getCanvasCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    return {
+      x: ((clientX - rect.left) / rect.width) * 600,
+      y: ((clientY - rect.top) / rect.height) * 840
+    };
+  }
+
+  canvas.addEventListener('pointerdown', e => {
+    Synth.init();
+    isPointerDown = true;
+    const pos = getCanvasCoords(e);
+    const lvl = LEVELS[State.currentLevelIndex];
+
+    let hitItem = null;
+    for (let item of lvl.items) {
+      if (State.placedItems.has(item.id)) continue;
+      const curX = item.curX || item.tx;
+      const curY = item.curY || item.ty;
+      const dist = Math.hypot(pos.x - curX, pos.y - curY);
+      if (dist < Math.max(item.w, item.h) * 0.75) {
+        hitItem = item;
+        break;
+      }
+    }
+
+    if (hitItem) {
+      State.activeDragItem = hitItem;
+      State.dragOffset = { x: pos.x - (hitItem.curX || hitItem.tx), y: pos.y - (hitItem.curY || hitItem.ty) };
+      Synth.sfx.pickup();
+    } else {
+      // Tap anywhere on ground to walk there!
+      State.player.targetX = Math.max(40, Math.min(560, pos.x));
+      State.player.targetY = Math.max(180, Math.min(760, pos.y));
+    }
+  });
+
+  canvas.addEventListener('pointermove', e => {
+    if (!isPointerDown) return;
+    const pos = getCanvasCoords(e);
+
+    if (State.activeDragItem) {
+      State.activeDragItem.curX = pos.x - State.dragOffset.x;
+      State.activeDragItem.curY = pos.y - State.dragOffset.y;
+    } else {
+      State.player.targetX = Math.max(40, Math.min(560, pos.x));
+      State.player.targetY = Math.max(180, Math.min(760, pos.y));
+    }
+  });
+
+  canvas.addEventListener('pointerup', e => {
+    isPointerDown = false;
+    if (State.activeDragItem) {
+      const item = State.activeDragItem;
+      State.activeDragItem = null;
+      const distToTarget = Math.hypot(item.curX - item.tx, item.curY - item.ty);
+
+      if (distToTarget < 110 || (LEVELS[State.currentLevelIndex].type === 'pack_van' && item.curX > 280 && item.curY < 490)) {
+        attemptPlaceItem(item);
+      } else {
+        Synth.sfx.drop();
+      }
+    }
+  });
+}
+
+function handleActionPress() {
+  const lvl = LEVELS[State.currentLevelIndex];
+
+  if (State.player.carryingItem) {
+    attemptPlaceItem(State.player.carryingItem);
+    return;
+  }
+
+  let closest = null;
+  let minDist = 120;
+
+  for (let item of lvl.items) {
+    if (State.placedItems.has(item.id)) continue;
+    const curX = item.curX || item.tx;
+    const curY = item.curY || item.ty;
+    const dist = Math.hypot(State.player.x - curX, State.player.y - curY);
+    if (dist < minDist) {
+      minDist = dist;
+      closest = item;
+    }
+  }
+
+  if (closest) {
+    State.player.carryingItem = closest;
+    Synth.sfx.pickup();
+    showBanner(`Picked up ${closest.name}!`);
+    renderDock();
+  }
+}
+
+// 11. UI BUILDERS
+function buildCharacterSelect() {
+  const container = document.getElementById('character-cards-container');
+  container.innerHTML = '';
+
+  Object.values(CHARACTERS).forEach(char => {
+    const card = document.createElement('div');
+    card.className = `char-card ${char.id === State.selectedCharId ? 'selected' : ''}`;
+    card.onclick = () => {
+      State.selectedCharId = char.id;
+      Synth.sfx.hooray();
+      buildCharacterSelect();
+      updateHudCharBar();
+      document.getElementById('char-bio-name').innerText = char.title;
+      document.getElementById('char-bio-desc').innerText = char.desc;
+      drawCharSelectPreview();
+      drawTitlePreview();
+    };
+
+    card.innerHTML = `
+      <div class="char-avatar" style="border-color:${char.color};">
+        <span style="font-size:28px;">${char.emoji}</span>
+      </div>
+      <div class="char-name">${char.name}</div>
+      <div class="char-role">${char.tag}</div>
+      <div class="char-tag" style="background:${char.color};">${char.id === State.selectedCharId ? 'READY ✓' : 'PICK ME'}</div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function buildLevelSelect() {
+  const container = document.getElementById('level-buttons-container');
+  container.innerHTML = '';
+
+  LEVELS.forEach((lvl, idx) => {
+    const btn = document.createElement('div');
+    btn.className = `level-btn ${idx === State.currentLevelIndex ? 'active-lvl' : ''}`;
+    btn.onclick = () => {
+      Synth.init(); Synth.sfx.click();
+      showLevelIntro(idx);
+    };
+
+    btn.innerHTML = `
+      <div class="num-badge">${lvl.num}</div>
+      <div class="lvl-info">
+        <div class="lvl-title">${lvl.icon} ${lvl.title}</div>
+        <div class="lvl-sub">${lvl.items.length} items to move</div>
+      </div>
+    `;
+    container.appendChild(btn);
+  });
+}
+
+function showLevelIntro(levelIndex) {
+  State.currentLevelIndex = levelIndex;
+  const lvl = LEVELS[levelIndex];
+  document.getElementById('intro-badge').innerText = `Level ${lvl.num} of 10`;
+  document.getElementById('intro-title').innerText = lvl.title;
+  document.getElementById('intro-desc').innerText = lvl.taskDesc;
+  showScreen('s-intro');
+  drawIntroPreview(lvl);
+}
+
+// 12. PREVIEW CANVASES
+function drawCharSelectPreview() {
+  const pCanvas = document.getElementById('char-select-preview-canvas');
+  if (!pCanvas) return;
+  const pCtx = pCanvas.getContext('2d');
+  pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+
+  const grad = pCtx.createLinearGradient(0, 0, 0, 110);
+  grad.addColorStop(0, '#E0F2FE');
+  grad.addColorStop(1, '#BAE6FD');
+  pCtx.fillStyle = grad;
+  pCtx.fillRect(0, 0, 300, 110);
+
+  const char = CHARACTERS[State.selectedCharId];
+  drawCharacter(pCtx, 150, 80, char, true, 1, null, Date.now()*0.004, 1.25);
+
+  pCtx.font = 'bold 13px var(--font-display)';
+  pCtx.fillStyle = '#2C221E';
+  pCtx.textAlign = 'center';
+  pCtx.fillText(`Selected Mover: ${char.name}!`, 150, 20);
+}
+
+function drawTitlePreview() {
+  const pCanvas = document.getElementById('title-preview-canvas');
+  if (!pCanvas) return;
+  const pCtx = pCanvas.getContext('2d');
+  pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
+
+  const grad = pCtx.createLinearGradient(0, 0, 0, 180);
+  grad.addColorStop(0, '#56CFE1');
+  grad.addColorStop(1, '#94D2BD');
+  pCtx.fillStyle = grad;
+  pCtx.fillRect(0, 0, 340, 180);
+
+  // Mini Sofa & Box
+  pCtx.save();
+  pCtx.translate(80, 125);
+  drawRealFurniture(pCtx, { type: 'sofa', name: '', emoji: '🛋️', w: 100, h: 54 }, false, 0.7);
+  pCtx.restore();
+
+  const char = CHARACTERS[State.selectedCharId];
+  drawCharacter(pCtx, 220, 125, char, false, 1, null, Date.now()*0.003, 1.15);
+
+  pCtx.font = '28px var(--font-display)';
+  pCtx.fillText('🏆', 285, 75);
+}
+
+function drawIntroPreview(lvl) {
+  const iCanvas = document.getElementById('intro-canvas');
+  if (!iCanvas) return;
+  const iCtx = iCanvas.getContext('2d');
+  iCtx.clearRect(0, 0, iCanvas.width, iCanvas.height);
+
+  iCtx.fillStyle = '#E8F5E9';
+  iCtx.fillRect(0, 0, 320, 90);
+  iCtx.fillStyle = '#BC6C25';
+  iCtx.fillRect(0, 90, 320, 70);
+
+  const char = CHARACTERS[State.selectedCharId];
+  drawCharacter(iCtx, 160, 115, char, true, 1, lvl.items[0], Date.now()*0.004, 1.0);
+
+  iCtx.save();
+  iCtx.translate(70, 70);
+  drawRealFurniture(iCtx, lvl.items[0], false, 0.55);
+  iCtx.restore();
+}
+
+function drawTrophyPreview() {
+  const tCanvas = document.getElementById('trophy-canvas');
+  if (!tCanvas) return;
+  const tCtx = tCanvas.getContext('2d');
+  tCtx.clearRect(0, 0, tCanvas.width, tCanvas.height);
+
+  const grad = tCtx.createRadialGradient(150, 90, 10, 150, 90, 120);
+  grad.addColorStop(0, '#FFEAA7');
+  grad.addColorStop(1, '#FFD166');
+  tCtx.fillStyle = grad;
+  tCtx.fillRect(0, 0, 300, 180);
+
+  const char = CHARACTERS[State.selectedCharId];
+  drawCharacter(tCtx, 150, 130, char, false, 1, null, Date.now()*0.003, 1.25);
+
+  tCtx.font = '56px var(--font-display)';
+  tCtx.textAlign = 'center';
+  tCtx.fillText('🏆', 150, 48);
+
+  tCtx.font = '22px var(--font-display)';
+  tCtx.fillText('✨', 70, 40);
+  tCtx.fillText('⭐', 230, 45);
+  tCtx.fillText('🎉', 60, 110);
+  tCtx.fillText('🎊', 240, 110);
+}
+
+// 13. GAME LOOP & ROBUST MOVEMENT FOR ALL 5 CHARACTERS
+let lastTime = performance.now();
+
+function update(dt) {
+  const player = State.player;
+  let moveX = 0, moveY = 0;
+
+  if (State.keys['ArrowLeft'] || State.keys['a'] || State.keys['A'] || State.keys['KeyA']) moveX -= 1;
+  if (State.keys['ArrowRight'] || State.keys['d'] || State.keys['D'] || State.keys['KeyD']) moveX += 1;
+  if (State.keys['ArrowUp'] || State.keys['w'] || State.keys['W'] || State.keys['KeyW']) moveY -= 1;
+  if (State.keys['ArrowDown'] || State.keys['s'] || State.keys['S'] || State.keys['KeyS']) moveY += 1;
+
+  if (moveX !== 0 || moveY !== 0) {
+    const len = Math.hypot(moveX, moveY);
+    const speed = player.speed * 60 * dt;
+    player.vx = (moveX / len) * speed;
+    player.vy = (moveY / len) * speed;
+    player.x += player.vx;
+    player.y += player.vy;
+    player.targetX = player.x;
+    player.targetY = player.y;
+    player.facing = moveX !== 0 ? Math.sign(moveX) : player.facing;
+    player.isMoving = true;
+  } else {
+    const dx = player.targetX - player.x;
+    const dy = player.targetY - player.y;
+    const dist = Math.hypot(dx, dy);
+
+    if (dist > 4) {
+      const speed = Math.min(dist, player.speed * 60 * dt);
+      player.vx = (dx / dist) * speed;
+      player.vy = (dy / dist) * speed;
+      player.x += player.vx;
+      player.y += player.vy;
+      player.facing = dx !== 0 ? Math.sign(dx) : player.facing;
+      player.isMoving = true;
+    } else {
+      player.isMoving = false;
+      player.vx = 0; player.vy = 0;
+    }
+  }
+
+  player.x = Math.max(40, Math.min(560, player.x));
+  player.y = Math.max(180, Math.min(760, player.y));
+  player.animTime += dt;
+
+  for (let i = State.roomStars.length - 1; i >= 0; i--) {
+    const s = State.roomStars[i];
+    s.x += s.vx; s.y += s.vy; s.vy += 0.1;
+    s.life -= dt * 1.5;
+    if (s.life <= 0) State.roomStars.splice(i, 1);
+  }
+
+  for (let i = State.confettiParticles.length - 1; i >= 0; i--) {
+    const p = State.confettiParticles[i];
+    p.x += p.vx; p.y += p.vy; p.rot += p.vRot;
+    if (p.y > 860) State.confettiParticles.splice(i, 1);
+  }
+}
+
+function render() {
+  const { sx, sy } = getScale();
+
+  ctx.save();
+  ctx.scale(sx, sy);
+  ctx.clearRect(0, 0, 600, 840);
+
+  const lvl = LEVELS[State.currentLevelIndex];
+
+  if (lvl.type === 'pack_van') {
+    drawDrivewayScene(ctx);
+  } else {
+    drawRoomScene(ctx, lvl.theme);
+  }
+
+  // Target Silhouettes
+  lvl.items.forEach(item => {
+    const isPlaced = State.placedItems.has(item.id);
+    if (!isPlaced && lvl.type !== 'pack_van') {
+      ctx.save();
+      ctx.translate(item.tx, item.ty);
+      drawRealFurniture(ctx, item, true);
+      ctx.restore();
+    }
+  });
+
+  // Placed Furniture
+  lvl.items.forEach(item => {
+    const isPlaced = State.placedItems.has(item.id);
+    if (isPlaced && lvl.type !== 'pack_van') {
+      ctx.save();
+      ctx.translate(item.tx, item.ty);
+      drawRealFurniture(ctx, item, false);
+      ctx.restore();
+    }
+  });
+
+  // Unplaced Items on Ground
+  lvl.items.forEach(item => {
+    const isPlaced = State.placedItems.has(item.id);
+    const isCarried = State.player.carryingItem && State.player.carryingItem.id === item.id;
+    const isDragging = State.activeDragItem && State.activeDragItem.id === item.id;
+
+    if (!isPlaced && !isCarried) {
+      const x = isDragging ? item.curX : (item.curX || item.tx);
+      const y = isDragging ? item.curY : (item.curY || item.ty);
+      ctx.save();
+      ctx.translate(x, y);
+      drawRealFurniture(ctx, item, false, isDragging ? 1.08 : 1.0);
+      ctx.restore();
+    }
+  });
+
+  // Active Playable Character (Mum, Sister, Brother, Teenager, or Dad)
+  const char = CHARACTERS[State.selectedCharId];
+  drawCharacter(
+    ctx,
+    State.player.x,
+    State.player.y,
+    char,
+    State.player.isMoving,
+    State.player.facing,
+    State.player.carryingItem,
+    State.player.animTime
+  );
+
+  // Sparkles
+  State.roomStars.forEach(s => {
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, s.life);
+    ctx.fillStyle = s.color;
+    ctx.beginPath(); c.arc(s.x, s.y, s.size, 0, Math.PI*2); c.fill();
+    ctx.restore();
+  });
+
+  ctx.restore();
+
+  // Confetti
+  cCtx.save();
+  cCtx.scale(sx, sy);
+  cCtx.clearRect(0, 0, 600, 840);
+  State.confettiParticles.forEach(p => {
+    cCtx.save();
+    cCtx.translate(p.x, p.y);
+    cCtx.rotate((p.rot * Math.PI) / 180);
+    cCtx.fillStyle = p.color;
+    cCtx.fillRect(-p.size/2, -p.size/2, p.size, p.size);
+    cCtx.restore();
+  });
+  cCtx.restore();
+}
+
+function gameLoop(now) {
+  const dt = Math.min(0.1, (now - lastTime) / 1000);
+  lastTime = now;
+  update(dt);
+  render();
+  requestAnimationFrame(gameLoop);
+}
+
+// 14. INITIALIZATION
+window.addEventListener('DOMContentLoaded', () => {
+  setupControls();
+  buildCharacterSelect();
+  buildLevelSelect();
+  drawCharSelectPreview();
+  drawTitlePreview();
+  showScreen('s-title');
+  requestAnimationFrame(gameLoop);
+});
+</script>
+</body>
+</html>

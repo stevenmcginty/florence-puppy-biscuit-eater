@@ -1,0 +1,2566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>The Way to Get on Your Holiday — A Game by Florence</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏖️</text></svg>">
+<style>
+  /* ==========================================================================
+     THE WAY TO GET ON YOUR HOLIDAY — A 7-Level Game Designed by Florence
+     House style: Bright sunny holiday world, tactile buttons, rich procedural canvas,
+     lively WebAudio synth tunes & sound effects, sparkle animations.
+     ========================================================================== */
+  :root {
+    --sky: #5CB8FF;
+    --sky-light: #BCE5FF;
+    --ocean: #0096C7;
+    --ocean-deep: #023E8A;
+    --sand: #FFE082;
+    --sand-deep: #E5B842;
+    --coral: #FF5376;
+    --coral-deep: #D9254C;
+    --gold: #FFB703;
+    --gold-deep: #D48B00;
+    --palm: #2EC4B6;
+    --palm-deep: #0F8B8D;
+    --cream: #FFFDF7;
+    --panel: #FFFFFF;
+    --ink: #2C221E;
+    --ink-soft: #6A5B52;
+    --font-display: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Marker Felt', 'Nunito', 'Segoe UI', cursive, sans-serif;
+    --font-body: 'Trebuchet MS', 'Segoe UI', -apple-system, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body {
+    width: 100%; height: 100%; overflow: hidden;
+    background: #023e8a;
+    font-family: var(--font-body);
+    color: var(--ink);
+    user-select: none; -webkit-user-select: none;
+    touch-action: none;
+    position: fixed; inset: 0;
+  }
+
+  #stage {
+    position: fixed; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(circle at 50% 30%, #5cb8ff 0%, #0077b6 60%, #023e8a 100%);
+  }
+
+  #frame {
+    position: relative;
+    width: min(100vw, 76vh);
+    height: min(100vh, 132vw);
+    max-width: 600px;
+    max-height: 940px;
+    background: #5cb8ff;
+    overflow: hidden;
+    box-shadow: 0 0 0 100vmax rgba(2, 62, 138, 0.4), 0 15px 40px rgba(0,0,0,0.5);
+    border-radius: clamp(0px, 2vw, 24px);
+  }
+
+  canvas#game-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    display: block;
+    z-index: 1;
+  }
+
+  /* Screens & UI layers */
+  .screen {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+    padding: max(16px, env(safe-area-inset-top)) 18px max(18px, env(safe-area-inset-bottom));
+    text-align: center;
+    overflow-y: auto; scrollbar-width: none;
+    z-index: 10;
+    background: linear-gradient(180deg, #5cb8ff 0%, #90e0ef 45%, #ffe082 85%, #ffd166 100%);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+  }
+  .screen::-webkit-scrollbar { display: none; }
+  .screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: scale(0.96);
+  }
+
+  /* Eyebrows & Badges */
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: clamp(13px, 3.8vw, 17px);
+    color: #fff;
+    background: var(--coral);
+    padding: 6px 18px;
+    border-radius: 999px;
+    box-shadow: 0 3px 0 var(--coral-deep);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    display: inline-flex; align-items: center; gap: 6px;
+    transform: rotate(-1.5deg);
+  }
+
+  h1.game-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 8.2vw, 44px);
+    line-height: 1.05;
+    color: #FFF;
+    text-shadow: 0 3px 0 #D48B00, 0 6px 12px rgba(44, 34, 30, 0.35);
+    margin: 8px 0 4px;
+    text-wrap: balance;
+  }
+  h1.game-title span {
+    color: #FFE66D;
+  }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 6vw, 32px);
+    color: #FFF;
+    text-shadow: 0 2px 0 rgba(44, 34, 30, 0.4);
+    margin: 4px 0 8px;
+  }
+
+  p.tagline {
+    font-family: var(--font-display);
+    font-size: clamp(14px, 4vw, 18px);
+    color: #2C221E;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 6px 16px;
+    border-radius: 14px;
+    margin: 4px 0 10px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+  }
+
+  /* Buttons */
+  .btn {
+    font-family: var(--font-display);
+    font-size: clamp(17px, 5vw, 22px);
+    color: #fff;
+    background: linear-gradient(180deg, #FFAE03, #FB8500);
+    border: none; border-radius: 20px;
+    padding: 12px 32px;
+    box-shadow: 0 5px 0 #C96B00, 0 8px 14px rgba(44, 34, 30, 0.25);
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+    touch-action: manipulation;
+  }
+  .btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #C96B00, 0 3px 6px rgba(44, 34, 30, 0.2);
+  }
+  .btn.big {
+    font-size: clamp(22px, 7vw, 30px);
+    padding: 16px 46px;
+    border-radius: 26px;
+    background: linear-gradient(180deg, #FF6B8B, #FF3366);
+    box-shadow: 0 6px 0 #B81943, 0 10px 18px rgba(255, 51, 102, 0.35);
+  }
+  .btn.big:active {
+    transform: translateY(5px);
+    box-shadow: 0 1px 0 #B81943;
+  }
+  .btn.teal {
+    background: linear-gradient(180deg, #2EC4B6, #0F8B8D);
+    box-shadow: 0 5px 0 #09595A;
+  }
+  .btn.teal:active {
+    box-shadow: 0 1px 0 #09595A;
+  }
+  .btn.ghost {
+    background: #FFF;
+    color: var(--ink);
+    box-shadow: 0 4px 0 #D4C9B8;
+    font-size: clamp(15px, 4vw, 18px);
+    padding: 10px 22px;
+  }
+  .btn.ghost:active {
+    box-shadow: 0 1px 0 #D4C9B8;
+  }
+  .btn-row {
+    display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;
+    width: 100%; margin-top: 10px;
+  }
+
+  /* Level Cards & Panels */
+  .card-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 22px;
+    padding: 16px;
+    box-shadow: 0 6px 0 #E2D5BE, 0 10px 20px rgba(0,0,0,0.12);
+    width: 100%; max-width: 440px;
+    margin: 8px 0;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
+
+  .level-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    width: 100%; max-width: 460px;
+    margin: 6px 0;
+  }
+  .level-btn {
+    background: #FFF;
+    border: 3px solid #FFE082;
+    border-radius: 16px;
+    padding: 10px 8px;
+    cursor: pointer;
+    font-family: var(--font-display);
+    text-align: left;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 4px 0 #E5C365;
+    transition: transform 0.1s ease;
+  }
+  .level-btn:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #E5C365;
+  }
+  .level-btn.active-lvl {
+    border-color: #FF5376;
+    background: #FFF5F7;
+    box-shadow: 0 4px 0 #D9254C, 0 0 0 3px rgba(255, 83, 118, 0.3);
+  }
+  .level-btn .num-badge {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #FFB703; color: #FFF;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: bold; flex-shrink: 0;
+    box-shadow: 0 2px 0 #C96B00;
+  }
+  .level-btn .lvl-info { display: flex; flex-direction: column; }
+  .level-btn .lvl-title { font-size: 13.5px; color: var(--ink); line-height: 1.15; }
+  .level-btn .lvl-sub { font-size: 11px; color: var(--ink-soft); }
+
+  /* HUD */
+  #hud {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 5;
+    display: none;
+  }
+  #hud.on { display: block; }
+  .hud-chip {
+    position: absolute;
+    font-family: var(--font-display);
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 16px;
+    padding: 6px 14px;
+    font-size: clamp(14px, 3.8vw, 18px);
+    box-shadow: 0 3px 0 rgba(44, 34, 30, 0.2);
+    display: flex; align-items: center; gap: 6px;
+    pointer-events: auto;
+  }
+  #hud-level {
+    top: 12px; left: 12px;
+    background: linear-gradient(180deg, #FFF9E6, #FFEAA7);
+    border: 2.5px solid #FFB703; color: #9E5B00;
+    box-shadow: 0 3px 0 #D48B00;
+  }
+  #hud-counter {
+    top: 12px; right: 64px;
+    background: #FFF;
+    border: 2.5px solid #FF5376; color: #C9184A;
+    box-shadow: 0 3px 0 #D9254C;
+  }
+  #hud-hint {
+    bottom: 80px; left: 50%; transform: translateX(-50%);
+    background: rgba(44, 34, 30, 0.88);
+    color: #FFF;
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-size: clamp(14px, 3.8vw, 17px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    text-align: center;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    pointer-events: none;
+  }
+  #hud-hint.show { opacity: 1; }
+
+  /* Top Right Controls (Sound, Home) */
+  .icon-btn {
+    position: absolute;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    border: none; background: rgba(255, 255, 255, 0.94);
+    font-size: 20px; cursor: pointer;
+    box-shadow: 0 3px 0 rgba(44, 34, 30, 0.25);
+    z-index: 20;
+    display: flex; align-items: center; justify-content: center;
+    touch-action: manipulation;
+  }
+  .icon-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 rgba(44,34,30,0.25); }
+  #btn-sound { top: 12px; right: 12px; }
+  #btn-levels-open { top: 12px; left: 12px; font-size: 16px; }
+
+  /* Touch on-screen controls for Driving / Flying */
+  #touch-controls {
+    position: absolute; bottom: 12px; left: 12px; right: 12px;
+    height: 90px;
+    display: none; justify-content: space-between; align-items: center;
+    pointer-events: none;
+    z-index: 6;
+  }
+  #touch-controls.on { display: flex; }
+  .touch-btn-group { display: flex; gap: 12px; pointer-events: auto; }
+  .touch-btn {
+    width: 70px; height: 70px; border-radius: 50%;
+    background: rgba(255, 255, 255, 0.9);
+    border: 3px solid #0096C7;
+    font-size: 30px; font-family: var(--font-display);
+    color: #0077B6;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 0 #005F73, 0 6px 12px rgba(0,0,0,0.2);
+    cursor: pointer;
+    touch-action: manipulation;
+    user-select: none;
+  }
+  .touch-btn:active, .touch-btn.pressed {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #005F73;
+    background: #E0F7FA;
+  }
+
+  /* Level Intro Banner */
+  #banner {
+    position: absolute; top: 22%; left: 0; right: 0;
+    text-align: center; pointer-events: none;
+    font-family: var(--font-display);
+    font-size: clamp(32px, 9vw, 56px);
+    color: #FFF;
+    text-shadow: 0 4px 0 rgba(44, 34, 30, 0.5), 0 8px 20px rgba(0,0,0,0.3);
+    z-index: 7;
+    display: none;
+    padding: 0 16px;
+    animation: bannerPop 2s forwards ease;
+  }
+  @keyframes bannerPop {
+    0% { transform: scale(0.6) translateY(-20px); opacity: 0; }
+    20% { transform: scale(1.1) translateY(0); opacity: 1; }
+    30% { transform: scale(1); opacity: 1; }
+    80% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.05) translateY(-10px); opacity: 0; }
+  }
+
+  /* Confetti canvas */
+  #confetti-canvas {
+    position: absolute; inset: 0; pointer-events: none; z-index: 15;
+  }
+
+  /* Item packing bar at bottom for Levels 1 & 2 & 6 */
+  #item-dock {
+    position: absolute; bottom: 10px; left: 10px; right: 10px;
+    background: rgba(255, 255, 255, 0.95);
+    border: 3px solid #FFE082;
+    border-radius: 20px;
+    padding: 8px 10px;
+    display: none;
+    justify-content: space-around;
+    align-items: center;
+    box-shadow: 0 4px 0 #E5C365, 0 8px 16px rgba(0,0,0,0.15);
+    z-index: 5;
+  }
+  #item-dock.on { display: flex; }
+  .dock-btn {
+    flex: 1; max-width: 58px; height: 58px;
+    border-radius: 14px;
+    background: #FFF;
+    border: 2.5px solid #E0D5C0;
+    font-size: 26px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 3px 0 #C9BFAC;
+    position: relative;
+    touch-action: manipulation;
+  }
+  .dock-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #C9BFAC; }
+  .dock-btn.packed { opacity: 0.35; filter: grayscale(0.8); pointer-events: none; }
+  .dock-btn .key-label {
+    position: absolute; bottom: 2px; right: 4px;
+    font-size: 9px; font-family: var(--font-display);
+    color: #888; font-weight: bold;
+  }
+
+  /* Responsive tweaks */
+  @media (max-height: 640px) {
+    .card-panel { padding: 10px; margin: 4px 0; }
+    .btn { padding: 10px 24px; font-size: 16px; }
+    .btn.big { padding: 12px 34px; font-size: 20px; }
+    h1.game-title { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="frame">
+    <!-- Main Game Canvas -->
+    <canvas id="game-canvas" width="600" height="840"></canvas>
+    <canvas id="confetti-canvas" width="600" height="840"></canvas>
+
+    <!-- Floating Global Top Controls -->
+    <button class="icon-btn" id="btn-sound" aria-label="Toggle Sound">🔊</button>
+
+    <!-- HUD Overlay -->
+    <div id="hud">
+      <div id="hud-level" class="hud-chip">⭐ Level 1</div>
+      <div id="hud-counter" class="hud-chip">🧳 0 / 8</div>
+      <div id="hud-hint">Tap items to pack into the suitcase!</div>
+    </div>
+
+    <!-- On-screen Item Dock for Packing & Unpacking levels -->
+    <div id="item-dock"></div>
+
+    <!-- Touch Steer Controls for Car & Airplane Levels -->
+    <div id="touch-controls">
+      <div class="touch-btn-group">
+        <button class="touch-btn" id="t-left" aria-label="Steer Left">◀</button>
+        <button class="touch-btn" id="t-right" aria-label="Steer Right">▶</button>
+      </div>
+      <div class="touch-btn-group" id="t-updown-group" style="display:none;">
+        <button class="touch-btn" id="t-up" aria-label="Fly Up">▲</button>
+        <button class="touch-btn" id="t-down" aria-label="Fly Down">▼</button>
+      </div>
+      <button class="touch-btn" id="t-action" style="background:#FFEAA7;border-color:#FFB703;color:#D48B00;" aria-label="Action">✨</button>
+    </div>
+
+    <!-- Animated Banner for level cues -->
+    <div id="banner"></div>
+
+    <!-- SCREEN 1: TITLE / START SCREEN -->
+    <div class="screen" id="s-title">
+      <div style="margin-top: 10px;">
+        <div class="eyebrow">✈️ A Game Designed by Florence 🏝️</div>
+        <h1 class="game-title">The Way to Get on <span>Your Holiday</span></h1>
+        <p class="tagline">Pack, Drive, Fly, Unpack &amp; Win the Beach Trophy!</p>
+      </div>
+
+      <div class="card-panel">
+        <canvas id="title-preview-canvas" width="340" height="180" style="width:100%;max-width:340px;border-radius:16px;background:#FFF;box-shadow:inset 0 2px 6px rgba(0,0,0,0.1);"></canvas>
+        <p style="font-family:var(--font-display);font-size:15px;color:var(--ink-soft);line-height:1.35;">
+          7 exciting holiday adventures! From packing Mum &amp; Dad's room to flying through the clouds and relaxing on the beach!
+        </p>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:12px;">
+        <button class="btn big" id="btn-play">START HOLIDAY! 🌴</button>
+      </div>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn ghost" id="btn-level-select">🗺️ Select Level</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 2: LEVEL SELECT -->
+    <div class="screen hidden" id="s-levels">
+      <div>
+        <div class="eyebrow">Holiday Itinerary</div>
+        <h2>Choose a Level</h2>
+      </div>
+
+      <div class="level-grid" id="level-buttons-container">
+        <!-- Built by JS -->
+      </div>
+
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn ghost" id="btn-levels-back">← Back</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 3: LEVEL INTRO / HOW TO PLAY CARD -->
+    <div class="screen hidden" id="s-intro">
+      <div>
+        <div class="eyebrow" id="intro-badge">Level 1 of 7</div>
+        <h2 id="intro-title">Mum &amp; Dad's Room</h2>
+      </div>
+
+      <div class="card-panel">
+        <canvas id="intro-canvas" width="320" height="170" style="width:100%;max-width:320px;border-radius:14px;background:#F0F8FF;box-shadow:inset 0 2px 6px rgba(0,0,0,0.08);"></canvas>
+        <div id="intro-desc" style="font-family:var(--font-display);font-size:16px;line-height:1.4;color:var(--ink);text-align:center;">
+          Pack clothes, toothbrushes, hairbrushes and sunhats into the suitcase!
+        </div>
+        <div id="intro-controls-tip" style="font-size:13px;color:var(--ink-soft);background:#FFF9E6;padding:6px 14px;border-radius:12px;border:1.5px dashed #FFB703;">
+          💡 <strong>How to play:</strong> Tap the items or press keys 1–8 to fly them into the suitcase!
+        </div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:14px;">
+        <button class="btn big" id="btn-intro-go">LET'S GO! 🚀</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 4: LEVEL COMPLETE / TRANSITION -->
+    <div class="screen hidden" id="s-complete">
+      <div>
+        <div class="eyebrow">Level Cleared! ⭐</div>
+        <h2 id="complete-title">Suitcase Packed!</h2>
+      </div>
+
+      <div class="card-panel">
+        <div style="font-size:56px;margin:4px 0;" id="complete-emoji">🧳✨</div>
+        <p id="complete-msg" style="font-family:var(--font-display);font-size:18px;color:var(--ink);line-height:1.35;">
+          Great job! Everything is packed and ready.
+        </p>
+        <div style="font-size:24px;letter-spacing:6px;color:#FFB703;">⭐⭐⭐⭐⭐</div>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:14px;">
+        <button class="btn big" id="btn-next-level">Next Level →</button>
+      </div>
+    </div>
+
+    <!-- SCREEN 5: GRAND WIN / BEACH FINALE & TROPHY -->
+    <div class="screen hidden" id="s-trophy">
+      <div>
+        <div class="eyebrow" style="background:#FFB703;color:#854D00;box-shadow:0 3px 0 #C96B00;">🏆 HOLIDAY CHAMPION 🏆</div>
+        <h1 class="game-title" style="font-size:clamp(28px,7.5vw,42px);margin:6px 0;">Florence Made It!</h1>
+        <p class="tagline">The Way to Get on Your Holiday is Complete!</p>
+      </div>
+
+      <div class="card-panel" style="background:linear-gradient(180deg,#FFFDF7,#FFF6D6);border:3px solid #FFD166;">
+        <canvas id="trophy-canvas" width="300" height="190" style="width:100%;max-width:300px;border-radius:16px;"></canvas>
+        <div style="font-family:var(--font-display);font-size:17px;color:#C96B00;font-weight:bold;">
+          🌟 Golden Holiday Trophy Awarded! 🌟
+        </div>
+        <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.35;">
+          You packed all the clothes, screens and cuddly toys, dodged the traffic, piloted through the clouds, and made it to the sunny beach!
+        </p>
+      </div>
+
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn big" id="btn-play-again">Play Again! 🏖️</button>
+      </div>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn ghost" id="btn-trophy-home">🏠 Main Menu</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+'use strict';
+/* ============================================================================
+   THE WAY TO GET ON YOUR HOLIDAY — Complete Game Engine
+   Author / Game Concept: Florence
+   Levels:
+   1. Mum and Dad's Room (Packing clothes, brushes, toiletries)
+   2. Kids' Room (Teenager screens & Child cuddly toys/blankets)
+   3. Car Journey to Airport (Get in car + dodge highway traffic)
+   4. Aeroplane Flight (Be the pilot & dodge clouds in the sky)
+   5. New Holiday Car (Dodge island traffic in tropical rental car)
+   6. Holiday House Unpacking (Place items in villa rooms)
+   7. Beach Day & Grand Golden Trophy Award!
+   ============================================================================ */
+
+const $ = id => document.getElementById(id);
+const clamp = (v, min, max) => Math.min(Math.max(v, min), max);
+const rand = (a, b) => a + Math.random() * (b - a);
+const TAU = Math.PI * 2;
+
+// ----------------------------------------------------------------------------
+// AUDIO ENGINE (WebAudio Synthesizer - Completely zero-dependency)
+// ----------------------------------------------------------------------------
+const AudioEngine = (() => {
+  let ctx = null;
+  let master = null;
+  let musicBus = null;
+  let sfxBus = null;
+  let enabled = true;
+  let musicTimer = 0;
+  let musicStep = 0;
+  let currentMood = 0;
+  let musicInterval = null;
+
+  function init() {
+    if (ctx) return true;
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      ctx = new AC();
+      master = ctx.createGain();
+      master.gain.value = enabled ? 0.35 : 0;
+      master.connect(ctx.destination);
+
+      musicBus = ctx.createGain();
+      musicBus.gain.value = 0.22;
+      musicBus.connect(master);
+
+      sfxBus = ctx.createGain();
+      sfxBus.gain.value = 0.75;
+      sfxBus.connect(master);
+      return true;
+    } catch (e) {
+      ctx = null;
+      return false;
+    }
+  }
+
+  function playTone(freq, t0, dur, type = 'sine', vol = 0.2, dest = sfxBus, freqEnd = null) {
+    if (!ctx || !enabled) return;
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, t0);
+      if (freqEnd) {
+        osc.frequency.exponentialRampToValueAtTime(Math.max(20, freqEnd), t0 + dur);
+      }
+      gain.gain.setValueAtTime(0.0001, t0);
+      gain.gain.exponentialRampToValueAtTime(vol, t0 + 0.008);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+      osc.connect(gain);
+      gain.connect(dest);
+      osc.start(t0);
+      osc.stop(t0 + dur + 0.05);
+    } catch (e) {}
+  }
+
+  // Pentatonic scales for bright tropical / holiday vibes
+  const SCALES = [
+    [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.26], // C major (Packing)
+    [293.66, 329.63, 369.99, 440.00, 493.88, 587.33, 659.26, 739.99], // D major (Driving)
+    [329.63, 369.99, 415.30, 493.88, 554.37, 659.26, 739.99, 830.61], // E major (Flying)
+    [349.23, 392.00, 440.00, 523.25, 587.33, 698.46, 783.99, 880.00], // F major (Beach / Calypso)
+  ];
+
+  const MELODIES = [
+    [0, 2, 4, 7, 4, 2, 0, 4, 2, 4, 7, 9, 7, 4, 2, 0], // Bedroom bounce
+    [0, 4, 7, 9, 7, 4, 0, 4, 7, 9, 11, 9, 7, 4, 2, 0], // Driving groove
+    [4, 7, 9, 11, 9, 7, 4, 7, 9, 11, 12, 11, 9, 7, 4, 2], // Flight soaring
+    [0, 2, 4, 7, 9, 7, 4, 2, 0, 4, 2, 0, 4, 7, 9, 11], // Tropical paradise
+  ];
+
+  function tickMusic() {
+    if (!ctx || !enabled) return;
+    const now = ctx.currentTime;
+    const stepDur = 0.15;
+    while (musicTimer < now + 0.35) {
+      const stepIdx = musicStep % 16;
+      const scale = SCALES[currentMood % SCALES.length];
+      const melody = MELODIES[currentMood % MELODIES.length];
+      const noteIdx = melody[stepIdx] % scale.length;
+      const freq = scale[noteIdx];
+
+      // Marimba / synth lead note
+      if (stepIdx % 2 === 0 || stepIdx === 7 || stepIdx === 15) {
+        playTone(freq, musicTimer, 0.12, 'triangle', 0.12, musicBus);
+      }
+      // Bassline note
+      if (stepIdx % 4 === 0) {
+        const bassFreq = scale[0] / 2 * (stepIdx === 8 ? 1.33 : 1);
+        playTone(bassFreq, musicTimer, 0.28, 'sine', 0.2, musicBus);
+      }
+      // Percussive blip
+      if (stepIdx % 4 === 2) {
+        playTone(600, musicTimer, 0.03, 'square', 0.03, musicBus, 120);
+      }
+
+      musicTimer += stepDur;
+      musicStep++;
+    }
+  }
+
+  return {
+    init,
+    toggleSound() {
+      enabled = !enabled;
+      if (master) master.gain.value = enabled ? 0.35 : 0;
+      return enabled;
+    },
+    get isEnabled() { return enabled; },
+    startMusic(mood = 0) {
+      currentMood = mood;
+      if (!init() || !enabled) return;
+      if (ctx.state === 'suspended') ctx.resume();
+      if (!musicInterval) {
+        musicTimer = ctx.currentTime + 0.05;
+        musicStep = 0;
+        musicInterval = setInterval(tickMusic, 100);
+      }
+    },
+    stopMusic() {
+      if (musicInterval) {
+        clearInterval(musicInterval);
+        musicInterval = null;
+      }
+    },
+    sfx: {
+      tap() {
+        if (!init() || !enabled) return;
+        playTone(480, ctx.currentTime, 0.06, 'sine', 0.15, sfxBus, 720);
+      },
+      magicFly() {
+        if (!init() || !enabled) return;
+        const now = ctx.currentTime;
+        [523, 659, 784, 1046, 1318].forEach((f, i) => {
+          playTone(f, now + i * 0.04, 0.14, 'triangle', 0.18, sfxBus, f * 1.25);
+        });
+      },
+      packThud() {
+        if (!init() || !enabled) return;
+        playTone(180, ctx.currentTime, 0.14, 'square', 0.25, sfxBus, 60);
+      },
+      horn() {
+        if (!init() || !enabled) return;
+        const now = ctx.currentTime;
+        playTone(340, now, 0.12, 'sawtooth', 0.16, sfxBus);
+        playTone(440, now + 0.02, 0.14, 'sawtooth', 0.16, sfxBus);
+      },
+      coin() {
+        if (!init() || !enabled) return;
+        const now = ctx.currentTime;
+        playTone(987, now, 0.08, 'sine', 0.22, sfxBus, 1318);
+        playTone(1318, now + 0.06, 0.15, 'sine', 0.25, sfxBus);
+      },
+      cloudWhoosh() {
+        if (!init() || !enabled) return;
+        playTone(280, ctx.currentTime, 0.22, 'triangle', 0.2, sfxBus, 140);
+      },
+      levelWin() {
+        if (!init() || !enabled) return;
+        const now = ctx.currentTime;
+        [523, 659, 784, 1046].forEach((f, i) => {
+          playTone(f, now + i * 0.1, 0.22, 'triangle', 0.25, sfxBus);
+        });
+      },
+      grandFanfare() {
+        if (!init() || !enabled) return;
+        const now = ctx.currentTime;
+        const notes = [523, 523, 523, 659, 784, 659, 784, 1046];
+        const times = [0, 0.12, 0.24, 0.36, 0.54, 0.72, 0.84, 1.05];
+        notes.forEach((f, i) => {
+          playTone(f, now + times[i], 0.35, 'triangle', 0.28, sfxBus);
+        });
+      },
+      oceanWave() {
+        if (!init() || !enabled) return;
+        playTone(120, ctx.currentTime, 0.8, 'sine', 0.15, sfxBus, 60);
+      }
+    }
+  };
+})();
+
+// ----------------------------------------------------------------------------
+// GAME STATE & DEFINITIONS
+// ----------------------------------------------------------------------------
+const GAME_WIDTH = 600;
+const GAME_HEIGHT = 840;
+
+const LEVELS = [
+  {
+    id: 1,
+    title: "Mum & Dad's Room",
+    subtitle: "Packing clothes & toiletries",
+    badge: "Level 1: Packing",
+    icon: "🧳",
+    musicMood: 0,
+    desc: "Pack Mum & Dad's holiday clothes, toothbrushes, hairbrush, sunglasses and sunhat magically into the open suitcase!",
+    hint: "Tap any item in the room to fly it into the suitcase!",
+    targetCount: 8,
+    items: [
+      { id: 'dad_shirt', name: "Dad's Hawaiian Shirt", emoji: '👕', color: '#FF6B6B', x: 120, y: 360, w: 60, h: 60 },
+      { id: 'mum_dress', name: "Mum's Summer Dress", emoji: '👗', color: '#FF9EAA', x: 200, y: 340, w: 60, h: 60 },
+      { id: 'tb_blue', name: "Blue Toothbrush", emoji: '🪥', color: '#4CC9F0', x: 480, y: 290, w: 45, h: 45 },
+      { id: 'tb_pink', name: "Pink Toothbrush", emoji: '🪥', color: '#F72585', x: 530, y: 290, w: 45, h: 45 },
+      { id: 'hairbrush', name: "Mum's Hairbrush", emoji: '🪮', color: '#F39A59', x: 450, y: 345, w: 50, h: 50 },
+      { id: 'sunhat', name: "Sunny Holiday Hat", emoji: '👒', color: '#FFD166', x: 130, y: 220, w: 65, h: 50 },
+      { id: 'toothpaste', name: "Mint Toothpaste", emoji: '🧴', color: '#06D6A0', x: 490, y: 345, w: 45, h: 45 },
+      { id: 'sunglasses', name: "Cool Sunglasses", emoji: '🕶️', color: '#118AB2', x: 370, y: 350, w: 55, h: 40 },
+    ]
+  },
+  {
+    id: 2,
+    title: "The Kids' Room",
+    subtitle: "Screens, Cuddly Toys & Blankets",
+    badge: "Level 2: Kids' Packing",
+    icon: "🎮",
+    musicMood: 0,
+    desc: "First pack the teenager's screens (phones, iPads, Nintendo Switch), then pack the child's cuddly toys, blankets and storybook!",
+    hint: "Tap screens and cuddly toys to pack them!",
+    targetCount: 8,
+    items: [
+      { id: 'phone', name: "Teen's Phone", emoji: '📱', color: '#4361EE', x: 110, y: 320, w: 50, h: 50, group: 'teen' },
+      { id: 'ipad', name: "Holiday iPad Tablet", emoji: '📲', color: '#3A0CA3', x: 180, y: 310, w: 60, h: 50, group: 'teen' },
+      { id: 'nintendo', name: "Nintendo Switch", emoji: '🎮', color: '#E63946', x: 120, y: 390, w: 65, h: 50, group: 'teen' },
+      { id: 'headphones', name: "Gamer Headphones", emoji: '🎧', color: '#7209B7', x: 210, y: 380, w: 55, h: 55, group: 'teen' },
+      { id: 'teddy', name: "Barnaby Bear", emoji: '🧸', color: '#9C6644', x: 410, y: 320, w: 60, h: 60, group: 'child' },
+      { id: 'bunny', name: "Fluffy Bunny", emoji: '🐰', color: '#E9D8A6', x: 490, y: 310, w: 55, h: 55, group: 'child' },
+      { id: 'blanket', name: "Cozy Star Blanket", emoji: '🌟', color: '#FFD166', x: 400, y: 400, w: 70, h: 50, group: 'child' },
+      { id: 'storybook', name: "Bedtime Storybook", emoji: '📖', color: '#06D6A0', x: 490, y: 390, w: 55, h: 50, group: 'child' },
+    ]
+  },
+  {
+    id: 3,
+    title: "Car Journey to the Airport",
+    subtitle: "Dodge traffic on the highway",
+    badge: "Level 3: Driving",
+    icon: "🚗",
+    musicMood: 1,
+    desc: "Everyone gets into the car! Steer down the motorway, dodge incoming cars and road cones, and reach the airport terminal!",
+    hint: "Use Left / Right arrow keys or touch buttons to steer!",
+    targetCount: 100, // Distance percent
+    isArcade: true,
+    mode: 'drive_highway'
+  },
+  {
+    id: 4,
+    title: "Flying the Aeroplane",
+    subtitle: "Be the pilot & dodge the clouds!",
+    badge: "Level 4: Flying",
+    icon: "✈️",
+    musicMood: 2,
+    desc: "Board the plane and take the pilot's controls! Steer through the sky and make sure you don't fly through any stormy clouds!",
+    hint: "Use Arrow keys or touch buttons to guide the plane!",
+    targetCount: 100, // Distance percent
+    isArcade: true,
+    mode: 'fly_clouds'
+  },
+  {
+    id: 5,
+    title: "The New Holiday Car",
+    subtitle: "Tropical rental car road trip",
+    badge: "Level 5: Island Drive",
+    icon: "🚙",
+    musicMood: 1,
+    desc: "You landed! Hop in your sunny holiday rental car and cruise along the tropical coastal road to your holiday villa!",
+    hint: "Dodge ice cream vans, beach buggies and rolling beach balls!",
+    targetCount: 100, // Distance percent
+    isArcade: true,
+    mode: 'drive_tropical'
+  },
+  {
+    id: 6,
+    title: "Unpacking at the Holiday House",
+    subtitle: "Unpack into your holiday rooms",
+    badge: "Level 6: Unpacking",
+    icon: "🏡",
+    musicMood: 0,
+    desc: "You arrived at the holiday house! Tap the packed items in the suitcases to place everything neatly into the holiday villa!",
+    hint: "Tap items in the suitcase to unpack them into the room!",
+    targetCount: 8,
+    items: [
+      { id: 'u_shirt', name: "Hang Holiday Shirts", emoji: '👕', targetX: 110, targetY: 280, x: 260, y: 550 },
+      { id: 'u_dress', name: "Hang Summer Dress", emoji: '👗', targetX: 170, targetY: 275, x: 310, y: 550 },
+      { id: 'u_tb', name: "Toothbrushes in Bathroom", emoji: '🪥', targetX: 520, targetY: 270, x: 360, y: 550 },
+      { id: 'u_nintendo', name: "Dock Nintendo Switch", emoji: '🎮', targetX: 300, targetY: 340, x: 240, y: 610 },
+      { id: 'u_teddy', name: "Put Teddy on the Bed", emoji: '🧸', targetX: 430, targetY: 360, x: 290, y: 610 },
+      { id: 'u_blanket', name: "Spread Cozy Blanket", emoji: '🌟', targetX: 470, targetY: 380, x: 340, y: 610 },
+      { id: 'u_hat', name: "Sunhat on the Stand", emoji: '👒', targetX: 80, targetY: 220, x: 260, y: 670 },
+      { id: 'u_glasses', name: "Sunglasses on Table", emoji: '🕶️', targetX: 300, targetY: 380, x: 320, y: 670 },
+    ]
+  },
+  {
+    id: 7,
+    title: "Beach Day & Golden Trophy",
+    subtitle: "Relax on the beach & win the cup!",
+    badge: "Level 7: Beach Finale",
+    icon: "🏖️",
+    musicMood: 3,
+    desc: "Head down to the sunny beach! Relax on the deckchair, build a sandcastle, splash in the sea, and claim Florence's Holiday Trophy!",
+    hint: "Tap the deckchair, sandcastle or sea to enjoy the beach!",
+    targetCount: 3,
+    isBeach: true
+  }
+];
+
+// Global Game State
+const state = {
+  currentLevelIndex: 0,
+  packedItems: new Set(),
+  flyingParticles: [],
+  sparkles: [],
+  confetti: [],
+  arcade: {
+    playerX: GAME_WIDTH / 2,
+    playerY: 650,
+    targetX: GAME_WIDTH / 2,
+    targetY: 650,
+    speed: 0,
+    distance: 0,
+    obstacles: [],
+    collectibles: [],
+    spawnTimer: 0,
+    score: 0,
+    invincibleTimer: 0,
+    wobble: 0
+  },
+  beach: {
+    sunloungerState: 0,
+    sandcastleLevel: 0,
+    seaSplashes: 0,
+    dolphinJump: 0,
+    ballBounce: 0
+  },
+  keys: {
+    left: false, right: false, up: false, down: false
+  },
+  cutsceneStep: 0,
+  cutsceneTimer: 0
+};
+
+// ----------------------------------------------------------------------------
+// CANVAS RENDERING & PROCEDURAL ART
+// ----------------------------------------------------------------------------
+const canvas = $('game-canvas');
+const ctx = canvas.getContext('2d');
+const confettiCanvas = $('confetti-canvas');
+const cCtx = confettiCanvas.getContext('2d');
+
+// High-DPI Canvas scaling
+function resizeCanvases() {
+  const rect = canvas.getBoundingClientRect();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = GAME_WIDTH * dpr;
+  canvas.height = GAME_HEIGHT * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+  confettiCanvas.width = GAME_WIDTH * dpr;
+  confettiCanvas.height = GAME_HEIGHT * dpr;
+  cCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+window.addEventListener('resize', resizeCanvases);
+resizeCanvases();
+
+// ----------------------------------------------------------------------------
+// DRAWING ROUTINES FOR ROOMS, CARS, PLANES & CHARACTERS
+// ----------------------------------------------------------------------------
+
+function drawShadow(x, y, w, h) {
+  ctx.save();
+  ctx.fillStyle = 'rgba(20, 10, 5, 0.18)';
+  ctx.beginPath();
+  ctx.ellipse(x, y, w / 2, h / 2, 0, 0, TAU);
+  ctx.fill();
+  ctx.restore();
+}
+
+// Draw Suitcase
+function drawSuitcase(x, y, w, h, open = true, packedCount = 0, totalCount = 8) {
+  ctx.save();
+  drawShadow(x, y + h / 2 + 6, w * 0.9, 20);
+
+  // Outer case
+  const grad = ctx.createLinearGradient(x - w / 2, y - h / 2, x + w / 2, y + h / 2);
+  grad.addColorStop(0, '#0096C7');
+  grad.addColorStop(1, '#023E8A');
+
+  ctx.fillStyle = grad;
+  ctx.strokeStyle = '#03045E';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.roundRect(x - w / 2, y - h / 2, w, h, 18);
+  ctx.fill();
+  ctx.stroke();
+
+  // Corner protective brackets
+  ctx.fillStyle = '#FFB703';
+  [
+    [x - w / 2, y - h / 2],
+    [x + w / 2 - 16, y - h / 2],
+    [x - w / 2, y + h / 2 - 16],
+    [x + w / 2 - 16, y + h / 2 - 16]
+  ].forEach(([cx, cy]) => {
+    ctx.fillRect(cx, cy, 16, 16);
+  });
+
+  if (open) {
+    // Interior lining
+    ctx.fillStyle = '#FFF8E7';
+    ctx.beginPath();
+    ctx.roundRect(x - w / 2 + 10, y - h / 2 + 10, w - 20, h - 20, 10);
+    ctx.fill();
+    ctx.strokeStyle = '#E2D3B3';
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Packing straps
+    ctx.strokeStyle = '#FF5376';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(x - w / 2 + 18, y - h / 2 + 18);
+    ctx.lineTo(x + w / 2 - 18, y + h / 2 - 18);
+    ctx.moveTo(x + w / 2 - 18, y - h / 2 + 18);
+    ctx.lineTo(x - w / 2 + 18, y + h / 2 - 18);
+    ctx.stroke();
+
+    // Suitcase Fill meter
+    const fillPercent = packedCount / totalCount;
+    if (fillPercent > 0) {
+      ctx.fillStyle = 'rgba(76, 201, 240, 0.4)';
+      ctx.beginPath();
+      ctx.roundRect(x - w / 2 + 14, y + h / 2 - 14 - (h - 28) * fillPercent, w - 28, (h - 28) * fillPercent, 6);
+      ctx.fill();
+    }
+
+    // Holiday Luggage Tag
+    ctx.save();
+    ctx.translate(x + w / 2 - 10, y - h / 2 + 8);
+    ctx.rotate(0.2);
+    ctx.fillStyle = '#FFD166';
+    ctx.strokeStyle = '#D48B00';
+    ctx.lineWidth = 1.5;
+    ctx.fillRect(0, 0, 36, 22);
+    ctx.strokeRect(0, 0, 36, 22);
+    ctx.fillStyle = '#C96B00';
+    ctx.font = 'bold 8px sans-serif';
+    ctx.fillText('HOLIDAY', 3, 14);
+    ctx.restore();
+  }
+
+  // Handle
+  ctx.fillStyle = '#333';
+  ctx.beginPath();
+  ctx.roundRect(x - 24, y - h / 2 - 10, 48, 12, 6);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+// Draw Level 1: Mum and Dad's Bedroom
+function drawBedroom() {
+  // Wallpaper
+  const wallGrad = ctx.createLinearGradient(0, 0, 0, 480);
+  wallGrad.addColorStop(0, '#E0F2FE');
+  wallGrad.addColorStop(1, '#BAE6FD');
+  ctx.fillStyle = wallGrad;
+  ctx.fillRect(0, 0, GAME_WIDTH, 480);
+
+  // Wallpaper cute polka dots
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+  for (let gx = 30; gx < GAME_WIDTH; gx += 50) {
+    for (let gy = 30; gy < 460; gy += 50) {
+      ctx.beginPath();
+      ctx.arc(gx, gy, 4, 0, TAU);
+      ctx.fill();
+    }
+  }
+
+  // Wooden Floor
+  const floorGrad = ctx.createLinearGradient(0, 480, 0, GAME_HEIGHT);
+  floorGrad.addColorStop(0, '#DEB887');
+  floorGrad.addColorStop(1, '#C49758');
+  ctx.fillStyle = floorGrad;
+  ctx.fillRect(0, 480, GAME_WIDTH, GAME_HEIGHT - 480);
+
+  // Floor plank lines
+  ctx.strokeStyle = 'rgba(90, 50, 20, 0.15)';
+  ctx.lineWidth = 2;
+  for (let fy = 510; fy < GAME_HEIGHT; fy += 40) {
+    ctx.beginPath();
+    ctx.moveTo(0, fy);
+    ctx.lineTo(GAME_WIDTH, fy);
+    ctx.stroke();
+  }
+
+  // Cozy Rug
+  drawShadow(GAME_WIDTH / 2, 620, 420, 140);
+  ctx.fillStyle = '#FF9EAA';
+  ctx.beginPath();
+  ctx.ellipse(GAME_WIDTH / 2, 620, 200, 60, 0, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = '#FFF';
+  ctx.lineWidth = 4;
+  ctx.stroke();
+
+  // Big Double Bed in background
+  drawShadow(180, 420, 220, 80);
+  ctx.fillStyle = '#4A3525';
+  ctx.beginPath();
+  ctx.roundRect(70, 260, 220, 140, 16);
+  ctx.fill();
+
+  // Bed duvet & pillows
+  ctx.fillStyle = '#FFF8E7';
+  ctx.fillRect(80, 310, 200, 90);
+  ctx.fillStyle = '#FFD166';
+  ctx.fillRect(80, 350, 200, 50);
+
+  // Pillows
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath();
+  ctx.roundRect(95, 275, 75, 45, 10);
+  ctx.roundRect(185, 275, 75, 45, 10);
+  ctx.fill();
+
+  // Vanity Dresser & Mirror (Right)
+  drawShadow(500, 430, 150, 40);
+  ctx.fillStyle = '#6F4E37';
+  ctx.beginPath();
+  ctx.roundRect(430, 330, 140, 100, 10);
+  ctx.fill();
+  // Mirror
+  ctx.fillStyle = '#E0F7FA';
+  ctx.beginPath();
+  ctx.ellipse(500, 250, 45, 65, 0, 0, TAU);
+  ctx.fill();
+  ctx.strokeStyle = '#FFB703';
+  ctx.lineWidth = 6;
+  ctx.stroke();
+
+  // Wardrobe (Left)
+  drawShadow(60, 450, 80, 30);
+  ctx.fillStyle = '#5A3E28';
+  ctx.beginPath();
+  ctx.roundRect(15, 160, 75, 260, 10);
+  ctx.fill();
+  ctx.fillStyle = '#FFD166';
+  ctx.beginPath();
+  ctx.arc(75, 290, 5, 0, TAU);
+  ctx.fill();
+
+  // Holiday packing suitcase on luggage stand in center
+  drawSuitcase(300, 580, 200, 150, true, state.packedItems.size, 8);
+}
+
+// Draw Level 2: The Kids' Room (Split Teenager Tech & Child Cuddly Toys)
+function drawKidsRoom() {
+  // Left side: Teenager cool vibe (Grape purple & Teal)
+  const leftGrad = ctx.createLinearGradient(0, 0, GAME_WIDTH / 2, 480);
+  leftGrad.addColorStop(0, '#2B2D42');
+  leftGrad.addColorStop(1, '#3D348B');
+  ctx.fillStyle = leftGrad;
+  ctx.fillRect(0, 0, GAME_WIDTH / 2, 480);
+
+  // Right side: Child cozy vibe (Sunny Yellow & Mint)
+  const rightGrad = ctx.createLinearGradient(GAME_WIDTH / 2, 0, GAME_WIDTH, 480);
+  rightGrad.addColorStop(0, '#FFF3B0');
+  rightGrad.addColorStop(1, '#E2ECE9');
+  ctx.fillStyle = rightGrad;
+  ctx.fillRect(GAME_WIDTH / 2, 0, GAME_WIDTH / 2, 480);
+
+  // Floor
+  ctx.fillStyle = '#C49758';
+  ctx.fillRect(0, 480, GAME_WIDTH, GAME_HEIGHT - 480);
+
+  // Teenager Gaming Desk (Left)
+  ctx.fillStyle = '#1D3557';
+  ctx.beginPath();
+  ctx.roundRect(40, 320, 200, 110, 12);
+  ctx.fill();
+  // Gaming monitor
+  ctx.fillStyle = '#0F0F1A';
+  ctx.fillRect(80, 220, 110, 75);
+  ctx.strokeStyle = '#2EC4B6';
+  ctx.lineWidth = 3;
+  ctx.strokeRect(80, 220, 110, 75);
+  ctx.fillStyle = '#2EC4B6';
+  ctx.font = '10px sans-serif';
+  ctx.fillText('HOLIDAY READY', 88, 260);
+
+  // Child's Bed & Toy Box (Right)
+  ctx.fillStyle = '#FF99C8';
+  ctx.beginPath();
+  ctx.roundRect(380, 310, 190, 120, 16);
+  ctx.fill();
+  // Child pillow with rainbow
+  ctx.fillStyle = '#FFF';
+  ctx.beginPath();
+  ctx.roundRect(400, 270, 80, 40, 10);
+  ctx.fill();
+  // Fairy lights string on right
+  for (let lx = 320; lx < GAME_WIDTH - 20; lx += 32) {
+    const ly = 120 + Math.sin(lx * 0.05) * 15;
+    ctx.fillStyle = ['#FFD166', '#FF5376', '#06D6A0', '#4CC9F0'][((lx / 32) | 0) % 4];
+    ctx.beginPath();
+    ctx.arc(lx, ly, 6, 0, TAU);
+    ctx.fill();
+  }
+
+  // Banners for Zones
+  ctx.fillStyle = '#7209B7';
+  ctx.font = 'bold 13px sans-serif';
+  ctx.fillText('📱 TEENAGER ZONE', 65, 190);
+  ctx.fillStyle = '#FF5376';
+  ctx.fillText('🧸 CHILD ZONE', 420, 190);
+
+  // Center Open Kids' Suitcase
+  drawSuitcase(300, 580, 210, 155, true, state.packedItems.size, 8);
+}
+
+// Draw Flying & Interactive Items
+function drawItems(items) {
+  items.forEach((item, index) => {
+    const isPacked = state.packedItems.has(item.id);
+    if (isPacked) return;
+
+    ctx.save();
+    // Item shadow
+    drawShadow(item.x, item.y + item.h / 2, item.w * 0.8, 12);
+
+    // Glowing item highlight card
+    ctx.fillStyle = '#FFF';
+    ctx.strokeStyle = item.color || '#FFB703';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.roundRect(item.x - item.w / 2, item.y - item.h / 2, item.w, item.h, 14);
+    ctx.fill();
+    ctx.stroke();
+
+    // Emoji icon
+    ctx.font = `${Math.round(item.w * 0.58)}px sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(item.emoji, item.x, item.y);
+
+    // Number key badge
+    ctx.fillStyle = '#FF5376';
+    ctx.beginPath();
+    ctx.arc(item.x - item.w / 2 + 10, item.y - item.h / 2 + 10, 10, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = '#FFF';
+    ctx.font = 'bold 11px sans-serif';
+    ctx.fillText((index + 1).toString(), item.x - item.w / 2 + 10, item.y - item.h / 2 + 10);
+
+    ctx.restore();
+  });
+}
+
+// Draw Floating Flying Particles (Items traveling to suitcase)
+function drawFlyingParticles() {
+  for (let i = state.flyingParticles.length - 1; i >= 0; i--) {
+    const p = state.flyingParticles[i];
+    p.progress += 0.045;
+
+    // Cubic bezier or parabolic trajectory
+    const t = p.progress;
+    const curX = (1 - t) * (1 - t) * p.startX + 2 * (1 - t) * t * p.ctrlX + t * t * p.targetX;
+    const curY = (1 - t) * (1 - t) * p.startY + 2 * (1 - t) * t * p.ctrlY + t * t * p.targetY;
+    const scale = 1 + Math.sin(t * Math.PI) * 0.6;
+    const rot = t * Math.PI * 4;
+
+    ctx.save();
+    ctx.translate(curX, curY);
+    ctx.rotate(rot);
+    ctx.scale(scale, scale);
+
+    // Golden magic aura
+    ctx.fillStyle = 'rgba(255, 215, 0, 0.4)';
+    ctx.beginPath();
+    ctx.arc(0, 0, 28, 0, TAU);
+    ctx.fill();
+
+    // Emoji
+    ctx.font = '36px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(p.emoji, 0, 0);
+    ctx.restore();
+
+    // Sparkle trail
+    if (Math.random() < 0.6) {
+      state.sparkles.push({
+        x: curX + rand(-10, 10),
+        y: curY + rand(-10, 10),
+        size: rand(6, 14),
+        alpha: 1,
+        color: ['#FFD166', '#FF5376', '#4CC9F0', '#06D6A0'][Math.floor(rand(0, 4))]
+      });
+    }
+
+    if (p.progress >= 1) {
+      AudioEngine.sfx.packThud();
+      state.flyingParticles.splice(i, 1);
+      // Burst sparkles inside suitcase
+      for (let s = 0; s < 12; s++) {
+        state.sparkles.push({
+          x: p.targetX + rand(-25, 25),
+          y: p.targetY + rand(-20, 20),
+          size: rand(8, 16),
+          alpha: 1,
+          vx: rand(-3, 3),
+          vy: rand(-4, 1),
+          color: '#FFB703'
+        });
+      }
+    }
+  }
+}
+
+// Sparkles rendering
+function drawSparkles() {
+  for (let i = state.sparkles.length - 1; i >= 0; i--) {
+    const s = state.sparkles[i];
+    s.alpha -= 0.035;
+    if (s.vx) s.x += s.vx;
+    if (s.vy) s.y += s.vy;
+
+    ctx.save();
+    ctx.globalAlpha = Math.max(0, s.alpha);
+    ctx.fillStyle = s.color || '#FFD166';
+    ctx.beginPath();
+    // Star shape
+    const r = s.size;
+    ctx.moveTo(s.x, s.y - r);
+    ctx.lineTo(s.x + r * 0.3, s.y - r * 0.3);
+    ctx.lineTo(s.x + r, s.y);
+    ctx.lineTo(s.x + r * 0.3, s.y + r * 0.3);
+    ctx.lineTo(s.x, s.y + r);
+    ctx.lineTo(s.x - r * 0.3, s.y + r * 0.3);
+    ctx.lineTo(s.x - r, s.y);
+    ctx.lineTo(s.x - r * 0.3, s.y - r * 0.3);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+
+    if (s.alpha <= 0) state.sparkles.splice(i, 1);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// VEHICLE & ARCADE DRAWING ROUTINES (Levels 3, 4, 5)
+// ----------------------------------------------------------------------------
+
+// Family Car (Red Estate / Station Wagon)
+function drawFamilyCar(x, y, w = 70, h = 120, wobble = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(wobble * 0.05);
+
+  drawShadow(0, 6, w * 1.1, h * 0.95);
+
+  // Wheels
+  ctx.fillStyle = '#111';
+  ctx.fillRect(-w / 2 - 4, -h / 2 + 15, 8, 24);
+  ctx.fillRect(w / 2 - 4, -h / 2 + 15, 8, 24);
+  ctx.fillRect(-w / 2 - 4, h / 2 - 35, 8, 24);
+  ctx.fillRect(w / 2 - 4, h / 2 - 35, 8, 24);
+
+  // Car Body
+  const carGrad = ctx.createLinearGradient(-w / 2, 0, w / 2, 0);
+  carGrad.addColorStop(0, '#E63946');
+  carGrad.addColorStop(0.5, '#FF4D6D');
+  carGrad.addColorStop(1, '#C9184A');
+  ctx.fillStyle = carGrad;
+  ctx.beginPath();
+  ctx.roundRect(-w / 2, -h / 2, w, h, 20);
+  ctx.fill();
+
+  // Roof & Windows
+  ctx.fillStyle = '#3A0CA3';
+  ctx.beginPath();
+  ctx.roundRect(-w / 2 + 8, -h / 2 + 25, w - 16, h - 50, 14);
+  ctx.fill();
+
+  // Windshield & Rear Window
+  ctx.fillStyle = '#4CC9F0';
+  ctx.fillRect(-w / 2 + 12, -h / 2 + 30, w - 24, 20); // Front
+  ctx.fillRect(-w / 2 + 12, h / 2 - 45, w - 24, 16); // Back
+
+  // Roof Luggage Rack with Suitcases!
+  ctx.fillStyle = '#FFB703';
+  ctx.beginPath();
+  ctx.roundRect(-w / 2 + 14, -h / 2 + 55, w - 28, 26, 6);
+  ctx.fill();
+  ctx.fillStyle = '#0096C7';
+  ctx.beginPath();
+  ctx.roundRect(-w / 2 + 18, -h / 2 + 58, 20, 20, 4);
+  ctx.fill();
+
+  // Headlights
+  ctx.fillStyle = '#FFE66D';
+  ctx.beginPath();
+  ctx.arc(-w / 2 + 14, -h / 2 + 6, 7, 0, TAU);
+  ctx.arc(w / 2 - 14, -h / 2 + 6, 7, 0, TAU);
+  ctx.fill();
+
+  // Headlight beams
+  ctx.fillStyle = 'rgba(255, 230, 109, 0.18)';
+  ctx.beginPath();
+  ctx.moveTo(-w / 2 + 10, -h / 2 + 6);
+  ctx.lineTo(-w / 2 - 40, -h / 2 - 90);
+  ctx.lineTo(w / 2 + 40, -h / 2 - 90);
+  ctx.lineTo(w / 2 - 10, -h / 2 + 6);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.restore();
+}
+
+// Holiday Rental Car (Tropical Yellow Convertible / Jeep)
+function drawHolidayCar(x, y, w = 70, h = 115, wobble = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(wobble * 0.05);
+
+  drawShadow(0, 6, w * 1.1, h * 0.95);
+
+  // Wheels
+  ctx.fillStyle = '#222';
+  ctx.fillRect(-w / 2 - 5, -h / 2 + 15, 9, 24);
+  ctx.fillRect(w / 2 - 4, -h / 2 + 15, 9, 24);
+  ctx.fillRect(-w / 2 - 5, h / 2 - 35, 9, 24);
+  ctx.fillRect(w / 2 - 4, h / 2 - 35, 9, 24);
+
+  // Body
+  const carGrad = ctx.createLinearGradient(-w / 2, 0, w / 2, 0);
+  carGrad.addColorStop(0, '#FFB703');
+  carGrad.addColorStop(0.5, '#FFD166');
+  carGrad.addColorStop(1, '#F77F00');
+  ctx.fillStyle = carGrad;
+  ctx.beginPath();
+  ctx.roundRect(-w / 2, -h / 2, w, h, 18);
+  ctx.fill();
+
+  // Open-top seats & family inside in sunglasses!
+  ctx.fillStyle = '#2EC4B6';
+  ctx.beginPath();
+  ctx.roundRect(-w / 2 + 8, -h / 2 + 30, w - 16, h - 55, 10);
+  ctx.fill();
+
+  // Front Windshield
+  ctx.fillStyle = '#E0F7FA';
+  ctx.fillRect(-w / 2 + 10, -h / 2 + 25, w - 20, 12);
+
+  // People in the car (smiling heads)
+  ctx.fillStyle = '#FFD8BE';
+  ctx.beginPath();
+  ctx.arc(-14, -h / 2 + 48, 9, 0, TAU); // Driver (Dad)
+  ctx.arc(14, -h / 2 + 48, 9, 0, TAU);  // Passenger (Mum)
+  ctx.arc(-14, -h / 2 + 70, 8, 0, TAU); // Teen
+  ctx.arc(14, -h / 2 + 70, 8, 0, TAU);  // Child Florence
+  ctx.fill();
+
+  // Sunglasses on passengers
+  ctx.fillStyle = '#111';
+  [-14, 14].forEach(px => {
+    ctx.fillRect(px - 6, -h / 2 + 45, 12, 4);
+    ctx.fillRect(px - 5, -h / 2 + 67, 10, 4);
+  });
+
+  ctx.restore();
+}
+
+// Airplane (Level 4)
+function drawAirplane(x, y, w = 90, h = 90, tilt = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(tilt * 0.08);
+
+  drawShadow(0, 24, 70, 26);
+
+  // Wings
+  ctx.fillStyle = '#0077B6';
+  ctx.beginPath();
+  ctx.moveTo(0, -10);
+  ctx.lineTo(-w / 2 - 20, 25);
+  ctx.lineTo(-w / 2 - 15, 38);
+  ctx.lineTo(0, 20);
+  ctx.lineTo(w / 2 + 15, 38);
+  ctx.lineTo(w / 2 + 20, 25);
+  ctx.closePath();
+  ctx.fill();
+
+  // Jet Engines on wings
+  ctx.fillStyle = '#FFB703';
+  ctx.beginPath();
+  ctx.roundRect(-w / 2 + 8, 18, 14, 26, 6);
+  ctx.roundRect(w / 2 - 22, 18, 14, 26, 6);
+  ctx.fill();
+
+  // Fuselage (Body)
+  const grad = ctx.createLinearGradient(-18, 0, 18, 0);
+  grad.addColorStop(0, '#E0F2FE');
+  grad.addColorStop(0.5, '#FFFFFF');
+  grad.addColorStop(1, '#BAE6FD');
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 22, h / 2, 0, 0, TAU);
+  ctx.fill();
+
+  // Pilot Cockpit Window
+  ctx.fillStyle = '#023E8A';
+  ctx.beginPath();
+  ctx.ellipse(0, -h / 2 + 18, 14, 8, 0, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = '#4CC9F0';
+  ctx.beginPath();
+  ctx.ellipse(0, -h / 2 + 18, 11, 5, 0, 0, TAU);
+  ctx.fill();
+
+  // Cabin Windows
+  ctx.fillStyle = '#0077B6';
+  for (let wy = -h / 2 + 35; wy < h / 2 - 20; wy += 14) {
+    ctx.beginPath();
+    ctx.arc(-14, wy, 3, 0, TAU);
+    ctx.arc(14, wy, 3, 0, TAU);
+    ctx.fill();
+  }
+
+  // Tail fin with Holiday Sun Logo
+  ctx.fillStyle = '#FF5376';
+  ctx.beginPath();
+  ctx.moveTo(-10, h / 2 - 15);
+  ctx.lineTo(0, h / 2 + 20);
+  ctx.lineTo(10, h / 2 - 15);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = '#FFD166';
+  ctx.beginPath();
+  ctx.arc(0, h / 2 - 2, 5, 0, TAU);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+// Obstacles (Traffic cars, clouds, beach balls)
+function drawObstacle(obs) {
+  ctx.save();
+  if (obs.type === 'car_blue') {
+    drawShadow(obs.x, obs.y + 6, obs.w, obs.h * 0.9);
+    ctx.fillStyle = '#1D3557';
+    ctx.beginPath();
+    ctx.roundRect(obs.x - obs.w / 2, obs.y - obs.h / 2, obs.w, obs.h, 16);
+    ctx.fill();
+    ctx.fillStyle = '#4CC9F0';
+    ctx.fillRect(obs.x - obs.w / 2 + 8, obs.y - obs.h / 2 + 20, obs.w - 16, 16);
+  } else if (obs.type === 'truck') {
+    drawShadow(obs.x, obs.y + 8, obs.w, obs.h * 0.9);
+    ctx.fillStyle = '#2A9D8F';
+    ctx.beginPath();
+    ctx.roundRect(obs.x - obs.w / 2, obs.y - obs.h / 2, obs.w, obs.h, 12);
+    ctx.fill();
+    ctx.fillStyle = '#E76F51';
+    ctx.fillRect(obs.x - obs.w / 2 + 4, obs.y - obs.h / 2 + 10, obs.w - 8, 30);
+  } else if (obs.type === 'cone') {
+    ctx.fillStyle = '#F77F00';
+    ctx.beginPath();
+    ctx.moveTo(obs.x, obs.y - obs.h / 2);
+    ctx.lineTo(obs.x - obs.w / 2, obs.y + obs.h / 2);
+    ctx.lineTo(obs.x + obs.w / 2, obs.y + obs.h / 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.fillStyle = '#FFF';
+    ctx.fillRect(obs.x - 12, obs.y, 24, 6);
+  } else if (obs.type === 'cloud') {
+    // Stormy / Fluffy Cloud
+    ctx.fillStyle = obs.isStorm ? '#6C757D' : '#E9ECEF';
+    ctx.beginPath();
+    ctx.arc(obs.x, obs.y, obs.w * 0.35, 0, TAU);
+    ctx.arc(obs.x - obs.w * 0.28, obs.y + 4, obs.w * 0.24, 0, TAU);
+    ctx.arc(obs.x + obs.w * 0.28, obs.y + 4, obs.w * 0.24, 0, TAU);
+    ctx.arc(obs.x, obs.y + 12, obs.w * 0.3, 0, TAU);
+    ctx.fill();
+    if (obs.isStorm) {
+      // Lightning bolt icon
+      ctx.fillStyle = '#FFD166';
+      ctx.font = '22px sans-serif';
+      ctx.fillText('⚡', obs.x - 8, obs.y + 10);
+    }
+  } else if (obs.type === 'ice_cream_van') {
+    drawShadow(obs.x, obs.y + 6, obs.w, obs.h);
+    ctx.fillStyle = '#FF9EAA';
+    ctx.beginPath();
+    ctx.roundRect(obs.x - obs.w / 2, obs.y - obs.h / 2, obs.w, obs.h, 14);
+    ctx.fill();
+    ctx.fillStyle = '#FFF';
+    ctx.font = '24px sans-serif';
+    ctx.fillText('🍦', obs.x - 12, obs.y + 8);
+  } else if (obs.type === 'beach_ball') {
+    ctx.beginPath();
+    ctx.arc(obs.x, obs.y, obs.w / 2, 0, TAU);
+    ctx.fillStyle = '#FF5376';
+    ctx.fill();
+    ctx.fillStyle = '#FFD166';
+    ctx.beginPath();
+    ctx.arc(obs.x, obs.y, obs.w / 2, 0, Math.PI);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+// Collectibles (Snacks, Coins, Sunbeams, Tropical Fruit)
+function drawCollectible(c) {
+  ctx.save();
+  ctx.font = '28px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(c.emoji, c.x, c.y);
+  ctx.restore();
+}
+
+// ----------------------------------------------------------------------------
+// ROAD & SCENERY RENDERING (Levels 3, 4, 5)
+// ----------------------------------------------------------------------------
+
+function drawHighwayScenery() {
+  const dist = state.arcade.distance;
+  // Grass shoulders
+  ctx.fillStyle = '#79C94F';
+  ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+  // Highway Asphalt
+  ctx.fillStyle = '#495057';
+  ctx.fillRect(80, 0, GAME_WIDTH - 160, GAME_HEIGHT);
+
+  // White road borders
+  ctx.fillStyle = '#FFF';
+  ctx.fillRect(80, 0, 6, GAME_HEIGHT);
+  ctx.fillRect(GAME_WIDTH - 86, 0, 6, GAME_HEIGHT);
+
+  // Yellow dashed middle dividers
+  ctx.fillStyle = '#FFD166';
+  const offset = (dist * 12) % 60;
+  for (let y = -60 + offset; y < GAME_HEIGHT + 60; y += 60) {
+    ctx.fillRect(GAME_WIDTH / 2 - 4, y, 8, 36);
+  }
+
+  // Roadside trees and lamp posts
+  for (let ty = -100 + ((dist * 8) % 150); ty < GAME_HEIGHT + 100; ty += 150) {
+    ctx.fillStyle = '#2D6A4F';
+    ctx.beginPath();
+    ctx.arc(45, ty, 24, 0, TAU);
+    ctx.arc(GAME_WIDTH - 45, ty + 70, 24, 0, TAU);
+    ctx.fill();
+  }
+
+  // Airport Terminal approaching when close to 100%
+  if (dist > 85) {
+    const termY = (100 - dist) * 25 - 60;
+    ctx.fillStyle = '#E0F2FE';
+    ctx.fillRect(40, termY, GAME_WIDTH - 80, 90);
+    ctx.fillStyle = '#023E8A';
+    ctx.font = 'bold 20px sans-serif';
+    ctx.fillText('✈️ AIRPORT TERMINAL DEPARTURES', 70, termY + 50);
+  }
+}
+
+function drawSkyScenery() {
+  const dist = state.arcade.distance;
+  // Gradient Sky (Transitions from bright day to warm tropical sunset as you arrive)
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, GAME_HEIGHT);
+  if (dist < 50) {
+    skyGrad.addColorStop(0, '#0077B6');
+    skyGrad.addColorStop(1, '#90E0EF');
+  } else {
+    skyGrad.addColorStop(0, '#0096C7');
+    skyGrad.addColorStop(0.6, '#FFAE03');
+    skyGrad.addColorStop(1, '#FF5376');
+  }
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+  // Distant islands and clouds below
+  const islandY = (dist * 5) % GAME_HEIGHT;
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+  ctx.beginPath();
+  ctx.arc(120, islandY, 60, 0, TAU);
+  ctx.arc(480, (islandY + 400) % GAME_HEIGHT, 80, 0, TAU);
+  ctx.fill();
+
+  // Holiday Island Runway approaching
+  if (dist > 85) {
+    const runY = (100 - dist) * 25 - 80;
+    ctx.fillStyle = '#333';
+    ctx.fillRect(150, runY, 300, 120);
+    ctx.fillStyle = '#06D6A0';
+    ctx.fillRect(140, runY + 20, 10, 80);
+    ctx.fillRect(450, runY + 20, 10, 80);
+    ctx.fillStyle = '#FFF';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillText('🏝️ HOLIDAY ISLAND RUNWAY ✈️', 170, runY + 65);
+  }
+}
+
+function drawTropicalRoadScenery() {
+  const dist = state.arcade.distance;
+  // Turquoise ocean on left, tropical beach on right
+  ctx.fillStyle = '#00B4D8';
+  ctx.fillRect(0, 0, 100, GAME_HEIGHT);
+  ctx.fillStyle = '#FFE082';
+  ctx.fillRect(GAME_WIDTH - 100, 0, 100, GAME_HEIGHT);
+
+  // Coastal Road
+  ctx.fillStyle = '#5C677D';
+  ctx.fillRect(100, 0, GAME_WIDTH - 200, GAME_HEIGHT);
+
+  // Palm trees
+  const offset = (dist * 10) % 140;
+  for (let py = -140 + offset; py < GAME_HEIGHT + 140; py += 140) {
+    // Left palm tree
+    ctx.fillStyle = '#7F4F24';
+    ctx.fillRect(75, py, 12, 35);
+    ctx.fillStyle = '#2D6A4F';
+    ctx.beginPath();
+    ctx.arc(81, py - 6, 26, 0, TAU);
+    ctx.fill();
+
+    // Right palm tree
+    ctx.fillStyle = '#7F4F24';
+    ctx.fillRect(GAME_WIDTH - 85, py + 70, 12, 35);
+    ctx.fillStyle = '#2D6A4F';
+    ctx.beginPath();
+    ctx.arc(GAME_WIDTH - 79, py + 64, 26, 0, TAU);
+    ctx.fill();
+  }
+
+  // Holiday Villa approaching
+  if (dist > 85) {
+    const villaY = (100 - dist) * 25 - 90;
+    ctx.fillStyle = '#FFFDF7';
+    ctx.beginPath();
+    ctx.roundRect(120, villaY, GAME_WIDTH - 240, 110, 16);
+    ctx.fill();
+    ctx.fillStyle = '#FF5376';
+    ctx.font = 'bold 18px sans-serif';
+    ctx.fillText('🏡 HOLIDAY VILLA AHEAD!', 170, villaY + 60);
+  }
+}
+
+// ----------------------------------------------------------------------------
+// LEVEL 6 & 7: UNPACKING & BEACH SCENES
+// ----------------------------------------------------------------------------
+
+function drawHolidayHouseUnpacking() {
+  // Sunny Holiday Villa with big open balcony
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, 320);
+  skyGrad.addColorStop(0, '#5CB8FF');
+  skyGrad.addColorStop(1, '#00B4D8');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, GAME_WIDTH, 320);
+
+  // Sea view through balcony
+  ctx.fillStyle = '#0077B6';
+  ctx.fillRect(0, 220, GAME_WIDTH, 100);
+
+  // Balcony railings
+  ctx.fillStyle = '#FFF';
+  ctx.fillRect(0, 300, GAME_WIDTH, 20);
+  for (let bx = 20; bx < GAME_WIDTH; bx += 35) {
+    ctx.fillRect(bx, 250, 6, 50);
+  }
+
+  // Villa Floor
+  ctx.fillStyle = '#F4E8C1';
+  ctx.fillRect(0, 320, GAME_WIDTH, GAME_HEIGHT - 320);
+
+  // Wardrobe (Left)
+  ctx.fillStyle = '#8B5A2B';
+  ctx.beginPath();
+  ctx.roundRect(30, 200, 140, 220, 12);
+  ctx.fill();
+  ctx.fillStyle = '#FFF';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('👗 WARDROBE', 45, 230);
+
+  // Holiday Bed (Right)
+  ctx.fillStyle = '#E76F51';
+  ctx.beginPath();
+  ctx.roundRect(380, 320, 190, 130, 14);
+  ctx.fill();
+  ctx.fillStyle = '#FFF';
+  ctx.font = '12px sans-serif';
+  ctx.fillText('🛏️ HOLIDAY BED', 410, 345);
+
+  // Center TV / Table
+  ctx.fillStyle = '#264653';
+  ctx.beginPath();
+  ctx.roundRect(240, 340, 120, 70, 8);
+  ctx.fill();
+  ctx.fillStyle = '#FFF';
+  ctx.font = '11px sans-serif';
+  ctx.fillText('📺 GAMING DESK', 250, 375);
+
+  // Open Suitcase with remaining items to unpack
+  drawSuitcase(300, 620, 260, 160, true, 8 - state.packedItems.size, 8);
+}
+
+function drawBeachScene() {
+  // Sunny Tropical Sky
+  const skyGrad = ctx.createLinearGradient(0, 0, 0, 340);
+  skyGrad.addColorStop(0, '#38B6FF');
+  skyGrad.addColorStop(1, '#90E0EF');
+  ctx.fillStyle = skyGrad;
+  ctx.fillRect(0, 0, GAME_WIDTH, 340);
+
+  // Big Sun with gentle pulsing rays
+  const sunPulse = Math.sin(Date.now() * 0.003) * 4;
+  ctx.fillStyle = '#FFD166';
+  ctx.beginPath();
+  ctx.arc(490, 90, 48 + sunPulse, 0, TAU);
+  ctx.fill();
+
+  // Ocean Waves
+  const waveOffset = Math.sin(Date.now() * 0.002) * 10;
+  ctx.fillStyle = '#0096C7';
+  ctx.beginPath();
+  ctx.moveTo(0, 260);
+  ctx.bezierCurveTo(150, 240 + waveOffset, 350, 280 - waveOffset, GAME_WIDTH, 260);
+  ctx.lineTo(GAME_WIDTH, 440);
+  ctx.lineTo(0, 440);
+  ctx.closePath();
+  ctx.fill();
+
+  // Golden Sand Beach
+  ctx.fillStyle = '#FFE082';
+  ctx.beginPath();
+  ctx.moveTo(0, 390);
+  ctx.bezierCurveTo(200, 370, 400, 410, GAME_WIDTH, 390);
+  ctx.lineTo(GAME_WIDTH, GAME_HEIGHT);
+  ctx.lineTo(0, GAME_HEIGHT);
+  ctx.closePath();
+  ctx.fill();
+
+  // Palm tree on the left
+  ctx.fillStyle = '#7F4F24';
+  ctx.beginPath();
+  ctx.moveTo(30, GAME_HEIGHT);
+  ctx.quadraticCurveTo(60, 400, 80, 200);
+  ctx.lineTo(95, 200);
+  ctx.quadraticCurveTo(75, 400, 50, GAME_HEIGHT);
+  ctx.fill();
+  // Palm leaves
+  ctx.fillStyle = '#2D6A4F';
+  [
+    [85, 200, -50, -40],
+    [85, 200, 50, -40],
+    [85, 200, -70, 10],
+    [85, 200, 70, 10],
+    [85, 200, 0, -60]
+  ].forEach(([px, py, dx, dy]) => {
+    ctx.beginPath();
+    ctx.ellipse(px + dx / 2, py + dy / 2, 35, 12, Math.atan2(dy, dx), 0, TAU);
+    ctx.fill();
+  });
+
+  // Striped Beach Umbrella & Sun Lounger
+  const loungerX = 320, loungerY = 560;
+  drawShadow(loungerX, loungerY + 30, 140, 30);
+
+  // Deckchair
+  ctx.fillStyle = '#FF5376';
+  ctx.beginPath();
+  ctx.roundRect(loungerX - 50, loungerY, 100, 45, 10);
+  ctx.fill();
+
+  // Striped Umbrella
+  ctx.fillStyle = '#7F4F24';
+  ctx.fillRect(loungerX - 35, loungerY - 140, 8, 140);
+  // Umbrella Canopy
+  ctx.fillStyle = '#FFD166';
+  ctx.beginPath();
+  ctx.arc(loungerX - 31, loungerY - 140, 70, Math.PI, 0);
+  ctx.fill();
+  ctx.fillStyle = '#FF5376';
+  ctx.beginPath();
+  ctx.arc(loungerX - 31, loungerY - 140, 70, Math.PI * 1.25, Math.PI * 1.75);
+  ctx.lineTo(loungerX - 31, loungerY - 140);
+  ctx.fill();
+
+  // Sandcastle
+  const scX = 170, scY = 620;
+  drawShadow(scX, scY + 30, 90, 24);
+  ctx.fillStyle = '#E5B842';
+  ctx.fillRect(scX - 35, scY - 20, 70, 50);
+  ctx.fillRect(scX - 45, scY - 10, 20, 40);
+  ctx.fillRect(scX + 25, scY - 10, 20, 40);
+  // Sandcastle Flag
+  ctx.fillStyle = '#E63946';
+  ctx.fillRect(scX - 2, scY - 45, 4, 25);
+  ctx.beginPath();
+  ctx.moveTo(scX + 2, scY - 45);
+  ctx.lineTo(scX + 22, scY - 35);
+  ctx.lineTo(scX + 2, scY - 25);
+  ctx.closePath();
+  ctx.fill();
+
+  // Beach Ball
+  const bbX = 460, bbY = 650;
+  drawShadow(bbX, bbY + 18, 36, 12);
+  ctx.fillStyle = '#4CC9F0';
+  ctx.beginPath();
+  ctx.arc(bbX, bbY, 20, 0, TAU);
+  ctx.fill();
+  ctx.fillStyle = '#FF5376';
+  ctx.beginPath();
+  ctx.arc(bbX, bbY, 20, 0, Math.PI);
+  ctx.fill();
+
+  // Florence relaxing on the deckchair!
+  ctx.fillStyle = '#FFD8BE';
+  ctx.beginPath();
+  ctx.arc(loungerX, loungerY + 10, 16, 0, TAU);
+  ctx.fill();
+  // Sunglasses & Smile
+  ctx.fillStyle = '#111';
+  ctx.fillRect(loungerX - 10, loungerY + 6, 20, 6);
+  ctx.strokeStyle = '#D9254C';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(loungerX, loungerY + 18, 5, 0, Math.PI);
+  ctx.stroke();
+
+  // Grand Trophy Button Overlay in center
+  const btnY = 730;
+  ctx.fillStyle = '#FFB703';
+  ctx.strokeStyle = '#D48B00';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.roundRect(GAME_WIDTH / 2 - 140, btnY - 30, 280, 60, 20);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = '#FFF';
+  ctx.font = 'bold 22px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('🏆 COLLECT TROPHY! 🏆', GAME_WIDTH / 2, btnY + 8);
+}
+
+// ----------------------------------------------------------------------------
+// MAIN GAME LOOP & UPDATES
+// ----------------------------------------------------------------------------
+
+function updateArcade(dt) {
+  const arc = state.arcade;
+  const currentLvl = LEVELS[state.currentLevelIndex];
+
+  // Steering controls
+  if (state.keys.left) arc.playerX -= 320 * dt;
+  if (state.keys.right) arc.playerX += 320 * dt;
+  if (currentLvl.mode === 'fly_clouds') {
+    if (state.keys.up) arc.playerY -= 260 * dt;
+    if (state.keys.down) arc.playerY += 260 * dt;
+  }
+
+  // Bounds
+  arc.playerX = clamp(arc.playerX, 120, GAME_WIDTH - 120);
+  arc.playerY = clamp(arc.playerY, 150, GAME_HEIGHT - 120);
+
+  // Progress distance
+  arc.distance += 7.5 * dt;
+  $('hud-counter').textContent = `🛣️ ${Math.min(100, Math.floor(arc.distance))}%`;
+
+  // Spawning obstacles & collectibles
+  arc.spawnTimer += dt;
+  if (arc.spawnTimer > 1.1) {
+    arc.spawnTimer = 0;
+    const spawnX = rand(130, GAME_WIDTH - 130);
+
+    if (currentLvl.mode === 'drive_highway') {
+      const types = ['car_blue', 'truck', 'cone'];
+      const type = types[Math.floor(rand(0, types.length))];
+      arc.obstacles.push({
+        type,
+        x: spawnX,
+        y: -60,
+        w: type === 'truck' ? 70 : 60,
+        h: type === 'truck' ? 120 : 90,
+        speed: rand(180, 260)
+      });
+      // Collectible snack or coin
+      if (Math.random() < 0.6) {
+        arc.collectibles.push({
+          emoji: ['🥨', '⭐', '⛽', '🧃'][Math.floor(rand(0, 4))],
+          x: rand(140, GAME_WIDTH - 140),
+          y: -40,
+          w: 40,
+          h: 40,
+          speed: 200
+        });
+      }
+    } else if (currentLvl.mode === 'fly_clouds') {
+      arc.obstacles.push({
+        type: 'cloud',
+        isStorm: Math.random() < 0.4,
+        x: spawnX,
+        y: -70,
+        w: rand(90, 130),
+        h: 70,
+        speed: rand(160, 240)
+      });
+      if (Math.random() < 0.7) {
+        arc.collectibles.push({
+          emoji: ['☀️', '🌈', '⭐'][Math.floor(rand(0, 3))],
+          x: rand(140, GAME_WIDTH - 140),
+          y: -40,
+          w: 40,
+          h: 40,
+          speed: 180
+        });
+      }
+    } else if (currentLvl.mode === 'drive_tropical') {
+      const types = ['ice_cream_van', 'beach_ball'];
+      const type = types[Math.floor(rand(0, types.length))];
+      arc.obstacles.push({
+        type,
+        x: spawnX,
+        y: -60,
+        w: type === 'beach_ball' ? 44 : 70,
+        h: type === 'beach_ball' ? 44 : 105,
+        speed: rand(170, 230)
+      });
+      if (Math.random() < 0.6) {
+        arc.collectibles.push({
+          emoji: ['🍍', '🥥', '🌺', '⭐'][Math.floor(rand(0, 4))],
+          x: rand(140, GAME_WIDTH - 140),
+          y: -40,
+          w: 40,
+          h: 40,
+          speed: 200
+        });
+      }
+    }
+  }
+
+  // Update obstacles
+  for (let i = arc.obstacles.length - 1; i >= 0; i--) {
+    const obs = arc.obstacles[i];
+    obs.y += obs.speed * dt;
+
+    // Collision check
+    const dx = Math.abs(obs.x - arc.playerX);
+    const dy = Math.abs(obs.y - arc.playerY);
+    if (dx < (obs.w / 2 + 25) && dy < (obs.h / 2 + 35) && arc.invincibleTimer <= 0) {
+      // Gentle bumper bounce & horn!
+      AudioEngine.sfx.horn();
+      arc.invincibleTimer = 1.0;
+      arc.wobble = 1.0;
+      showBanner("BEEP BEEP! 🚗");
+    }
+
+    if (obs.y > GAME_HEIGHT + 100) arc.obstacles.splice(i, 1);
+  }
+
+  // Update collectibles
+  for (let i = arc.collectibles.length - 1; i >= 0; i--) {
+    const c = arc.collectibles[i];
+    c.y += c.speed * dt;
+
+    const dx = Math.abs(c.x - arc.playerX);
+    const dy = Math.abs(c.y - arc.playerY);
+    if (dx < 35 && dy < 45) {
+      AudioEngine.sfx.coin();
+      arc.collectibles.splice(i, 1);
+      // Sparkle burst
+      for (let s = 0; s < 6; s++) {
+        state.sparkles.push({
+          x: c.x + rand(-15, 15),
+          y: c.y + rand(-15, 15),
+          size: rand(6, 12),
+          alpha: 1,
+          color: '#FFD166'
+        });
+      }
+    } else if (c.y > GAME_HEIGHT + 50) {
+      arc.collectibles.splice(i, 1);
+    }
+  }
+
+  if (arc.invincibleTimer > 0) arc.invincibleTimer -= dt;
+  if (arc.wobble > 0) arc.wobble -= dt * 2;
+
+  // Level completed!
+  if (arc.distance >= 100) {
+    levelComplete();
+  }
+}
+
+let lastTime = performance.now();
+function gameLoop(now) {
+  const dt = Math.min((now - lastTime) / 1000, 0.1);
+  lastTime = now;
+
+  ctx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+
+  const lvl = LEVELS[state.currentLevelIndex];
+
+  if (lvl.id === 1) {
+    drawBedroom();
+    drawItems(lvl.items);
+  } else if (lvl.id === 2) {
+    drawKidsRoom();
+    drawItems(lvl.items);
+  } else if (lvl.id === 3) {
+    drawHighwayScenery();
+    state.arcade.obstacles.forEach(drawObstacle);
+    state.arcade.collectibles.forEach(drawCollectible);
+    drawFamilyCar(state.arcade.playerX, state.arcade.playerY, 70, 120, state.arcade.wobble);
+    updateArcade(dt);
+  } else if (lvl.id === 4) {
+    drawSkyScenery();
+    state.arcade.obstacles.forEach(drawObstacle);
+    state.arcade.collectibles.forEach(drawCollectible);
+    drawAirplane(state.arcade.playerX, state.arcade.playerY, 95, 95, state.arcade.wobble);
+    updateArcade(dt);
+  } else if (lvl.id === 5) {
+    drawTropicalRoadScenery();
+    state.arcade.obstacles.forEach(drawObstacle);
+    state.arcade.collectibles.forEach(drawCollectible);
+    drawHolidayCar(state.arcade.playerX, state.arcade.playerY, 70, 115, state.arcade.wobble);
+    updateArcade(dt);
+  } else if (lvl.id === 6) {
+    drawHolidayHouseUnpacking();
+    drawItems(lvl.items);
+  } else if (lvl.id === 7) {
+    drawBeachScene();
+  }
+
+  drawFlyingParticles();
+  drawSparkles();
+
+  requestAnimationFrame(gameLoop);
+}
+requestAnimationFrame(gameLoop);
+
+// ----------------------------------------------------------------------------
+// INTERACTION & CONTROL HANDLERS
+// ----------------------------------------------------------------------------
+
+function showBanner(text) {
+  const b = $('banner');
+  b.textContent = text;
+  b.style.display = 'block';
+  b.style.animation = 'none';
+  void b.offsetWidth; // Trigger reflow
+  b.style.animation = 'bannerPop 2s forwards ease';
+  setTimeout(() => { b.style.display = 'none'; }, 2000);
+}
+
+function triggerPackItem(item) {
+  if (state.packedItems.has(item.id)) return;
+  state.packedItems.add(item.id);
+
+  AudioEngine.sfx.magicFly();
+
+  const lvl = LEVELS[state.currentLevelIndex];
+  const targetX = lvl.id === 6 ? (item.targetX || 200) : 300;
+  const targetY = lvl.id === 6 ? (item.targetY || 300) : 580;
+
+  state.flyingParticles.push({
+    emoji: item.emoji,
+    startX: item.x,
+    startY: item.y,
+    ctrlX: (item.x + targetX) / 2 + rand(-60, 60),
+    ctrlY: Math.min(item.y, targetY) - 100,
+    targetX,
+    targetY,
+    progress: 0
+  });
+
+  // Update item dock buttons
+  const dockBtn = document.querySelector(`.dock-btn[data-item="${item.id}"]`);
+  if (dockBtn) dockBtn.classList.add('packed');
+
+  const count = state.packedItems.size;
+  const total = lvl.targetCount;
+  $('hud-counter').textContent = `🧳 ${count} / ${total}`;
+
+  if (count >= total) {
+    setTimeout(levelComplete, 900);
+  }
+}
+
+// Canvas tap / click listener
+canvas.addEventListener('pointerdown', e => {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = GAME_WIDTH / rect.width;
+  const scaleY = GAME_HEIGHT / rect.height;
+  const clickX = (e.clientX - rect.left) * scaleX;
+  const clickY = (e.clientY - rect.top) * scaleY;
+
+  const lvl = LEVELS[state.currentLevelIndex];
+
+  if (lvl.items) {
+    lvl.items.forEach(item => {
+      if (state.packedItems.has(item.id)) return;
+      const dx = Math.abs(clickX - item.x);
+      const dy = Math.abs(clickY - item.y);
+      if (dx < item.w / 2 + 15 && dy < item.h / 2 + 15) {
+        triggerPackItem(item);
+      }
+    });
+  } else if (lvl.isBeach) {
+    // Check beach interactions
+    if (clickY > 690 && clickY < 770 && Math.abs(clickX - GAME_WIDTH / 2) < 140) {
+      showGrandTrophy();
+    } else {
+      AudioEngine.sfx.oceanWave();
+      for (let s = 0; s < 10; s++) {
+        state.sparkles.push({
+          x: clickX + rand(-20, 20),
+          y: clickY + rand(-20, 20),
+          size: rand(8, 16),
+          alpha: 1,
+          color: '#4CC9F0'
+        });
+      }
+    }
+  }
+});
+
+// Keyboard controls
+window.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') state.keys.left = true;
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') state.keys.right = true;
+  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') state.keys.up = true;
+  if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') state.keys.down = true;
+
+  // Number key shortcuts for packing items (1-8)
+  const lvl = LEVELS[state.currentLevelIndex];
+  if (lvl.items) {
+    const num = parseInt(e.key);
+    if (!isNaN(num) && num >= 1 && num <= lvl.items.length) {
+      triggerPackItem(lvl.items[num - 1]);
+    }
+  }
+});
+
+window.addEventListener('keyup', e => {
+  if (e.key === 'ArrowLeft' || e.key === 'a' || e.key === 'A') state.keys.left = false;
+  if (e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') state.keys.right = false;
+  if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') state.keys.up = false;
+  if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') state.keys.down = false;
+});
+
+// On-screen touch buttons for steering & flying
+function setupTouchButton(id, keyProp) {
+  const el = $(id);
+  if (!el) return;
+  el.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    state.keys[keyProp] = true;
+    el.classList.add('pressed');
+  });
+  const up = () => {
+    state.keys[keyProp] = false;
+    el.classList.remove('pressed');
+  };
+  el.addEventListener('pointerup', up);
+  el.addEventListener('pointerleave', up);
+  el.addEventListener('pointercancel', up);
+}
+setupTouchButton('t-left', 'left');
+setupTouchButton('t-right', 'right');
+setupTouchButton('t-up', 'up');
+setupTouchButton('t-down', 'down');
+
+$('t-action').addEventListener('pointerdown', () => {
+  const lvl = LEVELS[state.currentLevelIndex];
+  if (lvl.items) {
+    // Pack first unpacked item
+    const nextItem = lvl.items.find(i => !state.packedItems.has(i.id));
+    if (nextItem) triggerPackItem(nextItem);
+  } else if (lvl.isBeach) {
+    showGrandTrophy();
+  }
+});
+
+// ----------------------------------------------------------------------------
+// LEVEL PROGRESSION & SCREEN SWITCHING
+// ----------------------------------------------------------------------------
+
+function showScreen(screenId) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+  if (screenId) {
+    const s = $(screenId);
+    if (s) s.classList.remove('hidden');
+  }
+}
+
+function startLevel(index) {
+  state.currentLevelIndex = index;
+  state.packedItems.clear();
+  state.arcade.playerX = GAME_WIDTH / 2;
+  state.arcade.playerY = 650;
+  state.arcade.distance = 0;
+  state.arcade.obstacles = [];
+  state.arcade.collectibles = [];
+  state.arcade.invincibleTimer = 0;
+
+  const lvl = LEVELS[index];
+
+  // Show intro card
+  $('intro-badge').textContent = `${lvl.badge} (${index + 1}/7)`;
+  $('intro-title').textContent = lvl.title;
+  $('intro-desc').textContent = lvl.desc;
+  $('intro-controls-tip').innerHTML = `💡 <strong>Florence's Tip:</strong> ${lvl.hint}`;
+
+  drawIntroPreview(lvl);
+  showScreen('s-intro');
+}
+
+function launchCurrentLevel() {
+  const lvl = LEVELS[state.currentLevelIndex];
+  showScreen(null); // Hide all modal screens to reveal game canvas
+
+  $('hud').classList.add('on');
+  $('hud-level').textContent = `⭐ ${lvl.title}`;
+  $('hud-counter').textContent = lvl.isArcade ? '🛣️ 0%' : `🧳 0 / ${lvl.targetCount}`;
+
+  // Configure bottom dock
+  const dock = $('item-dock');
+  dock.innerHTML = '';
+  if (lvl.items) {
+    dock.classList.add('on');
+    lvl.items.forEach((item, idx) => {
+      const b = document.createElement('button');
+      b.className = 'dock-btn';
+      b.setAttribute('data-item', item.id);
+      b.innerHTML = `${item.emoji}<span class="key-label">${idx + 1}</span>`;
+      b.addEventListener('click', () => triggerPackItem(item));
+      dock.appendChild(b);
+    });
+  } else {
+    dock.classList.remove('on');
+  }
+
+  // Configure Touch Controls
+  const tc = $('touch-controls');
+  const upDownGroup = $('t-updown-group');
+  if (lvl.isArcade) {
+    tc.classList.add('on');
+    upDownGroup.style.display = lvl.mode === 'fly_clouds' ? 'flex' : 'none';
+  } else if (lvl.isBeach) {
+    tc.classList.add('on');
+    upDownGroup.style.display = 'none';
+  } else {
+    tc.classList.remove('on');
+  }
+
+  AudioEngine.startMusic(lvl.musicMood);
+  showBanner(lvl.title.toUpperCase() + '!');
+}
+
+function levelComplete() {
+  const lvl = LEVELS[state.currentLevelIndex];
+  AudioEngine.sfx.levelWin();
+
+  $('complete-title').textContent = `${lvl.title} Complete!`;
+  $('complete-msg').textContent = lvl.id === 1 ? "Mum and Dad's clothes and toothbrushes are packed!" :
+    lvl.id === 2 ? "Screens, tablets and cuddly toys are in the bag!" :
+    lvl.id === 3 ? "You drove through the traffic and arrived at the airport!" :
+    lvl.id === 4 ? "Smooth flying! You landed safely at the holiday island!" :
+    lvl.id === 5 ? "You dodged all the holiday traffic and reached the villa!" :
+    lvl.id === 6 ? "Everything is unpacked! Time to head to the beach!" : "Holiday Success!";
+
+  showScreen('s-complete');
+  $('hud').classList.remove('on');
+  $('item-dock').classList.remove('on');
+  $('touch-controls').classList.remove('on');
+}
+
+function showGrandTrophy() {
+  AudioEngine.sfx.grandFanfare();
+  showScreen('s-trophy');
+  $('hud').classList.remove('on');
+  $('item-dock').classList.remove('on');
+  $('touch-controls').classList.remove('on');
+
+  drawTrophyArt();
+  startConfetti();
+}
+
+// ----------------------------------------------------------------------------
+// PREVIEW & TROPHY DRAWING
+// ----------------------------------------------------------------------------
+
+function drawIntroPreview(lvl) {
+  const c = $('intro-canvas');
+  const pCtx = c.getContext('2d');
+  pCtx.clearRect(0, 0, c.width, c.height);
+
+  pCtx.fillStyle = '#FFF8E7';
+  pCtx.fillRect(0, 0, c.width, c.height);
+
+  pCtx.font = '54px sans-serif';
+  pCtx.textAlign = 'center';
+  pCtx.textBaseline = 'middle';
+  pCtx.fillText(lvl.icon, c.width / 2, c.height / 2 - 10);
+
+  pCtx.fillStyle = '#2C221E';
+  pCtx.font = 'bold 16px sans-serif';
+  pCtx.fillText(lvl.subtitle, c.width / 2, c.height - 24);
+}
+
+function drawTitlePreview() {
+  const c = $('title-preview-canvas');
+  const pCtx = c.getContext('2d');
+  pCtx.clearRect(0, 0, c.width, c.height);
+
+  // Sunny gradient
+  const grad = pCtx.createLinearGradient(0, 0, c.width, c.height);
+  grad.addColorStop(0, '#5CB8FF');
+  grad.addColorStop(0.5, '#FFE082');
+  grad.addColorStop(1, '#FF5376');
+  pCtx.fillStyle = grad;
+  pCtx.fillRect(0, 0, c.width, c.height);
+
+  // Emojis of the 7 levels
+  pCtx.font = '36px sans-serif';
+  pCtx.textAlign = 'center';
+  pCtx.textBaseline = 'middle';
+  const icons = ['🧳', '🎮', '🚗', '✈️', '🚙', '🏡', '🏆'];
+  icons.forEach((ic, i) => {
+    const x = 30 + i * 46;
+    const y = c.height / 2 + Math.sin(i * 0.8) * 16;
+    pCtx.fillText(ic, x, y);
+  });
+}
+drawTitlePreview();
+
+function drawTrophyArt() {
+  const c = $('trophy-canvas');
+  const tCtx = c.getContext('2d');
+  tCtx.clearRect(0, 0, c.width, c.height);
+
+  // Shimmering Golden Trophy
+  const cx = c.width / 2, cy = c.height / 2 + 10;
+
+  // Cup Base & Pedestal
+  tCtx.fillStyle = '#C96B00';
+  tCtx.fillRect(cx - 50, cy + 45, 100, 24);
+  tCtx.fillStyle = '#FFB703';
+  tCtx.fillRect(cx - 40, cy + 30, 80, 15);
+
+  // Cup Stem
+  tCtx.fillStyle = '#FFD166';
+  tCtx.fillRect(cx - 14, cy + 10, 28, 20);
+
+  // Trophy Bowl
+  tCtx.fillStyle = '#FFB703';
+  tCtx.beginPath();
+  tCtx.arc(cx, cy - 25, 45, 0, Math.PI);
+  tCtx.lineTo(cx + 45, cy - 45);
+  tCtx.lineTo(cx - 45, cy - 45);
+  tCtx.closePath();
+  tCtx.fill();
+
+  // Trophy Handles
+  tCtx.strokeStyle = '#D48B00';
+  tCtx.lineWidth = 8;
+  tCtx.beginPath();
+  tCtx.arc(cx - 45, cy - 30, 20, Math.PI * 0.5, Math.PI * 1.5);
+  tCtx.stroke();
+  tCtx.beginPath();
+  tCtx.arc(cx + 45, cy - 30, 20, Math.PI * 1.5, Math.PI * 0.5);
+  tCtx.stroke();
+
+  // Trophy Star
+  tCtx.fillStyle = '#FFF';
+  tCtx.font = '28px sans-serif';
+  tCtx.textAlign = 'center';
+  tCtx.textBaseline = 'middle';
+  tCtx.fillText('⭐', cx, cy - 25);
+}
+
+// Confetti System
+function startConfetti() {
+  state.confetti = [];
+  for (let i = 0; i < 90; i++) {
+    state.confetti.push({
+      x: rand(0, GAME_WIDTH),
+      y: rand(-50, GAME_HEIGHT),
+      w: rand(8, 16),
+      h: rand(8, 14),
+      color: ['#FF5376', '#FFB703', '#4CC9F0', '#06D6A0', '#9B5DE5'][Math.floor(rand(0, 5))],
+      vx: rand(-2, 2),
+      vy: rand(2, 6),
+      rot: rand(0, TAU),
+      vRot: rand(-0.1, 0.1)
+    });
+  }
+}
+
+function updateConfetti() {
+  cCtx.clearRect(0, 0, GAME_WIDTH, GAME_HEIGHT);
+  if (state.confetti.length === 0) return;
+
+  state.confetti.forEach(p => {
+    p.x += p.vx;
+    p.y += p.vy;
+    p.rot += p.vRot;
+
+    cCtx.save();
+    cCtx.translate(p.x, p.y);
+    cCtx.rotate(p.rot);
+    cCtx.fillStyle = p.color;
+    cCtx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+    cCtx.restore();
+
+    if (p.y > GAME_HEIGHT + 20) {
+      p.y = -20;
+      p.x = rand(0, GAME_WIDTH);
+    }
+  });
+  requestAnimationFrame(updateConfetti);
+}
+requestAnimationFrame(updateConfetti);
+
+// ----------------------------------------------------------------------------
+// LEVEL SELECT BUILDER & EVENT LISTENERS
+// ----------------------------------------------------------------------------
+
+function buildLevelSelectUI() {
+  const container = $('level-buttons-container');
+  container.innerHTML = '';
+  LEVELS.forEach((lvl, idx) => {
+    const btn = document.createElement('div');
+    btn.className = 'level-btn';
+    btn.innerHTML = `
+      <div class="num-badge">${idx + 1}</div>
+      <div class="lvl-info">
+        <div class="lvl-title">${lvl.icon} ${lvl.title}</div>
+        <div class="lvl-sub">${lvl.subtitle}</div>
+      </div>
+    `;
+    btn.addEventListener('click', () => {
+      AudioEngine.sfx.tap();
+      startLevel(idx);
+    });
+    container.appendChild(btn);
+  });
+}
+buildLevelSelectUI();
+
+// Button Event Listeners
+$('btn-play').addEventListener('click', () => {
+  AudioEngine.init();
+  AudioEngine.sfx.tap();
+  startLevel(0);
+});
+
+$('btn-level-select').addEventListener('click', () => {
+  AudioEngine.init();
+  AudioEngine.sfx.tap();
+  showScreen('s-levels');
+});
+
+$('btn-levels-back').addEventListener('click', () => {
+  AudioEngine.sfx.tap();
+  showScreen('s-title');
+});
+
+$('btn-intro-go').addEventListener('click', () => {
+  AudioEngine.sfx.tap();
+  launchCurrentLevel();
+});
+
+$('btn-next-level').addEventListener('click', () => {
+  AudioEngine.sfx.tap();
+  if (state.currentLevelIndex < LEVELS.length - 1) {
+    startLevel(state.currentLevelIndex + 1);
+  } else {
+    showGrandTrophy();
+  }
+});
+
+$('btn-play-again').addEventListener('click', () => {
+  AudioEngine.sfx.tap();
+  startLevel(0);
+});
+
+$('btn-trophy-home').addEventListener('click', () => {
+  AudioEngine.sfx.tap();
+  showScreen('s-title');
+});
+
+$('btn-sound').addEventListener('click', () => {
+  const on = AudioEngine.toggleSound();
+  $('btn-sound').textContent = on ? '🔊' : '🔇';
+});
+
+</script>
+</body>
+</html>

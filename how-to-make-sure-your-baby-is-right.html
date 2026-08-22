@@ -1,0 +1,1782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#FF6584">
+<title>How to Make Sure Your Baby is Right — A Game by Florence</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👶</text></svg>">
+<style>
+  :root {
+    --gold: #FFB703;
+    --gold-deep: #D48B00;
+    --coral: #FF5D73;
+    --coral-deep: #D9254C;
+    --mint: #2EC4B6;
+    --mint-deep: #0F8B8D;
+    --sky: #4EA8DE;
+    --sky-deep: #0077B6;
+    --purple: #7209B7;
+    --purple-light: #9B5DE5;
+    --pink-light: #FFB4D0;
+    --cream: #FFFDF7;
+    --ink: #2C221E;
+    --ink-soft: #6A5B52;
+    --font-display: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Marker Felt', 'Nunito', 'Segoe UI', cursive, sans-serif;
+    --font-body: 'Trebuchet MS', 'Segoe UI', -apple-system, sans-serif;
+  }
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: #1B263B;
+    font-family: var(--font-body);
+    color: var(--ink);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: none;
+    position: fixed;
+    inset: 0;
+  }
+  #stage {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: radial-gradient(circle at 50% 25%, #FF70A6 0%, #70A2FF 55%, #0D1B2A 100%);
+  }
+  #frame {
+    position: relative;
+    width: min(100vw, calc(100vh * 420 / 740), 460px);
+    aspect-ratio: 420 / 740;
+    height: auto;
+    max-height: 100vh;
+    background: #FFE08A;
+    overflow: hidden;
+    box-shadow: 0 0 0 100vmax rgba(13, 27, 42, 0.55), 0 18px 50px rgba(0,0,0,0.5);
+    border-radius: clamp(0px, 3vw, 28px);
+  }
+  canvas#game, canvas#confetti {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+  canvas#game {
+    z-index: 1;
+    cursor: pointer;
+    touch-action: none;
+  }
+  canvas#confetti {
+    z-index: 20;
+    pointer-events: none !important;
+  }
+
+  /* Screen Overlays */
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: max(14px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+    text-align: center;
+    overflow-y: auto;
+    scrollbar-width: none;
+    z-index: 30;
+    background: linear-gradient(180deg, #FFE599 0%, #FFB4D0 40%, #80E5FF 100%);
+    transition: opacity 0.22s ease, transform 0.22s ease;
+  }
+  .screen::-webkit-scrollbar { display: none; }
+  .screen.hidden {
+    display: none !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+
+  /* Badges & Typography */
+  .eyebrow {
+    font-family: var(--font-display);
+    font-size: clamp(12px, 3.4vw, 15px);
+    color: #fff;
+    background: var(--coral);
+    padding: 6px 16px;
+    border-radius: 999px;
+    box-shadow: 0 3px 0 var(--coral-deep);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transform: rotate(-1.5deg);
+  }
+  h1.game-title {
+    font-family: var(--font-display);
+    font-size: clamp(22px, 6.5vw, 34px);
+    line-height: 1.1;
+    color: #FFF;
+    text-shadow: 0 3px 0 #D48B00, 0 6px 16px rgba(44, 34, 30, 0.35);
+    margin: 6px 0 4px;
+    text-wrap: balance;
+  }
+  h1.game-title span { color: #FFE66D; }
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(20px, 5.6vw, 28px);
+    color: #FFF;
+    text-shadow: 0 2px 0 rgba(44, 34, 30, 0.35);
+    margin: 4px 0 6px;
+  }
+  p.tagline {
+    font-family: var(--font-display);
+    font-size: clamp(12px, 3.4vw, 15px);
+    color: #2C221E;
+    background: rgba(255,255,255,0.94);
+    padding: 6px 14px;
+    border-radius: 14px;
+    margin: 4px 0 8px;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+  }
+  .age-pill {
+    font-family: var(--font-display);
+    font-size: 11.5px;
+    background: #2EC4B6;
+    color: #fff;
+    padding: 3px 12px;
+    border-radius: 999px;
+    box-shadow: 0 2px 0 #0F8B8D;
+    display: inline-block;
+    margin-top: 2px;
+  }
+
+  /* Buttons */
+  .btn {
+    font-family: var(--font-display);
+    font-size: clamp(15px, 4.5vw, 20px);
+    color: #fff;
+    background: linear-gradient(180deg, #FFAE03, #FB8500);
+    border: none;
+    border-radius: 20px;
+    padding: 11px 26px;
+    box-shadow: 0 5px 0 #C96B00, 0 8px 14px rgba(44, 34, 30, 0.25);
+    cursor: pointer;
+    letter-spacing: 0.03em;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    touch-action: manipulation;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+  }
+  .btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 1px 0 #C96B00;
+  }
+  .btn.big {
+    font-size: clamp(18px, 5.5vw, 24px);
+    padding: 13px 36px;
+    border-radius: 24px;
+    background: linear-gradient(180deg, #FF6B8B, #FF3366);
+    box-shadow: 0 6px 0 #B81943, 0 10px 18px rgba(255, 51, 102, 0.35);
+  }
+  .btn.big:active {
+    transform: translateY(5px);
+    box-shadow: 0 1px 0 #B81943;
+  }
+  .btn.teal {
+    background: linear-gradient(180deg, #2EC4B6, #0F8B8D);
+    box-shadow: 0 5px 0 #09595A;
+  }
+  .btn.teal:active { box-shadow: 0 1px 0 #09595A; }
+  .btn.purple {
+    background: linear-gradient(180deg, #9B5DE5, #7209B7);
+    box-shadow: 0 5px 0 #4F0680;
+  }
+  .btn.purple:active { box-shadow: 0 1px 0 #4F0680; }
+  .btn.ghost {
+    background: #FFF;
+    color: var(--ink);
+    box-shadow: 0 4px 0 #D4C9B8;
+    font-size: clamp(13px, 3.6vw, 16px);
+    padding: 8px 16px;
+  }
+  .btn.ghost:active {
+    transform: translateY(3px);
+    box-shadow: 0 1px 0 #D4C9B8;
+  }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 100%;
+  }
+
+  .card-panel {
+    background: rgba(255,255,255,0.96);
+    border: 3px solid #FFD166;
+    border-radius: 20px;
+    padding: 12px 10px;
+    width: 100%;
+    max-width: 440px;
+    box-shadow: 0 6px 0 #E2C063, 0 10px 24px rgba(0,0,0,0.12);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  /* Baby Cards */
+  .baby-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-width: 440px;
+  }
+  .baby-card {
+    background: #FFF;
+    border: 3px solid #E2D5BE;
+    border-radius: 16px;
+    padding: 6px 4px 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #D8C7A8;
+    text-align: center;
+    touch-action: manipulation;
+  }
+  .baby-card.selected {
+    background: linear-gradient(180deg, #FFF9E6, #FFEAA7);
+    border-color: #FF5376;
+    box-shadow: 0 5px 0 #D9254C;
+    transform: translateY(-2px);
+  }
+  .baby-card canvas {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 10px;
+  }
+  .baby-card .nm {
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: bold;
+    margin-top: 3px;
+    color: var(--ink);
+  }
+  .baby-card .sub {
+    font-size: 10px;
+    color: var(--ink-soft);
+    line-height: 1.1;
+  }
+
+  /* Top HUD */
+  #hud {
+    position: absolute;
+    top: max(8px, env(safe-area-inset-top));
+    left: 8px;
+    right: 8px;
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    pointer-events: none;
+    z-index: 15;
+  }
+  #hud.on { display: flex; }
+  .hud-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .hud-chip {
+    font-family: var(--font-display);
+    font-size: clamp(11.5px, 3.2vw, 14.5px);
+    background: rgba(255,255,255,0.96);
+    color: var(--ink);
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 2px solid #FFD166;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+    font-weight: bold;
+    pointer-events: auto;
+  }
+  .icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2.5px solid #FFD166;
+    background: #FFF;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    pointer-events: auto;
+    touch-action: manipulation;
+  }
+  .icon-btn:active { transform: translateY(2px); }
+  #hud-banner {
+    background: rgba(255,255,255,0.96);
+    border-radius: 12px;
+    padding: 5px 8px;
+    font-family: var(--font-display);
+    font-size: clamp(11.5px, 3vw, 13.5px);
+    color: #2C221E;
+    border: 2px solid #72EFDD;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    text-align: center;
+    letter-spacing: 0.01em;
+  }
+
+  /* Popups & Toast */
+  #toast {
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: max(14px, env(safe-area-inset-bottom));
+    background: #2C221E;
+    color: #FFF;
+    font-family: var(--font-display);
+    font-size: clamp(13px, 3.5vw, 15px);
+    padding: 8px 12px;
+    border-radius: 16px;
+    box-shadow: 0 5px 0 #111, 0 10px 20px rgba(0,0,0,0.25);
+    z-index: 18;
+    display: none;
+    text-align: center;
+    pointer-events: none;
+  }
+  #toast.show { display: block; }
+
+  #cue {
+    position: absolute;
+    top: 36%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    background: linear-gradient(180deg, #FFD166, #FFB703);
+    border: 4px solid #FFF;
+    border-radius: 22px;
+    padding: 10px 20px;
+    font-family: var(--font-display);
+    font-size: clamp(18px, 5.2vw, 26px);
+    color: #2C221E;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    z-index: 25;
+    pointer-events: none;
+    text-align: center;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+  #cue.show { transform: translate(-50%, -50%) scale(1); }
+
+  /* Mobile Stroller Control Touch Buttons */
+  #buggy-controls {
+    position: absolute;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    left: 14px;
+    right: 14px;
+    display: none;
+    justify-content: space-between;
+    z-index: 16;
+    pointer-events: none;
+  }
+  #buggy-controls.on { display: flex; }
+  .ctrl-btn {
+    pointer-events: auto;
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: linear-gradient(180deg, #FF6B8B, #FF3366);
+    border: 3px solid #FFF;
+    box-shadow: 0 5px 0 #B81943, 0 8px 18px rgba(0,0,0,0.25);
+    color: #FFF;
+    font-size: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  .ctrl-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #B81943; }
+
+  /* Certificate Modal */
+  #cert-modal {
+    position: absolute;
+    inset: 12px;
+    background: #FFFDF7;
+    border: 6px solid #FFB703;
+    border-radius: 20px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.5);
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px;
+    text-align: center;
+  }
+  #cert-modal.open { display: flex; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .screen, #cue { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="stage">
+  <div id="frame">
+    <canvas id="game" width="420" height="740"></canvas>
+    <canvas id="confetti" width="420" height="740"></canvas>
+
+    <!-- Top In-Game HUD -->
+    <div id="hud">
+      <div class="hud-row">
+        <div id="hud-level" class="hud-chip">🏪 Level 1</div>
+        <div class="hud-row" style="gap:5px">
+          <div id="hud-count" class="hud-chip">Pick a real baby!</div>
+          <button class="icon-btn" id="btn-music" aria-label="Music">🎵</button>
+          <button class="icon-btn" id="btn-sound" aria-label="Sound">🔊</button>
+          <button class="icon-btn" id="btn-home" aria-label="Home">🏠</button>
+        </div>
+      </div>
+      <div id="hud-banner">Go to the baby shop and pick up a real baby!</div>
+    </div>
+
+    <!-- In-Game Popups -->
+    <div id="toast"></div>
+    <div id="cue">⭐ Great Parent! ⭐</div>
+
+    <!-- Buggy Steer Touch Controls for Level 5 -->
+    <div id="buggy-controls">
+      <button class="ctrl-btn" id="btn-left" type="button">◀</button>
+      <button class="ctrl-btn" id="btn-right" type="button">▶</button>
+    </div>
+
+    <!-- Title Screen -->
+    <div class="screen" id="s-title">
+      <div>
+        <div class="eyebrow">🌟 Designed by Florence 👶</div>
+        <h1 class="game-title">How to Make Sure<br><span>Your Baby is Right!</span></h1>
+        <p class="tagline">Real Baby Shop · Nappy Change · Dummy · Clothes · Park Buggy Trophy!</p>
+        <div class="age-pill">Ages Up to 10 · 5 Fun Levels · Florence's Game</div>
+      </div>
+      <div class="card-panel">
+        <canvas id="title-art" width="360" height="170" style="width:100%;max-width:360px;border-radius:14px;background:#EAF6FF;"></canvas>
+        <div style="font-family:var(--font-display);font-size:13.5px;line-height:1.35;color:var(--ink);">
+          Follow Florence's 5 golden steps to make sure your baby is happy, clean, dressed, and safely in the park!
+        </div>
+      </div>
+      <div class="btn-row" style="margin-bottom:6px;">
+        <button class="btn big" id="btn-play">START BABY ADVENTURE! 🚀</button>
+      </div>
+      <div class="btn-row" style="margin-bottom:2px;">
+        <a class="btn ghost" href="index.html" style="text-decoration:none;">← Florence's Games</a>
+      </div>
+    </div>
+
+    <!-- Baby Selector Screen -->
+    <div class="screen hidden" id="s-baby">
+      <div>
+        <div class="eyebrow">Step 1: The Baby Shop</div>
+        <h2>Pick a Real Baby!</h2>
+      </div>
+      <div class="baby-grid" id="baby-grid"></div>
+      <div class="btn-row" style="margin-bottom:6px;">
+        <button class="btn ghost" id="btn-baby-back">← Back</button>
+        <button class="btn big teal" id="btn-baby-go">TAKE BABY HOME! 🛒</button>
+      </div>
+    </div>
+
+    <!-- Level Intro Screen -->
+    <div class="screen hidden" id="s-intro">
+      <div>
+        <div class="eyebrow" id="intro-badge">Level 1 of 5</div>
+        <h2 id="intro-title">The Baby Shop</h2>
+      </div>
+      <div class="card-panel">
+        <canvas id="intro-art" width="340" height="150" style="width:100%;max-width:340px;border-radius:14px;background:#F0F8FF;"></canvas>
+        <div id="intro-desc" style="font-family:var(--font-display);font-size:14.5px;line-height:1.35;color:var(--ink);"></div>
+        <div style="font-size:12px;color:var(--ink-soft);background:#FFF9E6;padding:5px 12px;border-radius:12px;border:1.5px dashed #FFB703;">
+          💡 Easy touch controls · Big targets · Super fun sounds!
+        </div>
+      </div>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn big" id="btn-intro-go">START LEVEL! 🚀</button>
+      </div>
+    </div>
+
+    <!-- Level Complete Screen -->
+    <div class="screen hidden" id="s-complete">
+      <div>
+        <div class="eyebrow" id="complete-badge">Level Cleared!</div>
+        <h2 id="complete-title">Baby is Doing Great!</h2>
+      </div>
+      <div class="card-panel">
+        <div style="font-size:48px;" id="complete-emoji">🍼👶</div>
+        <p id="complete-msg" style="font-family:var(--font-display);font-size:16px;line-height:1.35;color:var(--ink);">
+          Awesome! Baby is happy and right on track.
+        </p>
+        <div style="font-size:22px;letter-spacing:6px;color:#FFB703;">⭐⭐⭐⭐⭐</div>
+      </div>
+      <div class="btn-row" style="margin-bottom:8px;">
+        <button class="btn big" id="btn-next">Next Step →</button>
+      </div>
+    </div>
+
+    <!-- Final Park Trophy Screen -->
+    <div class="screen hidden" id="s-trophy">
+      <div>
+        <div class="eyebrow">🏆 PARK TROPHY CHAMPION 🏆</div>
+        <h2>Baby is 100% Right!</h2>
+      </div>
+      <div class="card-panel">
+        <canvas id="trophy-art" width="320" height="190" style="width:100%;max-width:320px;cursor:pointer;"></canvas>
+        <p id="trophy-msg" style="font-family:var(--font-display);font-size:15px;line-height:1.3;color:var(--ink);">
+          You picked up a real baby, changed the nappy, bought a dummy, dressed them in style, and steered the buggy safely to the Park!
+        </p>
+        <div style="font-size:22px;letter-spacing:6px;color:#FFB703;">⭐⭐⭐⭐⭐</div>
+      </div>
+      <div class="btn-row" style="margin-bottom:6px;">
+        <button class="btn purple" id="btn-cert">📜 Best Parent Award</button>
+        <button class="btn big" id="btn-again">Play Again! 🔄</button>
+      </div>
+      <div class="btn-row">
+        <a class="btn ghost" href="index.html" style="text-decoration:none;">← All Games</a>
+      </div>
+    </div>
+
+    <!-- Official Certificate Modal -->
+    <div id="cert-modal">
+      <div style="font-family:var(--font-display);font-size:20px;color:#D48B00;font-weight:bold;">
+        🌟 OFFICIAL BABY MASTER CERTIFICATE 🌟
+      </div>
+      <div style="font-size:14px;color:var(--ink-soft);margin-top:2px;">Awarded by Florence</div>
+      <div style="border:2px dashed #FFB703;padding:12px;border-radius:14px;width:100%;background:#FFFDF7;margin:8px 0;">
+        <div style="font-size:13px;color:var(--ink);">This special trophy is awarded to:</div>
+        <div id="cert-name" style="font-family:var(--font-display);font-size:22px;color:#FF3366;font-weight:bold;margin:4px 0;">Baby Bean & Parent</div>
+        <div style="font-size:12.5px;line-height:1.35;color:var(--ink);">
+          For mastering all 5 levels: buying a real baby at the shop, changing dirty nappies, picking the sweetest dummy, wearing the coolest clothes, and navigating the buggy to the Park!
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-around;width:100%;align-items:center;">
+        <div>
+          <div style="font-family:var(--font-display);font-size:15px;color:#0F8B8D;font-weight:bold;">Florence</div>
+          <div style="font-size:10px;color:var(--ink-soft);">Game Designer & Chief Baby Expert</div>
+        </div>
+        <div style="font-size:34px;">🏆</div>
+      </div>
+      <button class="btn teal" id="btn-cert-close" style="margin-top:8px;">Close Certificate ✕</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const VW = 420, VH = 740;
+  const canvas = document.getElementById('game');
+  const ctx = canvas.getContext('2d');
+  const cCanvas = document.getElementById('confetti');
+  const cctx = cCanvas.getContext('2d');
+
+  /* ---------------- BABIES & ASSETS ---------------- */
+  const BABIES = {
+    bean:   { id: 'bean',   name: 'Baby Bean',   sub: 'Found by the baked beans', hair: '#C47A2A', hairStyle: 'curl', vest: '#2EC4B6', cheek: '#FF8FA3' },
+    pip:    { id: 'pip',    name: 'Baby Pip',    sub: 'Real supermarket floor model', hair: '#2B170B', hairStyle: 'fluff',vest: '#FFD93D', cheek: '#FF7A90' },
+    toast:  { id: 'toast',  name: 'Baby Toast',  sub: 'Warm and very crumbly',    hair: '#F2C14E', hairStyle: 'swirl',vest: '#FF8FAB', cheek: '#FF6B8A' },
+    nugget: { id: 'nugget', name: 'Baby Nugget', sub: 'Speedy crawler & dino fan', hair: '#A0522D', hairStyle: 'spiky',vest: '#FF7A00', cheek: '#FFAA85' },
+    sprout: { id: 'sprout', name: 'Baby Sprout', sub: 'Loves green onesies',      hair: '#4A7C20', hairStyle: 'sprout',vest: '#70E000', cheek: '#FF8FA3' },
+    blossom:{ id: 'blossom',name: 'Baby Blossom',sub: 'Sweet smile & flower curls', hair: '#8338EC', hairStyle: 'curls',vest: '#FF006E', cheek: '#FF99C8' }
+  };
+
+  const DUMMIES = [
+    { id: 'dino',   name: 'Dino Roar',   color: '#38B000', icon: '🦖', sound: 'quack' },
+    { id: 'berry',  name: 'Sweet Berry', color: '#FF0054', icon: '🍓', sound: 'pop' },
+    { id: 'star',   name: 'Gold Sparkle',color: '#FFB703', icon: '⭐', sound: 'suckle' },
+    { id: 'duck',   name: 'Squeaky Duck',color: '#FFD60A', icon: '🦆', sound: 'quack' },
+    { id: 'unicorn',name: 'Magic Horn',  color: '#9D4EDD', icon: '🦄', sound: 'suckle' },
+    { id: 'stache', name: 'Gentleman',   color: '#2B2D42', icon: '🥸', sound: 'giggle' }
+  ];
+
+  const OUTFITS = [
+    { id: 'dino',   name: 'Dino Onesie', color: '#52B788', icon: '🦖', hat: 'dino' },
+    { id: 'fairy',  name: 'Fairy Wings', color: '#FF70A6', icon: '🧚', hat: 'crown' },
+    { id: 'bear',   name: 'Teddy Suit',  color: '#C48A4A', icon: '🧸', hat: 'ears' },
+    { id: 'hero',   name: 'Super Baby',  color: '#3A86FF', icon: '🦸', hat: 'cape' },
+    { id: 'space',  name: 'Astronaut',   color: '#8E9AAF', icon: '🚀', hat: 'helmet' },
+    { id: 'berry',  name: 'Sweet Berry', color: '#EF476F', icon: '🍓', hat: 'leaf' }
+  ];
+
+  const LEVELS = [
+    {
+      title: 'The Real Baby Shop',
+      badge: 'Level 1 of 5',
+      desc: 'Go to the baby shop. This is a REAL shop with real babies! Find your favourite baby on the nursery playmat, scan at the till, and pay with 3 gold coins!',
+      hud: 'Pick up a real baby and take them to the till!'
+    },
+    {
+      title: 'The Nappy Change',
+      badge: 'Level 2 of 5',
+      desc: 'Baby needs a fresh nappy! Remove the dirty nappy, gently wipe baby clean with soft wet wipes, puff soothing baby powder, and snap on a clean nappy!',
+      hud: 'Wipe baby, add baby powder, and snap clean nappy!'
+    },
+    {
+      title: 'Buy Baby a Dummy',
+      badge: 'Level 3 of 5',
+      desc: 'Visit the Dummy Boutique! Try 6 fun pacifiers (Dino, Berry, Gold Star, Squeaky Duck, Unicorn, Mustache) and pop baby’s favourite into their mouth!',
+      hud: 'Try fun dummies and soothing pacifiers on baby!'
+    },
+    {
+      title: 'Buy Baby Cute Clothes',
+      badge: 'Level 4 of 5',
+      desc: 'Fashion time! Choose from Dino Onesies, Fairy Wings, Teddy Suits, Superhero capes, Astronaut suits, or Strawberry rompers!',
+      hud: 'Pick your favourite outfit and dress baby!'
+    },
+    {
+      title: 'Strap in Buggy & Park Dash!',
+      badge: 'Level 5 of 5',
+      desc: 'Strap baby safely into the buggy with the 5-point harness! Steer the stroller along the sidewalk, dodge puddles and pups, and reach the Park Trophy!',
+      hud: 'Strap baby in the buggy and steer to the Park!'
+    }
+  ];
+
+  /* ---------------- STATE ---------------- */
+  const State = {
+    screen: 'title',
+    level: 1,
+    babyId: 'bean',
+    selectedDummy: 'star',
+    selectedOutfit: 'dino',
+    sound: true,
+    music: true,
+    t: 0,
+    last: 0,
+    pointer: { x: 210, y: 370, down: false },
+    drag: null,
+    particles: [],
+    confetti: [],
+    toast: '',
+    toastUntil: 0,
+    L: {},
+    audioInitialized: false
+  };
+
+  function baby() { return BABIES[State.babyId] || BABIES.bean; }
+
+  /* ---------------- HAPTICS & SOUND ---------------- */
+  function vibrate(ms) {
+    if (navigator.vibrate) {
+      try { navigator.vibrate(ms || 25); } catch (e) {}
+    }
+  }
+
+  let actx = null;
+  let bgmTimer = null;
+  let bgmStep = 0;
+
+  function audioInit() {
+    if (actx) {
+      if (actx.state === 'suspended') actx.resume().catch(() => {});
+      return;
+    }
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    try {
+      actx = new AC();
+      State.audioInitialized = true;
+      if (State.music) startBgm();
+    } catch (e) { actx = null; }
+  }
+
+  function beep(freq, dur, type, vol, pitchEnd) {
+    if (!State.sound || !actx) return;
+    try {
+      const t = actx.currentTime;
+      const o = actx.createOscillator();
+      const g = actx.createGain();
+      o.type = type || 'sine';
+      o.frequency.setValueAtTime(freq, t);
+      if (pitchEnd) o.frequency.exponentialRampToValueAtTime(Math.max(10, pitchEnd), t + (dur || 0.1));
+      g.gain.setValueAtTime(vol || 0.08, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + (dur || 0.12));
+      o.connect(g); g.connect(actx.destination);
+      o.start(t); o.stop(t + (dur || 0.12) + 0.02);
+    } catch (e) {}
+  }
+
+  function sfx(kind) {
+    if (!State.sound || !actx) return;
+    vibrate(kind === 'win' ? 60 : kind === 'buckle' ? 40 : 25);
+    if (kind === 'pop') {
+      beep(540, 0.08, 'sine', 0.09, 880);
+    } else if (kind === 'suckle') {
+      beep(400, 0.06, 'sine', 0.06, 550);
+      setTimeout(() => beep(450, 0.06, 'sine', 0.06, 600), 70);
+    } else if (kind === 'quack') {
+      beep(320, 0.14, 'sawtooth', 0.06, 260);
+      setTimeout(() => beep(290, 0.12, 'sawtooth', 0.05, 240), 80);
+    } else if (kind === 'buckle') {
+      beep(200, 0.05, 'triangle', 0.09, 120);
+      setTimeout(() => beep(800, 0.08, 'square', 0.08), 50);
+    } else if (kind === 'bell') {
+      beep(1046, 0.2, 'sine', 0.09);
+      setTimeout(() => beep(1318, 0.25, 'sine', 0.09), 80);
+    } else if (kind === 'scan') {
+      beep(1760, 0.18, 'square', 0.06);
+    } else if (kind === 'coin') {
+      beep(987, 0.06, 'sine', 0.09);
+      setTimeout(() => beep(1318, 0.12, 'sine', 0.08), 50);
+    } else if (kind === 'giggle') {
+      beep(587, 0.06, 'sine', 0.07);
+      setTimeout(() => beep(784, 0.07, 'sine', 0.08), 60);
+      setTimeout(() => beep(880, 0.1, 'sine', 0.08), 120);
+    } else if (kind === 'wipe') {
+      beep(300, 0.08, 'triangle', 0.05, 500);
+    } else if (kind === 'splash') {
+      beep(350, 0.1, 'sine', 0.08, 150);
+    } else if (kind === 'win') {
+      [523, 659, 784, 1046].forEach((f, idx) => {
+        setTimeout(() => beep(f, 0.18, 'sine', 0.09), idx * 90);
+      });
+    } else if (kind === 'ok') {
+      beep(523, 0.08, 'sine', 0.08);
+      setTimeout(() => beep(784, 0.12, 'sine', 0.08), 70);
+    }
+  }
+
+  /* ---------------- BGM ---------------- */
+  const BGM_MELODY = [
+    523.25, 0, 659.25, 0, 783.99, 659.25, 523.25, 0,
+    587.33, 0, 698.46, 0, 880.00, 698.46, 587.33, 0,
+    659.25, 0, 783.99, 0, 1046.50, 783.99, 659.25, 0,
+    783.99, 698.46, 659.25, 587.33, 523.25, 0, 0, 0
+  ];
+  function startBgm() {
+    stopBgm();
+    if (!State.music || !actx) return;
+    bgmStep = 0;
+    bgmTimer = setInterval(() => {
+      if (!State.music || !actx || actx.state !== 'running') return;
+      const t = actx.currentTime;
+      const mFreq = BGM_MELODY[bgmStep % BGM_MELODY.length];
+      if (mFreq > 0) {
+        const o = actx.createOscillator();
+        const g = actx.createGain();
+        o.type = 'triangle';
+        o.frequency.setValueAtTime(mFreq, t);
+        g.gain.setValueAtTime(0.02, t);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.14);
+        o.connect(g); g.connect(actx.destination);
+        o.start(t); o.stop(t + 0.15);
+      }
+      bgmStep++;
+    }, 190);
+  }
+  function stopBgm() {
+    if (bgmTimer) { clearInterval(bgmTimer); bgmTimer = null; }
+  }
+
+  /* ---------------- UI HELPERS ---------------- */
+  function showScreen(id) {
+    ['s-title', 's-baby', 's-intro', 's-complete', 's-trophy'].forEach(s => {
+      document.getElementById(s).classList.toggle('hidden', s !== id);
+    });
+    const playing = !id;
+    document.getElementById('hud').classList.toggle('on', playing);
+    document.getElementById('buggy-controls').classList.toggle('on', playing && State.level === 5 && State.L.phase === 'drive');
+    State.screen = id || 'play';
+  }
+
+  function toast(msg, sec) {
+    State.toast = msg;
+    State.toastUntil = State.t + (sec || 2.5);
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  function hideToast() {
+    document.getElementById('toast').classList.remove('show');
+  }
+
+  function cue(msg) {
+    const el = document.getElementById('cue');
+    el.textContent = msg;
+    el.classList.add('show');
+    setTimeout(() => el.classList.remove('show'), 950);
+  }
+
+  function setHud(levelText, countText, banner) {
+    document.getElementById('hud-level').textContent = levelText;
+    document.getElementById('hud-count').textContent = countText;
+    document.getElementById('hud-banner').textContent = banner;
+  }
+
+  function burst(x, y, color, n) {
+    for (let i = 0; i < (n || 12); i++) {
+      State.particles.push({
+        x: x, y: y,
+        vx: (Math.random() - 0.5) * 220,
+        vy: -40 - Math.random() * 180,
+        life: 0.5 + Math.random() * 0.5,
+        age: 0,
+        col: color || '#FFD166',
+        r: 3.5 + Math.random() * 4.5
+      });
+    }
+  }
+
+  function rainConfetti(n) {
+    const cols = ['#FF5D73', '#FFB703', '#2EC4B6', '#FFE66D', '#9B5DE5', '#06D6A0', '#FFF'];
+    for (let i = 0; i < (n || 50); i++) {
+      State.confetti.push({
+        x: Math.random() * VW,
+        y: -20 - Math.random() * 80,
+        vx: (Math.random() - 0.5) * 60,
+        vy: 90 + Math.random() * 120,
+        rot: Math.random() * 6.28,
+        vr: (Math.random() - 0.5) * 9,
+        col: cols[i % cols.length],
+        w: 7 + Math.random() * 7,
+        h: 4 + Math.random() * 5
+      });
+    }
+  }
+
+  /* ---------------- MATH / HIT ---------------- */
+  function dist(ax, ay, bx, by) {
+    const dx = ax - bx, dy = ay - by;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
+  function hitC(px, py, x, y, r) { return dist(px, py, x, y) <= r; }
+  function hitR(px, py, x, y, w, h) { return px >= x && px <= x + w && py >= y && py <= y + h; }
+  function clamp(v, a, b) { return Math.max(a, Math.min(b, v)); }
+
+  function canvasPos(e) {
+    const r = canvas.getBoundingClientRect();
+    const src = (e.touches && e.touches.length > 0) ? e.touches[0] : (e.changedTouches && e.changedTouches.length > 0) ? e.changedTouches[0] : e;
+    return {
+      x: (src.clientX - r.left) * (VW / r.width),
+      y: (src.clientY - r.top) * (VH / r.height)
+    };
+  }
+
+  /* ---------------- DRAW HELPERS ---------------- */
+  function rr(c, x, y, w, h, r) {
+    c.beginPath();
+    if (c.roundRect) c.roundRect(x, y, w, h, r);
+    else c.rect(x, y, w, h);
+    c.fill();
+  }
+
+  function drawBaby(c, x, y, opt) {
+    opt = opt || {};
+    const pose = opt.pose || 'sit';
+    const sc = opt.scale || 1;
+    const flip = opt.flip || 1;
+    const t = opt.t || 0;
+    const b = opt.b || baby();
+    const nappy = opt.nappy !== false;
+    const dummy = opt.dummy || null;
+    const outfit = opt.outfit || null;
+    const mood = opt.mood || 'happy';
+    const bob = Math.sin(t * 3) * 1.8;
+
+    c.save();
+    c.translate(x, y + bob);
+    c.scale(flip * sc, sc);
+
+    // Ground shadow
+    c.beginPath();
+    c.ellipse(0, 30, 22, 7, 0, 0, Math.PI * 2);
+    c.fillStyle = 'rgba(44,34,30,0.18)';
+    c.fill();
+
+    // Body Outfit or Vest
+    const outfitMeta = outfit ? OUTFITS.find(o => o.id === outfit) : null;
+    c.fillStyle = outfitMeta ? outfitMeta.color : b.vest;
+    rr(c, -16, -10, 32, 26, 8);
+
+    // Legs / Feet
+    c.fillStyle = '#FFD6B0';
+    if (pose === 'sit') {
+      rr(c, -24, 12, 17, 10, 4);
+      rr(c, 7, 12, 17, 10, 4);
+    } else {
+      rr(c, -13, 12, 9, 17, 4);
+      rr(c, 4, 12, 9, 17, 4);
+    }
+
+    // Nappy
+    if (nappy && !outfit) {
+      c.fillStyle = '#FFF8EE';
+      rr(c, -15, 7, 30, 15, 7);
+      c.fillStyle = '#FFD93D';
+      c.beginPath(); c.arc(-5, 14, 3, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(5, 13, 2.7, 0, Math.PI * 2); c.fill();
+    }
+
+    // Head
+    c.fillStyle = '#FFD6B0';
+    c.beginPath(); c.arc(0, -23, 15, 0, Math.PI * 2); c.fill();
+    c.fillStyle = b.cheek;
+    c.beginPath(); c.arc(-9, -19, 3.5, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(9, -19, 3.5, 0, Math.PI * 2); c.fill();
+
+    // Eyes
+    c.fillStyle = '#2C221E';
+    c.beginPath(); c.arc(-4, -24, 2.2, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(4, -24, 2.2, 0, Math.PI * 2); c.fill();
+
+    // Mouth or Dummy
+    if (dummy) {
+      const dMeta = DUMMIES.find(d => d.id === dummy) || DUMMIES[0];
+      c.fillStyle = dMeta.color;
+      c.beginPath(); c.arc(0, -17, 7, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#FFF';
+      c.font = 'bold 9px sans-serif';
+      c.textAlign = 'center';
+      c.fillText(dMeta.icon, 0, -14);
+      // Pacifier ring
+      c.strokeStyle = '#FFD166'; c.lineWidth = 2;
+      c.beginPath(); c.arc(0, -11, 4, 0, Math.PI * 2); c.stroke();
+    } else {
+      c.strokeStyle = '#2C221E'; c.lineWidth = 1.6;
+      c.beginPath();
+      if (mood === 'cry') {
+        c.fillStyle = '#2C221E';
+        c.beginPath(); c.arc(0, -16, 4, 0, Math.PI * 2); c.fill();
+      } else {
+        c.arc(0, -18, 4, 0.15, Math.PI - 0.15);
+        c.stroke();
+      }
+    }
+
+    // Hair
+    c.fillStyle = b.hair;
+    if (b.hairStyle === 'spiky') {
+      [-8, 0, 8].forEach(hx => {
+        c.beginPath(); c.moveTo(hx - 4, -34); c.lineTo(hx, -44); c.lineTo(hx + 4, -34); c.fill();
+      });
+    } else if (b.hairStyle === 'sprout') {
+      c.beginPath(); c.arc(0, -36, 4, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(-5, -42, 5, 2.5, -0.6, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.ellipse(5, -42, 5, 2.5, 0.6, 0, Math.PI * 2); c.fill();
+    } else {
+      c.beginPath(); c.arc(-7, -35, 6, 0, Math.PI * 2); c.fill();
+      c.beginPath(); c.arc(5, -37, 5.5, 0, Math.PI * 2); c.fill();
+    }
+
+    // Outfit accessories
+    if (outfitMeta) {
+      if (outfitMeta.hat === 'dino') {
+        c.fillStyle = '#52B788';
+        [-8, 0, 8].forEach(dx => {
+          c.beginPath(); c.moveTo(dx - 4, -36); c.lineTo(dx, -48); c.lineTo(dx + 4, -36); c.fill();
+        });
+      } else if (outfitMeta.hat === 'crown') {
+        c.fillStyle = '#FFD166';
+        c.beginPath();
+        c.moveTo(-12, -36); c.lineTo(-14, -48); c.lineTo(-6, -42); c.lineTo(0, -52); c.lineTo(6, -42); c.lineTo(14, -48); c.lineTo(12, -36);
+        c.closePath(); c.fill();
+      } else if (outfitMeta.hat === 'ears') {
+        c.fillStyle = '#A06CD5';
+        c.beginPath(); c.arc(-14, -38, 6, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(14, -38, 6, 0, Math.PI * 2); c.fill();
+      } else if (outfitMeta.hat === 'cape') {
+        c.fillStyle = '#FF0054';
+        c.beginPath(); c.moveTo(-16, -6); c.lineTo(-24, 20); c.lineTo(-10, 18); c.fill();
+      }
+    }
+
+    c.restore();
+  }
+
+  function drawBuggy(c, x, y, t, strapped) {
+    c.save();
+    c.translate(x, y);
+    // Wheels
+    c.fillStyle = '#333';
+    c.beginPath(); c.arc(-30, 24, 12, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(30, 24, 12, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#FFF';
+    c.beginPath(); c.arc(-30, 24, 5, 0, Math.PI * 2); c.fill();
+    c.beginPath(); c.arc(30, 24, 5, 0, Math.PI * 2); c.fill();
+
+    // Stroller chassis
+    c.strokeStyle = '#D4A373'; c.lineWidth = 5;
+    c.beginPath(); c.moveTo(-30, 24); c.lineTo(0, -10); c.lineTo(30, 24); c.stroke();
+    c.beginPath(); c.moveTo(0, -10); c.lineTo(-25, -45); c.stroke();
+
+    // Stroller Seat
+    c.fillStyle = '#FF70A6';
+    rr(c, -28, -25, 56, 38, 12);
+    c.fillStyle = '#FFB4D0';
+    rr(c, -24, -20, 48, 28, 8);
+
+    // Sun Canopy
+    c.fillStyle = '#70D6FF';
+    c.beginPath(); c.arc(0, -25, 30, Math.PI, 0); c.fill();
+
+    // Harness Straps
+    if (strapped) {
+      c.strokeStyle = '#FFD166'; c.lineWidth = 4;
+      c.beginPath(); c.moveTo(-16, -20); c.lineTo(0, 0); c.stroke();
+      c.beginPath(); c.moveTo(16, -20); c.lineTo(0, 0); c.stroke();
+      // Buckle
+      c.fillStyle = '#FF5D73';
+      c.beginPath(); c.arc(0, 0, 6, 0, Math.PI * 2); c.fill();
+    }
+
+    c.restore();
+  }
+
+  /* ---------------- LEVEL INITIALIZATION ---------------- */
+  function startLevel(n) {
+    State.level = n;
+    State.drag = null;
+    State.particles = [];
+    State.confetti = [];
+    const L = State.L = { phase: 'start', winAt: 0 };
+
+    if (n === 1) {
+      // Level 1: Pick a real baby in shop
+      L.phase = 'browse';
+      L.baby = { x: 210, y: 390 };
+      L.coins = [
+        { x: 75, y: 640, homeX: 75, homeY: 640, paid: false, id: 0, val: '20p' },
+        { x: 135, y: 650, homeX: 135, homeY: 650, paid: false, id: 1, val: '20p' },
+        { x: 95, y: 690, homeX: 95, homeY: 690, paid: false, id: 2, val: '7p' }
+      ];
+      toast('Welcome to the Real Baby Shop! Tap to pick up your real baby.', 3);
+    } else if (n === 2) {
+      // Level 2: Change nappy
+      L.phase = 'remove';
+      L.baby = { x: 210, y: 360 };
+      L.wipeSwipes = 0;
+      L.powderPuffs = 0;
+      L.nappyOff = false;
+      L.cleanNappyOn = false;
+      toast('Unhook the dirty nappy to start the change!', 3);
+    } else if (n === 3) {
+      // Level 3: Dummy boutique
+      L.phase = 'select';
+      L.baby = { x: 210, y: 360 };
+      L.dummyAttached = false;
+      toast('Try all the fun dummies! Tap one to give it to baby.', 3);
+    } else if (n === 4) {
+      // Level 4: Clothes boutique
+      L.phase = 'select';
+      L.baby = { x: 210, y: 360 };
+      L.outfitDressed = false;
+      toast('Pick a cute outfit to dress your baby!', 3);
+    } else {
+      // Level 5: Strap in buggy & Park sidewalk runner
+      L.phase = 'strap';
+      L.baby = { x: 210, y: 360 };
+      L.buggyX = 210;
+      L.lane = 1; // 0: Left, 1: Middle, 2: Right
+      L.targetLaneX = 210;
+      L.distance = 0;
+      L.maxDistance = 100;
+      L.obstacles = [];
+      L.collectibles = [];
+      L.strapped = false;
+      toast('Tap the buckle to strap baby safely into the buggy!', 3);
+    }
+
+    showScreen(null);
+    updateHud();
+    sfx('ok');
+  }
+
+  function updateHud() {
+    const L = State.L;
+    if (State.level === 1) {
+      const paid = L.coins ? L.coins.filter(c => c.paid).length : 0;
+      let b = 'Pick up a real baby at the shop!';
+      if (L.phase === 'pay') b = 'Scan barcode & pay 47p into the register!';
+      setHud('🏪 Level 1', (L.phase === 'pay' ? paid + ' / 3 coins' : 'Real Baby Shop'), b);
+    } else if (State.level === 2) {
+      let b = 'Unhook the old nappy!';
+      if (L.phase === 'wipe') b = 'Swipe wet wipe across baby to clean!';
+      if (L.phase === 'powder') b = 'Tap powder puff to soothe skin!';
+      if (L.phase === 'snap') b = 'Snap on the fresh clean nappy!';
+      setHud('🧻 Level 2', 'NAPPY CHANGE', b);
+    } else if (State.level === 3) {
+      setHud('🍼 Level 3', 'DUMMY SHOP', 'Pick baby’s favourite pacifier!');
+    } else if (State.level === 4) {
+      setHud('👗 Level 4', 'CLOTHES BOUTIQUE', 'Choose a cool outfit for baby!');
+    } else {
+      let b = 'Strap baby in the stroller!';
+      if (L.phase === 'drive') b = 'Steer buggy to the Park! Dodge puddles & dogs!';
+      setHud('🌳 Level 5', Math.min(100, Math.round(L.distance || 0)) + '% to Park', b);
+    }
+  }
+
+  function winLevel() {
+    const L = State.L;
+    if (L.phase === 'won') return;
+    L.phase = 'won';
+    L.winAt = State.t + 1.2;
+    sfx('win');
+    rainConfetti(65);
+    cue(State.level === 1 ? 'REAL BABY ADOPTED! 👶' : State.level === 2 ? 'CLEAN & FRESH! ✨' : State.level === 3 ? 'DUMMY SOOTHED! 🍼' : State.level === 4 ? 'STYLED UP! 👗' : 'PARK CHAMPION! 🏆');
+    document.getElementById('buggy-controls').classList.remove('on');
+  }
+
+  function showComplete() {
+    const n = State.level;
+    const names = baby().name;
+    document.getElementById('complete-badge').textContent = 'Step ' + n + ' of 5 Cleared!';
+    if (n === 1) {
+      document.getElementById('complete-title').textContent = 'You picked ' + names + '!';
+      document.getElementById('complete-emoji').textContent = '🏪👶';
+      document.getElementById('complete-msg').textContent = 'A real baby straight from the baby shop! Paid 47p with receipt.';
+    } else if (n === 2) {
+      document.getElementById('complete-title').textContent = names + ' is Clean & Fresh!';
+      document.getElementById('complete-emoji').textContent = '🧻✨';
+      document.getElementById('complete-msg').textContent = 'Wiped squeaky clean, powdered, and wearing a fresh star nappy.';
+    } else if (n === 3) {
+      document.getElementById('complete-title').textContent = 'Dummy Equipped!';
+      document.getElementById('complete-emoji').textContent = '🍼⭐';
+      document.getElementById('complete-msg').textContent = names + ' loves their brand new dummy! Happy giggles all round.';
+    } else if (n === 4) {
+      document.getElementById('complete-title').textContent = 'Dressed to Impress!';
+      document.getElementById('complete-emoji').textContent = '👗🦖';
+      document.getElementById('complete-msg').textContent = names + ' is wearing their favourite boutique outfit!';
+    }
+    showScreen('s-complete');
+    drawIntroPreview();
+  }
+
+  function showTrophy() {
+    document.getElementById('trophy-msg').textContent =
+      baby().name + ' is completely happy, safe in the stroller, and celebrating at the Sunny Park!';
+    document.getElementById('cert-name').textContent = baby().name + ' & Florence';
+    showScreen('s-trophy');
+    rainConfetti(90);
+    drawTrophyArt();
+  }
+
+  /* ---------------- UPDATE ---------------- */
+  function update(dt) {
+    const L = State.L;
+
+    // Particles & Confetti
+    State.particles.forEach(p => {
+      p.age += dt; p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 300 * dt;
+    });
+    State.particles = State.particles.filter(p => p.age < p.life);
+
+    State.confetti.forEach(p => {
+      p.x += p.vx * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
+    });
+    State.confetti = State.confetti.filter(p => p.y < VH + 25);
+
+    if (State.t > State.toastUntil) hideToast();
+
+    if (State.screen !== 'play' || !L.phase || L.phase === 'won') {
+      if (L.phase === 'won' && State.t >= L.winAt) {
+        if (State.level === 5) showTrophy();
+        else showComplete();
+      }
+      return;
+    }
+
+    if (State.level === 1) {
+      if (L.phase === 'pay') {
+        L.coins.forEach(coin => {
+          if (coin.paid) return;
+          if (State.drag && State.drag.kind === 'coin' && State.drag.id === coin.id) {
+            coin.x = State.pointer.x;
+            coin.y = State.pointer.y;
+          }
+        });
+      }
+    } else if (State.level === 5 && L.phase === 'drive') {
+      // Stroller runner simulation
+      L.distance += dt * 14;
+      const laneXs = [110, 210, 310];
+      L.targetLaneX = laneXs[L.lane];
+      L.buggyX += (L.targetLaneX - L.buggyX) * dt * 12;
+
+      // Spawn obstacles (puddles, dogs)
+      if (Math.random() < 0.035 && L.distance < 88) {
+        const obsLane = Math.floor(Math.random() * 3);
+        const isDog = Math.random() > 0.5;
+        L.obstacles.push({ lane: obsLane, y: -40, type: isDog ? 'dog' : 'puddle' });
+      }
+      // Spawn collectibles (stars, rattles)
+      if (Math.random() < 0.045 && L.distance < 92) {
+        const cLane = Math.floor(Math.random() * 3);
+        L.collectibles.push({ lane: cLane, y: -40, type: 'star' });
+      }
+
+      // Update obstacles
+      L.obstacles.forEach(o => {
+        o.y += dt * 220;
+        const ox = laneXs[o.lane];
+        if (hitC(L.buggyX, 580, ox, o.y, 42)) {
+          o.y = VH + 100;
+          sfx(o.type === 'dog' ? 'giggle' : 'splash');
+          burst(L.buggyX, 580, o.type === 'dog' ? '#FFAA85' : '#70D6FF', 10);
+          toast(o.type === 'dog' ? 'Woof! Friendly puppy waved!' : 'Splash! Splashed a puddle!', 1.2);
+        }
+      });
+      L.obstacles = L.obstacles.filter(o => o.y < VH + 50);
+
+      // Update collectibles
+      L.collectibles.forEach(c => {
+        c.y += dt * 220;
+        const cx = laneXs[c.lane];
+        if (hitC(L.buggyX, 580, cx, c.y, 45)) {
+          c.y = VH + 100;
+          sfx('bell');
+          burst(L.buggyX, 580, '#FFD166', 12);
+        }
+      });
+      L.collectibles = L.collectibles.filter(c => c.y < VH + 50);
+
+      if (L.distance >= L.maxDistance) {
+        winLevel();
+      }
+    }
+
+    updateHud();
+  }
+
+  /* ---------------- POINTER INTERACTIONS ---------------- */
+  function onDown(e) {
+    audioInit();
+    if (State.screen !== 'play') return;
+    e.preventDefault();
+    const p = canvasPos(e);
+    State.pointer.x = p.x; State.pointer.y = p.y; State.pointer.down = true;
+
+    const L = State.L;
+    if (State.level === 1) {
+      if (L.phase === 'browse' && hitC(p.x, p.y, L.baby.x, L.baby.y, 65)) {
+        L.phase = 'pay';
+        sfx('scan');
+        burst(L.baby.x, L.baby.y, '#FF3366', 15);
+        toast('BEEP! Real baby scanned at the till. Drop 3 coins to pay 47p!', 2.5);
+      } else if (L.phase === 'pay') {
+        L.coins.forEach(coin => {
+          if (!coin.paid && hitC(p.x, p.y, coin.x, coin.y, 35)) {
+            State.drag = { kind: 'coin', id: coin.id };
+          }
+        });
+      }
+    } else if (State.level === 2) {
+      if (L.phase === 'remove' && hitC(p.x, p.y, L.baby.x, L.baby.y + 15, 55)) {
+        L.nappyOff = true;
+        L.phase = 'wipe';
+        sfx('pop');
+        burst(L.baby.x, L.baby.y + 15, '#FFF8EE', 14);
+        toast('Dirty nappy removed! Drag wet wipe to clean baby!', 2.2);
+      } else if (L.phase === 'wipe' && hitC(p.x, p.y, L.baby.x, L.baby.y + 15, 55)) {
+        L.wipeSwipes++;
+        sfx('wipe');
+        burst(p.x, p.y, '#80E5FF', 6);
+        if (L.wipeSwipes >= 4) {
+          L.phase = 'powder';
+          toast('Baby is clean! Tap powder puff to soothe skin.', 2.2);
+        }
+      } else if (L.phase === 'powder' && hitC(p.x, p.y, 320, 520, 50)) {
+        L.powderPuffs++;
+        sfx('pop');
+        burst(L.baby.x, L.baby.y + 15, '#FFF', 15);
+        if (L.powderPuffs >= 2) {
+          L.phase = 'snap';
+          toast('Now tap the fresh star nappy to snap it on!', 2.2);
+        }
+      } else if (L.phase === 'snap' && hitC(p.x, p.y, 100, 520, 50)) {
+        L.cleanNappyOn = true;
+        sfx('ok');
+        burst(L.baby.x, L.baby.y + 15, '#FFD166', 18);
+        winLevel();
+      }
+    } else if (State.level === 3) {
+      if (L.phase === 'select') {
+        DUMMIES.forEach((dMeta, idx) => {
+          const bx = 65 + (idx % 3) * 145;
+          const by = 510 + Math.floor(idx / 3) * 75;
+          if (hitR(p.x, p.y, bx - 60, by - 30, 120, 60)) {
+            State.selectedDummy = dMeta.id;
+            L.dummyAttached = true;
+            sfx(dMeta.sound);
+            burst(L.baby.x, L.baby.y - 15, dMeta.color, 16);
+            toast(dMeta.name + ' Dummy attached! Baby is soothed!', 2);
+            setTimeout(() => winLevel(), 900);
+          }
+        });
+      }
+    } else if (State.level === 4) {
+      if (L.phase === 'select') {
+        OUTFITS.forEach((oMeta, idx) => {
+          const bx = 65 + (idx % 3) * 145;
+          const by = 510 + Math.floor(idx / 3) * 75;
+          if (hitR(p.x, p.y, bx - 60, by - 30, 120, 60)) {
+            State.selectedOutfit = oMeta.id;
+            L.outfitDressed = true;
+            sfx('pop');
+            burst(L.baby.x, L.baby.y, oMeta.color, 18);
+            toast(oMeta.name + ' equipped! Gorgeous style!', 2);
+            setTimeout(() => winLevel(), 900);
+          }
+        });
+      }
+    } else if (State.level === 5) {
+      if (L.phase === 'strap') {
+        if (hitC(p.x, p.y, 210, 420, 75)) {
+          L.strapped = true;
+          L.phase = 'drive';
+          sfx('buckle');
+          burst(210, 420, '#FF5D73', 18);
+          toast('CLICK! 5-point harness strapped! Stroller steering active!', 2.5);
+          document.getElementById('buggy-controls').classList.add('on');
+        }
+      }
+    }
+  }
+
+  function onMove(e) {
+    if (!State.pointer.down) return;
+    e.preventDefault();
+    const p = canvasPos(e);
+    State.pointer.x = p.x; State.pointer.y = p.y;
+    if (State.level === 2 && State.L.phase === 'wipe' && hitC(p.x, p.y, State.L.baby.x, State.L.baby.y + 15, 55)) {
+      State.L.wipeSwipes++;
+      sfx('wipe');
+      burst(p.x, p.y, '#80E5FF', 4);
+      if (State.L.wipeSwipes >= 4) {
+        State.L.phase = 'powder';
+        toast('Baby is clean! Tap powder puff to soothe skin.', 2.2);
+      }
+    }
+  }
+
+  function onUp(e) {
+    if (State.screen !== 'play') { State.pointer.down = false; return; }
+    e.preventDefault();
+    const p = canvasPos(e);
+    State.pointer.x = p.x; State.pointer.y = p.y;
+    const L = State.L;
+
+    if (State.level === 1 && L.phase === 'pay' && State.drag && State.drag.kind === 'coin') {
+      L.coins.forEach(coin => {
+        if (coin.paid) return;
+        if (State.drag.id === coin.id) {
+          const onTill = hitC(p.x, p.y, 350, 470, 60) || hitR(p.x, p.y, 300, 430, 95, 75);
+          const justTapped = dist(p.x, p.y, coin.homeX, coin.homeY) < 35;
+          if (onTill || justTapped) {
+            coin.paid = true;
+            coin.x = 350; coin.y = 470;
+            sfx('coin');
+            burst(350, 470, '#FFD166', 8);
+          } else {
+            coin.x = coin.homeX; coin.y = coin.homeY;
+          }
+        }
+      });
+      if (L.coins.every(c => c.paid)) {
+        sfx('ok');
+        winLevel();
+      }
+    }
+
+    State.pointer.down = false;
+    State.drag = null;
+  }
+
+  /* ---------------- DRAW LEVEL SCENES ---------------- */
+  function drawPlay() {
+    const c = ctx;
+    const L = State.L;
+    const t = State.t;
+
+    if (State.level === 1) {
+      // Real Baby Shop
+      c.fillStyle = '#CDE7F5'; c.fillRect(0, 0, VW, VH);
+      // Lights
+      for (let i = 0; i < 4; i++) {
+        const lx = 50 + i * 105;
+        c.fillStyle = 'rgba(255,255,220,0.4)';
+        c.beginPath(); c.moveTo(lx - 30, 0); c.lineTo(lx + 30, 0); c.lineTo(lx + 80, 200); c.lineTo(lx - 80, 200); c.fill();
+        c.fillStyle = '#FFF6B0'; rr(c, lx - 22, 4, 44, 10, 4);
+      }
+      // Marquee Banner
+      c.fillStyle = '#2B2D42'; c.fillRect(0, 92, VW, 28);
+      c.fillStyle = '#FFE66D'; c.font = 'bold 12px Comic Sans MS, sans-serif'; c.textAlign = 'left';
+      const msg = '  ★ FLORENCE’S REAL BABY SHOP · ONLY REAL BABIES · £3.99 EACH · 100% CUTE ★  ';
+      c.fillText(msg + msg, 10 - ((t * 45) % 800), 111);
+
+      // Floor & playmat
+      c.fillStyle = '#E8D5B0'; c.fillRect(0, 440, VW, VH - 440);
+      c.fillStyle = '#FFD166'; rr(c, 100, 320, 220, 140, 24);
+      c.fillStyle = '#FFB4D0'; rr(c, 110, 330, 200, 120, 18);
+
+      // Baby on playmat
+      drawBaby(c, L.baby.x, L.baby.y, { pose: 'sit', t: t, nappy: true, scale: 1.2 });
+
+      // Checkout Till
+      c.fillStyle = '#6C584C'; rr(c, 210, 500, 200, 90, 10);
+      c.fillStyle = '#D4A373'; rr(c, 218, 480, 184, 26, 6);
+      c.fillStyle = '#111'; rr(c, 320, 442, 70, 40, 6);
+      c.fillStyle = '#7DFFB3'; c.font = 'bold 12px Comic Sans MS, sans-serif'; c.textAlign = 'center';
+      c.fillText('47p DUE', 355, 466);
+
+      // Coins
+      if (L.phase === 'pay' || L.phase === 'won') {
+        L.coins.forEach(coin => {
+          if (coin.paid) return;
+          c.fillStyle = '#FFD166'; c.beginPath(); c.arc(coin.x, coin.y, 20, 0, Math.PI * 2); c.fill();
+          c.strokeStyle = '#D48B00'; c.lineWidth = 3; c.stroke();
+          c.fillStyle = '#8B5A2B'; c.font = 'bold 12px Comic Sans MS, sans-serif'; c.textAlign = 'center';
+          c.fillText(coin.val, coin.x, coin.y + 4.5);
+        });
+      }
+    } else if (State.level === 2) {
+      // Nappy Change table
+      c.fillStyle = '#B8E0D2'; c.fillRect(0, 0, VW, VH);
+      // Soft change mat
+      c.fillStyle = '#FFFFFF'; rr(c, 80, 260, 260, 220, 28);
+      c.fillStyle = '#CAF0F8'; rr(c, 90, 270, 240, 200, 20);
+
+      drawBaby(c, L.baby.x, L.baby.y, { pose: 'sit', t: t, nappy: !L.nappyOff || L.cleanNappyOn, scale: 1.25 });
+
+      // Wet wipe box
+      c.fillStyle = '#70D6FF'; rr(c, 40, 500, 80, 55, 12);
+      c.fillStyle = '#FFF'; c.font = 'bold 11px Comic Sans MS, sans-serif'; c.textAlign = 'center';
+      c.fillText('WIPES 🧻', 80, 532);
+
+      // Powder shaker
+      c.fillStyle = '#FFB4D0'; rr(c, 300, 495, 65, 65, 16);
+      c.fillStyle = '#FFF'; c.font = 'bold 11px Comic Sans MS, sans-serif'; c.textAlign = 'center';
+      c.fillText('POWDER 💨', 332, 532);
+    } else if (State.level === 3) {
+      // Dummy Boutique
+      c.fillStyle = '#FDE2E4'; c.fillRect(0, 0, VW, VH);
+      drawBaby(c, L.baby.x, L.baby.y, { pose: 'sit', t: t, dummy: L.dummyAttached ? State.selectedDummy : null, scale: 1.2 });
+
+      // Dummies Display Tray
+      c.fillStyle = '#FFF'; rr(c, 30, 460, 360, 165, 18);
+      c.fillStyle = '#2C221E'; c.font = 'bold 13px Comic Sans MS, sans-serif'; c.textAlign = 'center';
+      c.fillText('PICK A DUMMY / PACIFIER:', 210, 482);
+
+      DUMMIES.forEach((dMeta, idx) => {
+        const bx = 65 + (idx % 3) * 145;
+        const by = 525 + Math.floor(idx / 3) * 65;
+        c.fillStyle = dMeta.color; rr(c, bx - 55, by - 22, 110, 46, 12);
+        c.fillStyle = '#FFF'; c.font = 'bold 16px sans-serif'; c.textAlign = 'center';
+        c.fillText(dMeta.icon, bx, by);
+        c.font = 'bold 10px Comic Sans MS, sans-serif';
+        c.fillText(dMeta.name, bx, by + 16);
+      });
+    } else if (State.level === 4) {
+      // Clothes Boutique
+      c.fillStyle = '#E2ECE9'; c.fillRect(0, 0, VW, VH);
+      drawBaby(c, L.baby.x, L.baby.y, { pose: 'stand', t: t, outfit: L.outfitDressed ? State.selectedOutfit : null, dummy: State.selectedDummy, scale: 1.25 });
+
+      c.fillStyle = '#FFF'; rr(c, 30, 460, 360, 165, 18);
+      c.fillStyle = '#2C221E'; c.font = 'bold 13px Comic Sans MS, sans-serif'; c.textAlign = 'center';
+      c.fillText('CHOOSE BABY OUTFIT:', 210, 482);
+
+      OUTFITS.forEach((oMeta, idx) => {
+        const bx = 65 + (idx % 3) * 145;
+        const by = 525 + Math.floor(idx / 3) * 65;
+        c.fillStyle = oMeta.color; rr(c, bx - 55, by - 22, 110, 46, 12);
+        c.fillStyle = '#FFF'; c.font = 'bold 16px sans-serif'; c.textAlign = 'center';
+        c.fillText(oMeta.icon, bx, by);
+        c.font = 'bold 10px Comic Sans MS, sans-serif';
+        c.fillText(oMeta.name, bx, by + 16);
+      });
+    } else {
+      // Level 5: Stroller Strap & Park Sidewalk Runner
+      if (L.phase === 'strap') {
+        c.fillStyle = '#D8F3DC'; c.fillRect(0, 0, VW, VH);
+        drawBuggy(c, 210, 380, t, false);
+        drawBaby(c, 210, 350, { pose: 'sit', t: t, outfit: State.selectedOutfit, dummy: State.selectedDummy, scale: 1.1 });
+
+        c.fillStyle = '#FF5D73'; rr(c, 80, 520, 260, 50, 20);
+        c.fillStyle = '#FFF'; c.font = 'bold 15px Comic Sans MS, sans-serif'; c.textAlign = 'center';
+        c.fillText('TAP BUCKLE TO STRAP IN! 🔒', 210, 552);
+      } else {
+        // Sidewalk runner
+        c.fillStyle = '#95D5B2'; c.fillRect(0, 0, VW, VH); // Park grass
+        c.fillStyle = '#E9ECEF'; c.fillRect(60, 0, 300, VH); // Sidewalk 3 lanes
+        // Lane dividers
+        c.strokeStyle = '#CED4DA'; c.setLineDash([16, 14]); c.lineWidth = 3;
+        c.beginPath(); c.moveTo(160, 0); c.lineTo(160, VH); c.stroke();
+        c.beginPath(); c.moveTo(260, 0); c.lineTo(260, VH); c.stroke();
+        c.setLineDash([]);
+
+        const laneXs = [110, 210, 310];
+
+        // Obstacles
+        L.obstacles.forEach(o => {
+          const ox = laneXs[o.lane];
+          if (o.type === 'puddle') {
+            c.fillStyle = '#70D6FF';
+            c.beginPath(); c.ellipse(ox, o.y, 28, 16, 0, 0, Math.PI * 2); c.fill();
+          } else {
+            // Puppy dog
+            c.fillStyle = '#D4A373';
+            c.beginPath(); c.arc(ox, o.y, 18, 0, Math.PI * 2); c.fill();
+            c.fillStyle = '#FFF'; c.font = 'bold 18px sans-serif'; c.textAlign = 'center';
+            c.fillText('🐶', ox, o.y + 6);
+          }
+        });
+
+        // Collectibles
+        L.collectibles.forEach(cl => {
+          const cx = laneXs[cl.lane];
+          c.fillStyle = '#FFD166';
+          c.beginPath(); c.arc(cx, cl.y, 14, 0, Math.PI * 2); c.fill();
+          c.fillStyle = '#2C221E'; c.font = 'bold 12px sans-serif'; c.textAlign = 'center';
+          c.fillText('⭐', cx, cl.y + 4);
+        });
+
+        // Buggy with baby
+        drawBuggy(c, L.buggyX, 580, t, true);
+        drawBaby(c, L.buggyX, 550, { pose: 'sit', t: t, outfit: State.selectedOutfit, dummy: State.selectedDummy, scale: 0.95 });
+      }
+    }
+
+    // Floating Particles
+    State.particles.forEach(p => {
+      c.globalAlpha = 1 - p.age / p.life;
+      c.fillStyle = p.col;
+      c.beginPath(); c.arc(p.x, p.y, p.r, 0, Math.PI * 2); c.fill();
+      c.globalAlpha = 1;
+    });
+  }
+
+  function drawConfetti() {
+    cctx.clearRect(0, 0, VW, VH);
+    State.confetti.forEach(p => {
+      cctx.save();
+      cctx.translate(p.x, p.y);
+      cctx.rotate(p.rot);
+      cctx.fillStyle = p.col;
+      cctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+      cctx.restore();
+    });
+  }
+
+  /* ---------------- PREVIEW & DECORATIVE CANVASES ---------------- */
+  function drawTitleArt() {
+    const cv = document.getElementById('title-art');
+    if (!cv) return;
+    const c = cv.getContext('2d');
+    c.clearRect(0, 0, 360, 170);
+    c.fillStyle = '#D8F3DC'; c.fillRect(0, 0, 360, 170);
+    drawBuggy(c, 180, 95, 0, true);
+    drawBaby(c, 180, 68, { pose: 'sit', t: 0, scale: 1.05, dummy: 'star', outfit: 'dino' });
+    c.fillStyle = '#2C221E'; c.font = 'bold 12px Comic Sans MS, sans-serif'; c.textAlign = 'center';
+    c.fillText('FLORENCE’S 5 STEPS TO BABY SUCCESS!', 180, 150);
+  }
+
+  function drawIntroPreview() {
+    const cv = document.getElementById('intro-art');
+    if (!cv) return;
+    const c = cv.getContext('2d');
+    c.clearRect(0, 0, 340, 150);
+    const n = State.level;
+    if (n === 1) {
+      c.fillStyle = '#CDE7F5'; c.fillRect(0, 0, 340, 150);
+      drawBaby(c, 170, 80, { pose: 'sit', t: 0, nappy: true });
+    } else if (n === 2) {
+      c.fillStyle = '#B8E0D2'; c.fillRect(0, 0, 340, 150);
+      drawBaby(c, 170, 80, { pose: 'sit', t: 0, nappy: false });
+    } else if (n === 3) {
+      c.fillStyle = '#FDE2E4'; c.fillRect(0, 0, 340, 150);
+      drawBaby(c, 170, 80, { pose: 'sit', t: 0, dummy: 'star' });
+    } else if (n === 4) {
+      c.fillStyle = '#E2ECE9'; c.fillRect(0, 0, 340, 150);
+      drawBaby(c, 170, 80, { pose: 'stand', t: 0, outfit: 'dino' });
+    } else {
+      c.fillStyle = '#D8F3DC'; c.fillRect(0, 0, 340, 150);
+      drawBuggy(c, 170, 85, 0, true);
+      drawBaby(c, 170, 60, { pose: 'sit', t: 0, outfit: State.selectedOutfit, dummy: State.selectedDummy });
+    }
+  }
+
+  function drawTrophyArt() {
+    const cv = document.getElementById('trophy-art');
+    if (!cv) return;
+    const c = cv.getContext('2d');
+    c.clearRect(0, 0, 320, 190);
+    c.fillStyle = '#FFF6DC'; c.fillRect(0, 0, 320, 190);
+    c.fillStyle = '#FFD166'; c.beginPath(); c.arc(160, 80, 50, 0, Math.PI * 2); c.fill();
+    drawBuggy(c, 160, 95, 0, true);
+    drawBaby(c, 160, 65, { pose: 'sit', t: 0, outfit: State.selectedOutfit, dummy: State.selectedDummy, scale: 0.95 });
+    c.fillStyle = '#D48B00'; c.font = 'bold 16px Comic Sans MS, sans-serif'; c.textAlign = 'center';
+    c.fillText('🏆 GRAND PARK TROPHY 🏆', 160, 165);
+  }
+
+  function buildBabySelect() {
+    const grid = document.getElementById('baby-grid');
+    grid.innerHTML = '';
+    Object.keys(BABIES).forEach(id => {
+      const b = BABIES[id];
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'baby-card' + (State.babyId === id ? ' selected' : '');
+      card.innerHTML = '<canvas width="110" height="110"></canvas><div class="nm"></div><div class="sub"></div>';
+      card.querySelector('.nm').textContent = b.name;
+      card.querySelector('.sub').textContent = b.sub;
+      const cv = card.querySelector('canvas');
+      const c = cv.getContext('2d');
+      c.fillStyle = '#EAF6FF'; c.fillRect(0, 0, 110, 110);
+      drawBaby(c, 55, 68, { pose: 'sit', t: 0, nappy: true, scale: 1.05, b: b });
+      card.addEventListener('click', () => {
+        State.babyId = id;
+        grid.querySelectorAll('.baby-card').forEach(el => el.classList.remove('selected'));
+        card.classList.add('selected');
+        sfx('pop');
+      });
+      grid.appendChild(card);
+    });
+  }
+
+  function openIntro() {
+    const meta = LEVELS[State.level - 1];
+    document.getElementById('intro-badge').textContent = meta.badge;
+    document.getElementById('intro-title').textContent = meta.title;
+    document.getElementById('intro-desc').textContent = meta.desc;
+    showScreen('s-intro');
+    drawIntroPreview();
+  }
+
+  /* ---------------- RESIZE & LOOP ---------------- */
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    [canvas, cCanvas].forEach(cv => {
+      cv.width = VW * dpr;
+      cv.height = VH * dpr;
+      const g = cv.getContext('2d');
+      g.setTransform(dpr, 0, 0, dpr, 0, 0);
+    });
+  }
+
+  function loop(now) {
+    const t = now / 1000;
+    const dt = State.last ? Math.min(0.033, t - State.last) : 0.016;
+    State.last = t;
+    State.t += dt;
+    if (State.screen === 'play') {
+      update(dt);
+      ctx.clearRect(0, 0, VW, VH);
+      drawPlay();
+    } else {
+      ctx.clearRect(0, 0, VW, VH);
+    }
+    drawConfetti();
+    requestAnimationFrame(loop);
+  }
+
+  /* ---------------- UI EVENT LISTENERS ---------------- */
+  document.getElementById('btn-play').addEventListener('click', () => {
+    audioInit();
+    sfx('ok');
+    buildBabySelect();
+    showScreen('s-baby');
+  });
+  document.getElementById('btn-baby-back').addEventListener('click', () => showScreen('s-title'));
+  document.getElementById('btn-baby-go').addEventListener('click', () => {
+    audioInit();
+    State.level = 1;
+    openIntro();
+    sfx('ok');
+  });
+  document.getElementById('btn-intro-go').addEventListener('click', () => {
+    audioInit();
+    startLevel(State.level);
+  });
+  document.getElementById('btn-next').addEventListener('click', () => {
+    State.level++;
+    openIntro();
+    sfx('ok');
+  });
+  document.getElementById('btn-again').addEventListener('click', () => {
+    State.level = 1;
+    openIntro();
+  });
+  document.getElementById('btn-sound').addEventListener('click', function () {
+    State.sound = !State.sound;
+    this.textContent = State.sound ? '🔊' : '🔇';
+    audioInit();
+  });
+  document.getElementById('btn-music').addEventListener('click', function () {
+    State.music = !State.music;
+    this.textContent = State.music ? '🎵' : '🔇';
+    if (State.music) startBgm();
+    else stopBgm();
+  });
+  document.getElementById('btn-home').addEventListener('click', () => {
+    State.L = {};
+    showScreen('s-title');
+    document.getElementById('buggy-controls').classList.remove('on');
+  });
+
+  // Buggy Steering Buttons for Level 5
+  document.getElementById('btn-left').addEventListener('click', (e) => {
+    e.stopPropagation();
+    audioInit();
+    if (State.L.lane > 0) {
+      State.L.lane--;
+      sfx('bell');
+    }
+  });
+  document.getElementById('btn-right').addEventListener('click', (e) => {
+    e.stopPropagation();
+    audioInit();
+    if (State.L.lane < 2) {
+      State.L.lane++;
+      sfx('bell');
+    }
+  });
+
+  document.getElementById('btn-cert').addEventListener('click', () => {
+    document.getElementById('cert-modal').classList.add('open');
+    sfx('win');
+  });
+  document.getElementById('btn-cert-close').addEventListener('click', () => {
+    document.getElementById('cert-modal').classList.remove('open');
+  });
+
+  document.getElementById('trophy-art').addEventListener('click', () => {
+    rainConfetti(40);
+    sfx('win');
+  });
+
+  canvas.addEventListener('pointerdown', onDown);
+  canvas.addEventListener('pointermove', onMove);
+  canvas.addEventListener('pointerup', onUp);
+  canvas.addEventListener('pointercancel', onUp);
+  canvas.addEventListener('touchstart', onDown, { passive: false });
+  canvas.addEventListener('touchmove', onMove, { passive: false });
+  canvas.addEventListener('touchend', onUp, { passive: false });
+
+  window.addEventListener('resize', resize);
+  resize();
+  drawTitleArt();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
