@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#C77DFF">
+<title>Unicorn &amp; Horse Jump — Florence's Games</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🦄</text></svg>">
+<style>
+  :root {
+    --gold: #FFB703;
+    --coral: #FF5D73;
+    --mint: #2EC4B6;
+    --sky: #4EA8DE;
+    --purple: #7209B7;
+    --pink: #FF3366;
+    --cream: #FFFDF7;
+    --ink: #2C221E;
+    --font-display: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Marker Felt', 'Nunito', 'Segoe UI', cursive, sans-serif;
+    --font-body: 'Trebuchet MS', 'Segoe UI', -apple-system, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    background: radial-gradient(circle at 50% 15%, #E0AAFF, #9D4EDD 55%, #5A189A 100%);
+    font-family: var(--font-display);
+    color: var(--ink);
+    display: flex; align-items: center; justify-content: center;
+    user-select: none; -webkit-user-select: none;
+    touch-action: none;
+    overflow: hidden;
+  }
+  #frame {
+    position: relative;
+    width: min(100vw, calc(100vh * 420 / 740), 460px);
+    aspect-ratio: 420 / 740;
+    max-height: 100vh;
+    overflow: hidden;
+    background: #FFD6F0;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.45);
+  }
+  @media (min-width: 500px) { #frame { border-radius: 28px; } }
+  #game { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #confetti { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 30; }
+
+  .screen {
+    position: absolute; inset: 0; z-index: 10;
+    display: flex; flex-direction: column; align-items: center;
+    padding: max(20px, env(safe-area-inset-top)) 18px max(20px, env(safe-area-inset-bottom));
+    text-align: center;
+    background: linear-gradient(180deg, rgba(255,240,250,0.88), rgba(243,232,255,0.88) 60%, rgba(230,247,255,0.88));
+    animation: pop-in 0.35s cubic-bezier(.2,1.4,.4,1);
+    overflow-y: auto;
+  }
+  .hidden { display: none !important; }
+  @keyframes pop-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: none; } }
+
+  .badge {
+    display: inline-block;
+    background: var(--pink); color: #fff;
+    padding: 6px 16px; border-radius: 999px;
+    font-size: 14px; letter-spacing: 0.05em; text-transform: uppercase;
+    box-shadow: 0 3px 0 #C2124A;
+    transform: rotate(-2deg);
+  }
+  h1 { font-size: clamp(32px, 10vw, 46px); line-height: 1.02; color: var(--purple); margin: 10px 0 8px; text-shadow: 0 3px 0 #FFD6F0; }
+  h2 { font-size: clamp(24px, 7vw, 30px); line-height: 1.1; color: var(--purple); margin: 10px 0 6px; }
+  .sub { font-family: var(--font-body); color: #5E4B6E; font-size: 16px; line-height: 1.35; max-width: 340px; }
+  .spacer { flex: 1; min-height: 10px; }
+  .credit { font-size: 13px; color: #8A7896; font-family: var(--font-body); margin-top: 8px; }
+  .title-art { font-size: 74px; margin: 16px 0 0; animation: bob 2.2s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(-4deg); } 50% { transform: translateY(-10px) rotate(4deg); } }
+
+  .btn {
+    font-family: var(--font-display);
+    font-size: 20px; font-weight: bold;
+    border: none; border-radius: 18px;
+    padding: 13px 26px;
+    background: var(--gold); color: var(--ink);
+    box-shadow: 0 5px 0 #C98A00;
+    cursor: pointer; touch-action: manipulation;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+    text-decoration: none; display: inline-block;
+  }
+  .btn:active { transform: translateY(3px); box-shadow: 0 2px 0 #C98A00; }
+  .btn.big { font-size: 26px; padding: 15px 40px; }
+  .btn.purple { background: var(--purple); color: #fff; box-shadow: 0 5px 0 #4A0677; }
+  .btn.purple:active { box-shadow: 0 2px 0 #4A0677; }
+  .btn.ghost { background: rgba(255,255,255,0.85); color: var(--purple); box-shadow: 0 4px 0 rgba(114,9,183,0.25); font-size: 16px; padding: 10px 18px; }
+  .row { display: flex; gap: 10px; justify-content: center; align-items: center; flex-wrap: wrap; }
+  .col { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+
+  .pick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; width: 100%; max-width: 360px; margin: 12px 0; }
+  .pick-card {
+    background: #fff; border: 4px solid transparent; border-radius: 18px;
+    padding: 6px 4px 8px; cursor: pointer; touch-action: manipulation;
+    box-shadow: 0 4px 0 rgba(114,9,183,0.18);
+    font-family: var(--font-display); font-size: 16px; color: var(--ink);
+    display: flex; flex-direction: column; align-items: center;
+  }
+  .pick-card canvas { display: block; }
+  .pick-card.selected { border-color: var(--purple); background: #F6EDFF; }
+  .pick-card .lvl { font-size: 12px; color: #8A7896; font-family: var(--font-body); }
+  .steed-grid { grid-template-columns: 1fr 1fr; }
+
+  .name-box { width: 100%; max-width: 340px; margin: 6px 0 12px; text-align: left; }
+  .name-box label { display: block; font-size: 18px; color: var(--purple); margin-bottom: 6px; }
+  .name-box input {
+    width: 100%;
+    font-family: var(--font-display); font-size: 22px;
+    padding: 12px 14px; border-radius: 14px;
+    border: 3px solid #D7B8F3; background: #fff; color: var(--ink);
+    outline: none; user-select: text; -webkit-user-select: text;
+  }
+  .name-box input:focus { border-color: var(--purple); }
+
+  #intro-canvas, #done-canvas { margin: 8px 0; }
+  .card-text {
+    background: #fff; border-radius: 18px; padding: 12px 16px; margin: 8px 0 12px;
+    font-size: 18px; line-height: 1.3; max-width: 360px;
+    box-shadow: 0 4px 0 rgba(114,9,183,0.15);
+  }
+
+  /* HUD */
+  #hud {
+    position: absolute; z-index: 5; left: 0; right: 0;
+    top: max(10px, env(safe-area-inset-top));
+    display: flex; align-items: center; gap: 8px; padding: 0 10px;
+    pointer-events: none;
+  }
+  .chip {
+    background: rgba(255,255,255,0.9); border-radius: 999px; padding: 6px 12px;
+    font-size: 18px; font-weight: bold; box-shadow: 0 3px 0 rgba(0,0,0,0.12);
+    white-space: nowrap;
+  }
+  #hud-bar { flex: 1; height: 16px; background: rgba(255,255,255,0.75); border-radius: 999px; overflow: hidden; box-shadow: 0 3px 0 rgba(0,0,0,0.12); position: relative; }
+  #hud-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #FF595E, #FFCA3A, #8AC926, #1982C4, #9D4EDD); border-radius: 999px; transition: width 0.3s ease; }
+  #btn-sound {
+    position: absolute; z-index: 40;
+    bottom: max(12px, env(safe-area-inset-bottom)); right: 12px;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: none; background: rgba(255,255,255,0.88);
+    font-size: 22px; cursor: pointer; touch-action: manipulation;
+    box-shadow: 0 3px 0 rgba(0,0,0,0.15);
+  }
+</style>
+</head>
+<body>
+<div id="frame">
+  <canvas id="game"></canvas>
+
+  <div id="hud" class="hidden">
+    <div class="chip" id="hud-hearts">❤️❤️❤️</div>
+    <div id="hud-bar"><div id="hud-fill"></div></div>
+    <div class="chip" id="hud-score">⭐ 0</div>
+  </div>
+
+  <!-- Title -->
+  <div class="screen" id="s-title">
+    <div class="badge">🦄 Florence's Game Studio 🐴</div>
+    <div class="title-art">🦄🐴</div>
+    <h1>Unicorn &amp; Horse Jump</h1>
+    <p class="sub">Pick your rider. Give them a name. Then ride your unicorn over rainbows and your horse over hurdles!</p>
+    <div class="spacer"></div>
+    <button class="btn big purple" id="btn-play">Let's Ride! ▶</button>
+    <div class="spacer"></div>
+    <a class="btn ghost" href="index.html">← All Games</a>
+    <p class="credit">A game designed by Florence 💖</p>
+  </div>
+
+  <!-- Pick rider + name -->
+  <div class="screen hidden" id="s-rider">
+    <div class="badge">Step 1</div>
+    <h2>Pick Your Rider</h2>
+    <div class="pick-grid" id="rider-grid"></div>
+    <div class="name-box">
+      <label for="in-name">What is your rider's name?</label>
+      <input id="in-name" maxlength="12" placeholder="Type a name" autocomplete="off">
+    </div>
+    <div class="row">
+      <button class="btn ghost" id="rider-back">← Back</button>
+      <button class="btn purple" id="rider-next">Next ▶</button>
+    </div>
+  </div>
+
+  <!-- Pick unicorn or horse + name -->
+  <div class="screen hidden" id="s-steed">
+    <div class="badge">Step 2</div>
+    <h2>Unicorn or Horse?</h2>
+    <div class="pick-grid steed-grid" id="steed-grid"></div>
+    <div class="name-box">
+      <label for="in-steed" id="steed-label">Name your unicorn:</label>
+      <input id="in-steed" maxlength="12" placeholder="Sparkle" autocomplete="off">
+    </div>
+    <div class="row">
+      <button class="btn ghost" id="steed-back">← Back</button>
+      <button class="btn purple" id="steed-next">Let's Go! ▶</button>
+    </div>
+  </div>
+
+  <!-- Level intro -->
+  <div class="screen hidden" id="s-intro">
+    <div class="badge" id="intro-badge">Level 1 of 2</div>
+    <h2 id="intro-title">Rainbow Jump!</h2>
+    <canvas id="intro-canvas" width="300" height="190"></canvas>
+    <div class="name-box hidden" id="intro-name-box">
+      <label for="in-intro" id="intro-name-label">Name your horse:</label>
+      <input id="in-intro" maxlength="12" placeholder="Thunder" autocomplete="off">
+    </div>
+    <div class="card-text" id="intro-text"></div>
+    <div class="spacer"></div>
+    <button class="btn big purple" id="intro-go">Go! ▶</button>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- Level complete -->
+  <div class="screen hidden" id="s-complete">
+    <div class="badge" id="done-badge">Level 1 Complete!</div>
+    <h2 id="done-title">You did it!</h2>
+    <canvas id="done-canvas" width="300" height="190"></canvas>
+    <div class="card-text" id="done-text"></div>
+    <div class="spacer"></div>
+    <div class="col">
+      <button class="btn big purple" id="done-next">Next ▶</button>
+      <button class="btn ghost" id="done-again">🔁 Play this level again</button>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- Fail -->
+  <div class="screen hidden" id="s-fail">
+    <div class="badge">Oh no!</div>
+    <div class="title-art">💫</div>
+    <h2 id="fail-title">Bump!</h2>
+    <div class="card-text" id="fail-text"></div>
+    <div class="spacer"></div>
+    <div class="col">
+      <button class="btn big purple" id="fail-retry">🔁 Try Again</button>
+      <button class="btn ghost" id="fail-menu">Pick Unicorn or Horse</button>
+    </div>
+    <div class="spacer"></div>
+  </div>
+
+  <!-- Trophy -->
+  <div class="screen hidden" id="s-trophy">
+    <div class="badge">Both Levels Done!</div>
+    <div class="title-art" id="trophy-icon">🏆</div>
+    <h1>Champion Riders!</h1>
+    <div class="card-text" id="trophy-text"></div>
+    <div class="spacer"></div>
+    <div class="col">
+      <button class="btn big purple" id="trophy-again">🔁 Play Again</button>
+      <a class="btn ghost" href="index.html">← All Games</a>
+    </div>
+    <p class="credit">The End! A game designed by Florence 💖</p>
+  </div>
+
+  <button id="btn-sound" aria-label="Sound on or off">🔊</button>
+  <canvas id="confetti"></canvas>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  const VW = 420, VH = 740, GROUND = 610, GOAL = 20;
+  const $ = id => document.getElementById(id);
+
+  const RIDERS = [
+    { id: 'pink',   label: 'Pink Rider',   skin: '#F6CBA8', hair: '#7A3E12', shirt: '#FF5D73', pony: true },
+    { id: 'blue',   label: 'Blue Rider',   skin: '#E9B48A', hair: '#2B1A10', shirt: '#4EA8DE', pony: false },
+    { id: 'purple', label: 'Purple Rider', skin: '#FBD9BE', hair: '#F2C14E', shirt: '#9D4EDD', pony: true },
+    { id: 'green',  label: 'Green Rider',  skin: '#9C6644', hair: '#1B1B1B', shirt: '#2EC4B6', pony: false }
+  ];
+
+  const LEVELS = {
+    unicorn: { num: 1, title: 'Rainbow Jump!', animal: 'unicorn', things: 'rainbows', item: '⭐', items: 'stars', defName: 'Sparkle' },
+    horse:   { num: 2, title: 'Hurdle Jump!',  animal: 'horse',   things: 'hurdles',  item: '🍎', items: 'apples', defName: 'Thunder' }
+  };
+
+  const State = {
+    screen: 'title',
+    riderId: 'pink',
+    name: '',
+    steed: 'unicorn',
+    names: { unicorn: 'Sparkle', horse: 'Thunder' },
+    named: { unicorn: false, horse: false },
+    done: { unicorn: false, horse: false },
+    sound: true,
+    G: null
+  };
+  const rider = () => RIDERS.find(r => r.id === State.riderId) || RIDERS[0];
+  const other = k => (k === 'unicorn' ? 'horse' : 'unicorn');
+
+  // ---------- Canvas ----------
+  const cv = $('game');
+  const ctx = cv.getContext('2d');
+  let scale = 1;
+  function resize() {
+    const r = $('frame').getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cv.width = Math.max(1, Math.round(r.width * dpr));
+    cv.height = Math.max(1, Math.round(r.height * dpr));
+    scale = cv.width / VW;
+  }
+  function rr(c, x, y, w, h, r) {
+    c.beginPath();
+    if (c.roundRect) c.roundRect(x, y, w, h, r); else c.rect(x, y, w, h);
+  }
+
+  // ---------- Drawing: rider ----------
+  function drawRider(c, x, y, R, ph) {
+    y += Math.sin(ph * 2) * 1.5;
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    c.strokeStyle = '#3D405B'; c.lineWidth = 8;
+    c.beginPath(); c.moveTo(x, y); c.lineTo(x + 8, y + 18); c.lineTo(x + 4, y + 30); c.stroke();
+    c.fillStyle = '#2C221E'; rr(c, x - 2, y + 28, 14, 7, 3); c.fill();
+    c.fillStyle = R.shirt; rr(c, x - 11, y - 34, 24, 38, 9); c.fill();
+    c.strokeStyle = R.skin; c.lineWidth = 6;
+    c.beginPath(); c.moveTo(x + 6, y - 26); c.lineTo(x + 22, y - 14); c.stroke();
+    if (R.pony) {
+      c.fillStyle = R.hair;
+      c.beginPath(); c.ellipse(x - 12, y - 44 + Math.sin(ph * 2) * 2, 7, 11, -0.5, 0, Math.PI * 2); c.fill();
+    }
+    c.fillStyle = R.skin; c.beginPath(); c.arc(x + 2, y - 48, 13, 0, Math.PI * 2); c.fill();
+    c.fillStyle = R.hair; c.beginPath(); c.arc(x + 2, y - 50, 13.5, Math.PI * 0.95, Math.PI * 2.05); c.fill();
+    c.fillStyle = '#2C221E'; c.beginPath(); c.arc(x + 9, y - 47, 2, 0, Math.PI * 2); c.fill();
+    c.strokeStyle = '#2C221E'; c.lineWidth = 1.8;
+    c.beginPath(); c.arc(x + 8, y - 43, 4, 0.2, 1.4); c.stroke();
+    c.fillStyle = 'rgba(255,93,115,0.35)'; c.beginPath(); c.arc(x + 4, y - 42, 3, 0, Math.PI * 2); c.fill();
+  }
+
+  // ---------- Drawing: unicorn / horse ----------
+  const RAINBOW = ['#FF595E', '#FF924C', '#FFCA3A', '#8AC926', '#1982C4', '#9D4EDD'];
+  function legs(c, x, y, ph, air, col, line, hoof, far) {
+    const set = far ? [[-38, 0], [30, Math.PI]] : [[-28, Math.PI], [40, 0]];
+    for (const [lx, off] of set) {
+      const a = air ? (lx < 0 ? 0.75 : -0.75) : Math.sin(ph + off) * 0.55;
+      c.save(); c.translate(x + lx, y + 8); c.rotate(a);
+      c.fillStyle = col; rr(c, -5, 0, 11, 40, 5); c.fill();
+      if (line) { c.strokeStyle = line; c.lineWidth = 2; c.stroke(); }
+      c.fillStyle = hoof; rr(c, -6, 36, 13, 9, 3); c.fill();
+      c.restore();
+    }
+  }
+  function drawSteed(c, x, y, kind, ph, air) {
+    const U = kind === 'unicorn';
+    const body = U ? '#FFFFFF' : '#A0622D';
+    const shade = U ? '#E2D6F5' : '#7A4320';
+    const hoof = U ? '#FF8FB1' : '#2C221E';
+    const mane = U ? RAINBOW : ['#3B2412', '#4A2E18'];
+    c.save();
+    c.lineCap = 'round'; c.lineJoin = 'round';
+    // tail
+    mane.forEach((col, i) => {
+      c.strokeStyle = col; c.lineWidth = U ? 5 : 10;
+      c.beginPath();
+      c.moveTo(x - 44, y - 12 + i * 2);
+      c.quadraticCurveTo(x - 74, y - 6 + i * 3 + Math.sin(ph) * 4, x - 66 + i * 2, y + 30 + Math.sin(ph + 1) * 6);
+      c.stroke();
+    });
+    legs(c, x, y, ph, air, shade, null, hoof, true);
+    // body
+    c.fillStyle = body; c.strokeStyle = shade; c.lineWidth = 3;
+    c.beginPath(); c.ellipse(x, y, 50, 24, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+    // neck
+    c.beginPath(); c.moveTo(x + 22, y - 16); c.lineTo(x + 44, y - 58); c.lineTo(x + 64, y - 52); c.lineTo(x + 48, y + 4); c.closePath(); c.fill();
+    // ear
+    c.beginPath(); c.moveTo(x + 52, y - 64); c.lineTo(x + 56, y - 84); c.lineTo(x + 64, y - 66); c.closePath(); c.fill(); c.stroke();
+    // head
+    c.save(); c.translate(x + 66, y - 54); c.rotate(0.45);
+    c.beginPath(); c.ellipse(8, 0, 25, 13, 0, 0, Math.PI * 2); c.fill(); c.stroke();
+    if (!U) { c.fillStyle = '#FFFFFF'; c.beginPath(); c.ellipse(12, -6, 12, 3, 0, 0, Math.PI * 2); c.fill(); }
+    else { c.fillStyle = 'rgba(255,143,177,0.45)'; c.beginPath(); c.arc(16, 4, 4, 0, Math.PI * 2); c.fill(); }
+    c.restore();
+    // eye + nostril
+    c.fillStyle = '#2C221E';
+    c.beginPath(); c.arc(x + 66, y - 58, 3.2, 0, Math.PI * 2); c.fill();
+    c.fillStyle = '#FFFFFF'; c.beginPath(); c.arc(x + 67, y - 59, 1.1, 0, Math.PI * 2); c.fill();
+    c.fillStyle = U ? '#C9A3D9' : '#3B2412'; c.beginPath(); c.arc(x + 91, y - 42, 2, 0, Math.PI * 2); c.fill();
+    // horn
+    if (U) {
+      c.fillStyle = '#FFC94D'; c.strokeStyle = '#E09F00'; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(x + 60, y - 68); c.lineTo(x + 70, y - 66); c.lineTo(x + 80, y - 98); c.closePath(); c.fill(); c.stroke();
+      c.strokeStyle = '#FFF3C4'; c.lineWidth = 2;
+      c.beginPath(); c.moveTo(x + 64, y - 75); c.lineTo(x + 71, y - 77); c.moveTo(x + 68, y - 85); c.lineTo(x + 74, y - 87); c.stroke();
+    }
+    // mane
+    mane.forEach((col, i) => {
+      c.strokeStyle = col; c.lineWidth = U ? 5 : 9;
+      c.beginPath();
+      c.moveTo(x + 50 - i * 2, y - 64 + i * 2);
+      c.quadraticCurveTo(x + 32 - i * 4 + Math.sin(ph) * 2, y - 44, x + 20 - i * 3, y - 16 + i);
+      c.stroke();
+    });
+    legs(c, x, y, ph, air, body, U ? shade : null, hoof, false);
+    c.restore();
+  }
+
+  // ---------- Drawing: world ----------
+  const clouds = [0, 1, 2, 3, 4].map(i => ({ x: i * 120 + 20, y: 70 + ((i * 53) % 150), s: 0.7 + (i % 3) * 0.25 }));
+  function cloud(x, y, s) {
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.beginPath();
+    ctx.arc(x, y, 22 * s, 0, Math.PI * 2);
+    ctx.arc(x + 24 * s, y - 10 * s, 26 * s, 0, Math.PI * 2);
+    ctx.arc(x + 50 * s, y, 20 * s, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  function hills(off, baseY, amp, col, freq) {
+    ctx.fillStyle = col;
+    ctx.beginPath(); ctx.moveTo(0, GROUND);
+    for (let x = 0; x <= VW; x += 10) ctx.lineTo(x, baseY - (Math.sin((x + off) * freq) + 1) * amp * 0.5);
+    ctx.lineTo(VW, GROUND); ctx.closePath(); ctx.fill();
+  }
+  function drawWorld(kind, d) {
+    const U = kind === 'unicorn';
+    const g = ctx.createLinearGradient(0, 0, 0, GROUND);
+    if (U) { g.addColorStop(0, '#FFC8EC'); g.addColorStop(0.5, '#E2C6FF'); g.addColorStop(1, '#C7ECFF'); }
+    else { g.addColorStop(0, '#6EC6FF'); g.addColorStop(1, '#DDF4FF'); }
+    ctx.fillStyle = g; ctx.fillRect(0, 0, VW, VH);
+    // sun
+    ctx.fillStyle = U ? 'rgba(255,255,255,0.75)' : '#FFE066';
+    ctx.beginPath(); ctx.arc(340, 130, 36, 0, Math.PI * 2); ctx.fill();
+    // faint big rainbow on level 1
+    if (U) {
+      ctx.globalAlpha = 0.28;
+      RAINBOW.forEach((col, i) => { ctx.strokeStyle = col; ctx.lineWidth = 12; ctx.beginPath(); ctx.arc(210, 470, 230 - i * 12, Math.PI, 0); ctx.stroke(); });
+      ctx.globalAlpha = 1;
+    }
+    for (const c of clouds) {
+      const w = VW + 200;
+      const x = (((c.x - d * 0.15 * c.s) % w) + w) % w - 100;
+      cloud(x, c.y, c.s);
+    }
+    hills(d * 0.3, GROUND - 90, 70, U ? '#D8F5DD' : '#9AD88E', 0.011);
+    hills(d * 0.55, GROUND - 40, 45, U ? '#B5EFC2' : '#79C66C', 0.019);
+    // fence on level 2
+    if (!U) {
+      const step = 60, off = (d * 0.8) % step;
+      ctx.fillStyle = '#FFFFFF';
+      for (let x = -off; x < VW + step; x += step) ctx.fillRect(x, GROUND - 40, 7, 40);
+      ctx.fillRect(0, GROUND - 34, VW, 5);
+      ctx.fillRect(0, GROUND - 20, VW, 5);
+    }
+    // ground
+    ctx.fillStyle = U ? '#8EE59B' : '#6CC060';
+    ctx.fillRect(0, GROUND, VW, VH - GROUND);
+    ctx.fillStyle = U ? '#6FD27F' : '#58A84C';
+    ctx.fillRect(0, GROUND, VW, 8);
+    if (!U) { ctx.fillStyle = '#D9B37A'; ctx.fillRect(0, GROUND + 20, VW, 54); ctx.fillStyle = '#C79E63'; ctx.fillRect(0, GROUND + 20, VW, 5); }
+    // ground details
+    const k0 = Math.floor(d / 70);
+    for (let k = k0; k < k0 + 8; k++) {
+      const x = k * 70 - d;
+      const yy = GROUND + 92 + ((k * 37) % 30);
+      if (U) {
+        ctx.fillStyle = ['#FF8FB1', '#FFE066', '#C77DFF'][((k % 3) + 3) % 3];
+        for (let p = 0; p < 5; p++) { ctx.beginPath(); ctx.arc(x + Math.cos(p * 1.26) * 6, yy + Math.sin(p * 1.26) * 6, 4, 0, Math.PI * 2); ctx.fill(); }
+        ctx.fillStyle = '#FFFFFF'; ctx.beginPath(); ctx.arc(x, yy, 3, 0, Math.PI * 2); ctx.fill();
+      } else {
+        ctx.strokeStyle = '#4E9A43'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(x, yy); ctx.lineTo(x - 4, yy - 10); ctx.moveTo(x + 4, yy); ctx.lineTo(x + 6, yy - 12); ctx.moveTo(x + 8, yy); ctx.lineTo(x + 14, yy - 9); ctx.stroke();
+      }
+    }
+  }
+  function drawRainbowObs(o) {
+    const cx = o.x + o.r, band = o.r / 8;
+    RAINBOW.forEach((col, i) => {
+      ctx.strokeStyle = col; ctx.lineWidth = band + 0.5;
+      ctx.beginPath(); ctx.arc(cx, GROUND, o.r - band * (i + 0.5), Math.PI, 0); ctx.stroke();
+    });
+    ctx.fillStyle = '#FFFFFF';
+    [o.x + band * 3, o.x + o.w - band * 3].forEach(px => {
+      ctx.beginPath(); ctx.arc(px - 8, GROUND - 2, 10, 0, Math.PI * 2); ctx.arc(px + 6, GROUND - 6, 12, 0, Math.PI * 2); ctx.arc(px + 16, GROUND - 1, 8, 0, Math.PI * 2); ctx.fill();
+    });
+  }
+  function drawHurdle(o) {
+    const x = o.x, h = o.h;
+    const stand = sx => {
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(sx, GROUND - h - 8, 10, h + 8);
+      ctx.fillStyle = '#E63946';
+      for (let yy = GROUND - h - 8; yy < GROUND; yy += 20) ctx.fillRect(sx, yy, 10, 10);
+      ctx.fillStyle = '#2C221E'; ctx.fillRect(sx - 4, GROUND - 4, 18, 4);
+    };
+    stand(x); stand(x + o.w - 10);
+    [h, h * 0.62, h * 0.3].forEach((ph, i) => {
+      const y = GROUND - ph;
+      ctx.fillStyle = '#FFFFFF'; ctx.fillRect(x + 4, y, o.w - 8, 8);
+      ctx.fillStyle = i === 0 ? '#E63946' : '#1982C4';
+      for (let xx = x + 8; xx < x + o.w - 8; xx += 16) ctx.fillRect(xx, y, 8, 8);
+    });
+  }
+  function drawFinish(f) {
+    const x = f.x;
+    ctx.fillStyle = '#7209B7'; ctx.fillRect(x, GROUND - 230, 10, 230); ctx.fillRect(x + 140, GROUND - 230, 10, 230);
+    ctx.fillStyle = '#FFFFFF'; rr(ctx, x - 6, GROUND - 268, 162, 46, 10); ctx.fill();
+    for (let i = 0; i < 16; i++) for (let j = 0; j < 2; j++) {
+      if ((i + j) % 2) { ctx.fillStyle = '#2C221E'; ctx.fillRect(x + i * 9.4, GROUND - 236 + j * 7, 9.4, 7); }
+    }
+    ctx.fillStyle = '#FF3366'; ctx.font = 'bold 24px ' + getComputedStyle(document.body).fontFamily;
+    ctx.textAlign = 'center'; ctx.fillText('FINISH', x + 75, GROUND - 240);
+    ctx.font = '28px sans-serif'; ctx.fillText('🏁', x + 5, GROUND - 270); ctx.fillText('🏁', x + 145, GROUND - 270);
+  }
+
+  // ---------- Game ----------
+  function newGame(kind) {
+    return {
+      kind, x: 120, y: GROUND - 56, vy: 0, onGround: true, jumps: 0,
+      hearts: 3, inv: 0, score: 0, speed: 5.5, dist: 0, nextAt: 380,
+      spawned: 0, passed: 0, obs: [], items: [], parts: [], finish: null,
+      won: false, dead: false, phase: 0, t: 0, hint: 200, shake: 0
+    };
+  }
+  function spawnObstacle(G) {
+    let o;
+    if (G.kind === 'unicorn') { const r = 36 + Math.random() * 16; o = { type: 'rainbow', x: VW + 40, r, w: r * 2, h: r * 0.92, inset: r * 0.3 }; }
+    else { const h = 52 + Math.random() * 30; o = { type: 'hurdle', x: VW + 40, w: 56, h, inset: 8 }; }
+    G.obs.push(o);
+    G.spawned++;
+    if (Math.random() < 0.6) {
+      for (let i = 0; i < 3; i++) G.items.push({ x: o.x + o.w / 2 + (i - 1) * 40, y: GROUND - o.h - 62 - (i === 1 ? 22 : 0), got: false });
+    } else {
+      const gx = o.x + o.w + 130;
+      for (let i = 0; i < 3; i++) G.items.push({ x: gx + i * 42, y: GROUND - 80, got: false });
+    }
+    G.nextAt = G.dist + 340 + Math.random() * 200 + G.speed * 10;
+  }
+  function jump() {
+    const G = State.G;
+    if (!G || G.dead || G.won) return;
+    G.hint = 0;
+    if (G.onGround) { G.vy = -15.5; G.onGround = false; G.jumps = 1; sfx('jump'); }
+    else if (G.jumps < 2) { G.vy = -13; G.jumps = 2; sfx('jump2'); puff(G, 8); }
+  }
+  function puff(G, n) {
+    for (let i = 0; i < n; i++) {
+      G.parts.push({
+        x: G.x - 30 + Math.random() * 40, y: G.y + 50, vx: -Math.random() * 2, vy: -Math.random() * 2,
+        life: 30, c: G.kind === 'unicorn' ? RAINBOW[i % RAINBOW.length] : '#D9B37A', s: 3 + Math.random() * 4
+      });
+    }
+  }
+  function hurt(G) {
+    G.hearts--;
+    G.inv = 90;
+    G.shake = 12;
+    sfx('hit'); vibrate(90);
+    updateHud();
+    if (G.hearts <= 0) {
+      G.dead = true;
+      setTimeout(showFail, 800);
+    }
+  }
+  function update(dt) {
+    const G = State.G;
+    if (!G || G.dead) return;
+    G.t += dt;
+    G.phase += 0.28 * dt;
+    if (G.hint > 0) G.hint -= dt;
+    G.speed = Math.min(7.5, 5.5 + G.passed * 0.1);
+    const sp = G.speed * dt;
+    G.dist += sp;
+    if (G.spawned < GOAL && G.dist >= G.nextAt) spawnObstacle(G);
+    else if (G.spawned >= GOAL && !G.finish && G.dist >= G.nextAt) G.finish = { x: VW + 60 };
+
+    G.vy += 0.75 * dt;
+    G.y += G.vy * dt;
+    const gy = GROUND - 56;
+    if (G.y >= gy) {
+      G.y = gy; G.vy = 0;
+      if (!G.onGround) { G.onGround = true; G.jumps = 0; puff(G, 5); }
+    }
+
+    for (const o of G.obs) {
+      o.x -= sp;
+      if (!o.passed && o.x + o.w < G.x - 44) { o.passed = true; G.passed++; updateHud(); }
+    }
+    G.obs = G.obs.filter(o => o.x + o.w > -60);
+
+    for (const it of G.items) {
+      it.x -= sp;
+      if (!it.got && Math.abs(it.x - (G.x + 10)) < 48 && Math.abs(it.y - G.y) < 56) {
+        it.got = true; G.score++; sfx('coin'); updateHud();
+        for (let i = 0; i < 6; i++) G.parts.push({ x: it.x, y: it.y, vx: (Math.random() - 0.5) * 5, vy: (Math.random() - 0.5) * 5, life: 24, c: G.kind === 'unicorn' ? '#FFE066' : '#FF5D73', s: 4 });
+      }
+    }
+    G.items = G.items.filter(it => it.x > -40 && !it.got);
+
+    if (G.inv > 0) G.inv -= dt;
+    else if (!G.won) {
+      const pl = G.x - 38, pr = G.x + 46, pb = G.y + 52;
+      for (const o of G.obs) {
+        if (o.hit) continue;
+        if (pr > o.x + o.inset && pl < o.x + o.w - o.inset && pb > GROUND - o.h + 8) { o.hit = true; hurt(G); break; }
+      }
+    }
+
+    if (G.finish) {
+      G.finish.x -= sp;
+      if (!G.won && G.finish.x + 75 < G.x) win();
+    }
+
+    if (G.kind === 'unicorn' && Math.random() < 0.6 * dt) {
+      G.parts.push({ x: G.x - 50, y: G.y - 10 + Math.random() * 20, vx: -1.5, vy: (Math.random() - 0.5), life: 36, c: RAINBOW[Math.floor(Math.random() * 6)], s: 3 + Math.random() * 3 });
+    }
+    for (const p of G.parts) { p.x += p.vx * dt - sp * 0.5; p.y += p.vy * dt; p.life -= dt; }
+    G.parts = G.parts.filter(p => p.life > 0);
+    if (G.shake > 0) G.shake -= dt;
+  }
+
+  let menuDist = 0;
+  function draw() {
+    ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    const G = State.G;
+    const kind = G ? G.kind : State.steed;
+    if (G && G.shake > 0) ctx.translate((Math.random() - 0.5) * G.shake, (Math.random() - 0.5) * G.shake);
+    drawWorld(kind, G ? G.dist : menuDist);
+    if (!G) return;
+    for (const o of G.obs) (o.type === 'rainbow' ? drawRainbowObs : drawHurdle)(o);
+    if (G.finish) drawFinish(G.finish);
+    ctx.font = '30px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    const item = LEVELS[G.kind].item;
+    for (const it of G.items) ctx.fillText(item, it.x, it.y + Math.sin(G.t * 0.1 + it.x * 0.05) * 4);
+    ctx.textBaseline = 'alphabetic';
+    for (const p of G.parts) {
+      ctx.globalAlpha = Math.max(0, p.life / 36);
+      ctx.fillStyle = p.c; ctx.beginPath(); ctx.arc(p.x, p.y, p.s, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+    // shadow
+    const lift = (GROUND - 56) - G.y;
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.beginPath(); ctx.ellipse(G.x + 4, GROUND + 2, Math.max(20, 52 - lift * 0.15), 7, 0, 0, Math.PI * 2); ctx.fill();
+    if (!(G.inv > 0 && Math.floor(G.inv / 5) % 2 === 0)) {
+      drawSteed(ctx, G.x, G.y, G.kind, G.phase, !G.onGround);
+      drawRider(ctx, G.x - 8, G.y - 22, rider(), G.phase);
+    }
+    if (G.hint > 0) {
+      ctx.globalAlpha = Math.min(1, G.hint / 40);
+      ctx.fillStyle = 'rgba(255,255,255,0.92)'; rr(ctx, 45, 250, 330, 84, 22); ctx.fill();
+      ctx.fillStyle = '#7209B7'; ctx.textAlign = 'center';
+      ctx.font = 'bold 28px ' + getComputedStyle(document.body).fontFamily;
+      ctx.fillText('Tap to jump! 👆', 210, 286);
+      ctx.font = '16px ' + getComputedStyle(document.body).fontFamily;
+      ctx.fillText('Tap again in the air = double jump', 210, 314);
+      ctx.globalAlpha = 1;
+    }
+  }
+
+  let last = 0;
+  function loop(t) {
+    const dt = last ? Math.min((t - last) / 16.667, 3) : 1;
+    last = t;
+    if (State.G) update(dt); else menuDist += 1.2 * dt;
+    draw();
+    requestAnimationFrame(loop);
+  }
+
+  // ---------- Audio ----------
+  let actx = null;
+  function audioInit() {
+    try {
+      if (!actx) { const AC = window.AudioContext || window.webkitAudioContext; if (AC) actx = new AC(); }
+      else if (actx.state === 'suspended') actx.resume();
+    } catch (e) { actx = null; }
+  }
+  function beep(freq, dur, type, vol, pitchEnd, delay) {
+    if (!State.sound || !actx) return;
+    try {
+      const t = actx.currentTime + (delay || 0);
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || 'sine';
+      o.frequency.setValueAtTime(freq, t);
+      if (pitchEnd) o.frequency.exponentialRampToValueAtTime(pitchEnd, t + dur);
+      g.gain.setValueAtTime(vol || 0.12, t);
+      g.gain.exponentialRampToValueAtTime(0.001, t + dur);
+      o.connect(g); g.connect(actx.destination);
+      o.start(t); o.stop(t + dur + 0.02);
+    } catch (e) {}
+  }
+  function sfx(k) {
+    if (k === 'tap') beep(660, 0.08, 'triangle', 0.12);
+    else if (k === 'jump') beep(440, 0.16, 'square', 0.07, 880);
+    else if (k === 'jump2') beep(660, 0.16, 'square', 0.07, 1320);
+    else if (k === 'coin') { beep(988, 0.08, 'triangle', 0.12); beep(1319, 0.12, 'triangle', 0.12, 0, 0.07); }
+    else if (k === 'hit') beep(180, 0.32, 'sawtooth', 0.14, 60);
+    else if (k === 'win') { [523, 659, 784, 1047].forEach((f, i) => beep(f, 0.25, 'triangle', 0.16, 0, i * 0.13)); beep(1319, 0.5, 'sine', 0.14, 0, 0.55); }
+    else if (k === 'sad') { [392, 349, 311, 262].forEach((f, i) => beep(f, 0.25, 'triangle', 0.12, 0, i * 0.18)); }
+  }
+  const MELODY = [523, 659, 784, 659, 587, 698, 880, 698, 523, 659, 784, 1047, 988, 784, 659, 587];
+  let mi = 0;
+  setInterval(() => {
+    const G = State.G;
+    if (!G || G.dead || G.won || !State.sound || !actx) return;
+    const f = MELODY[mi % MELODY.length] * (G.kind === 'horse' ? 0.75 : 1);
+    beep(f, 0.18, 'triangle', 0.035);
+    if (mi % 2 === 0) beep(f / 4, 0.2, 'sine', 0.05);
+    mi++;
+  }, 210);
+  function vibrate(ms) { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) {} }
+
+  // ---------- HUD ----------
+  function updateHud() {
+    const G = State.G;
+    if (!G) return;
+    let h = '';
+    for (let i = 0; i < 3; i++) h += i < G.hearts ? '❤️' : '🤍';
+    $('hud-hearts').textContent = h;
+    $('hud-score').textContent = LEVELS[G.kind].item + ' ' + G.score;
+    $('hud-fill').style.width = Math.min(100, (G.passed / GOAL) * 100) + '%';
+  }
+
+  // ---------- Screens ----------
+  function showScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+    if (id) $(id).classList.remove('hidden');
+    $('hud').classList.toggle('hidden', !!id);
+    State.screen = id || 'play';
+  }
+  function sizedCanvas(c, w, h) {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    c.width = w * dpr; c.height = h * dpr;
+    c.style.width = w + 'px'; c.style.height = h + 'px';
+    const x = c.getContext('2d');
+    x.setTransform(dpr, 0, 0, dpr, 0, 0);
+    x.clearRect(0, 0, w, h);
+    return x;
+  }
+  function drawPair(c, w, h, kind) {
+    const x = sizedCanvas(c, w, h);
+    const s = Math.min(w / 212, h / 165);
+    x.save();
+    x.translate((w - 212 * s) / 2, (h - 165 * s) / 2);
+    x.scale(s, s);
+    drawSteed(x, 90, 108, kind, 1, false);
+    drawRider(x, 82, 86, rider(), 1);
+    x.restore();
+  }
+
+  function buildRiderGrid() {
+    const grid = $('rider-grid');
+    grid.innerHTML = '';
+    RIDERS.forEach(R => {
+      const b = document.createElement('button');
+      b.className = 'pick-card' + (R.id === State.riderId ? ' selected' : '');
+      const c = document.createElement('canvas');
+      const x = sizedCanvas(c, 110, 104);
+      drawRider(x, 54, 64, R, 0);
+      const l = document.createElement('div');
+      l.textContent = R.label;
+      b.appendChild(c); b.appendChild(l);
+      b.addEventListener('click', () => {
+        audioInit(); sfx('tap');
+        State.riderId = R.id;
+        grid.querySelectorAll('.pick-card').forEach(e => e.classList.remove('selected'));
+        b.classList.add('selected');
+      });
+      grid.appendChild(b);
+    });
+  }
+  function buildSteedGrid() {
+    const grid = $('steed-grid');
+    grid.innerHTML = '';
+    ['unicorn', 'horse'].forEach(k => {
+      const L = LEVELS[k];
+      const b = document.createElement('button');
+      b.className = 'pick-card' + (k === State.steed ? ' selected' : '');
+      const c = document.createElement('canvas');
+      drawPair(c, 160, 124, k);
+      const l = document.createElement('div');
+      l.textContent = (k === 'unicorn' ? '🦄 Unicorn' : '🐴 Horse');
+      const s = document.createElement('div');
+      s.className = 'lvl';
+      s.textContent = 'Level ' + L.num + ': ' + L.title.replace('!', '');
+      b.appendChild(c); b.appendChild(l); b.appendChild(s);
+      b.addEventListener('click', () => {
+        audioInit(); sfx('tap');
+        saveSteedName();
+        State.steed = k;
+        grid.querySelectorAll('.pick-card').forEach(e => e.classList.remove('selected'));
+        b.classList.add('selected');
+        fillSteedName();
+      });
+      grid.appendChild(b);
+    });
+    fillSteedName();
+  }
+  function fillSteedName() {
+    const k = State.steed;
+    $('steed-label').textContent = 'Name your ' + k + ':';
+    $('in-steed').placeholder = LEVELS[k].defName;
+    $('in-steed').value = State.named[k] ? State.names[k] : '';
+  }
+  function saveSteedName() {
+    const v = $('in-steed').value.trim();
+    if (v) { State.names[State.steed] = v; State.named[State.steed] = true; }
+  }
+
+  function openIntro(kind) {
+    State.steed = kind;
+    const L = LEVELS[kind];
+    $('intro-badge').textContent = 'Level ' + L.num + ' of 2';
+    $('intro-title').textContent = L.title;
+    drawPair($('intro-canvas'), 300, 190, kind);
+    const needName = !State.named[kind];
+    $('intro-name-box').classList.toggle('hidden', !needName);
+    if (needName) {
+      $('intro-name-label').textContent = 'Name your ' + kind + ':';
+      $('in-intro').placeholder = L.defName;
+      $('in-intro').value = '';
+    }
+    introText();
+    showScreen('s-intro');
+  }
+  function introText() {
+    const kind = State.steed, L = LEVELS[kind];
+    const animalName = State.named[kind] ? State.names[kind] : ($('in-intro').value.trim() || L.defName);
+    $('intro-text').textContent = (State.name || 'You') + ' and ' + animalName + ' the ' + kind +
+      ' must jump over the ' + L.things + '! Collect the ' + L.items + ' ' + L.item + '. Tap to jump. Tap again in the air to jump higher!';
+  }
+  function startLevel(kind) {
+    State.steed = kind;
+    State.G = newGame(kind);
+    mi = 0;
+    updateHud();
+    showScreen(null);
+  }
+  function win() {
+    const G = State.G;
+    G.won = true;
+    State.done[G.kind] = true;
+    sfx('win'); vibrate([30, 60, 30]);
+    confetti();
+    setTimeout(showComplete, 1100);
+  }
+  function showComplete() {
+    const G = State.G;
+    if (!G) return;
+    const kind = G.kind, L = LEVELS[kind];
+    $('done-badge').textContent = 'Level ' + L.num + ' Complete!';
+    $('done-title').textContent = 'You did it!';
+    drawPair($('done-canvas'), 300, 190, kind);
+    $('done-text').textContent = (State.name || 'You') + ' and ' + State.names[kind] + ' jumped over all ' + GOAL + ' ' + L.things +
+      '! You got ' + G.score + ' ' + L.items + ' ' + L.item + '.';
+    const o = other(kind);
+    $('done-next').textContent = State.done[o]
+      ? '🏆 Get Your Trophy!'
+      : 'Next: Level ' + LEVELS[o].num + ' with a ' + o + (o === 'horse' ? ' 🐴' : ' 🦄');
+    State.G = null;
+    showScreen('s-complete');
+  }
+  function showFail() {
+    const G = State.G;
+    if (!G) return;
+    const L = LEVELS[G.kind];
+    $('fail-title').textContent = 'Bump! Bump! Bump!';
+    $('fail-text').textContent = State.names[G.kind] + ' bumped into too many ' + L.things + '. Have a carrot and try again! 🥕';
+    sfx('sad');
+    State.G = null;
+    showScreen('s-fail');
+  }
+  function showTrophy() {
+    $('trophy-text').textContent = (State.name || 'You') + ', ' + State.names.unicorn + ' the unicorn and ' + State.names.horse +
+      ' the horse jumped over every rainbow and every hurdle. You are Champion Riders!';
+    showScreen('s-trophy');
+    sfx('win');
+    confetti();
+  }
+
+  // ---------- Confetti ----------
+  const cf = $('confetti'), cfx = cf.getContext('2d');
+  let cparts = [], craf = 0;
+  function confetti() {
+    const r = $('frame').getBoundingClientRect();
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    cf.width = r.width * dpr; cf.height = r.height * dpr;
+    cfx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    const W = r.width, H = r.height;
+    const cols = ['#FF5D73', '#FFB703', '#2EC4B6', '#4EA8DE', '#7209B7', '#FF3366'];
+    cparts = [];
+    for (let i = 0; i < 130; i++) cparts.push({ x: Math.random() * W, y: -20 - Math.random() * 220, vx: (Math.random() - 0.5) * 2.4, vy: 2 + Math.random() * 3, r: Math.random() * 3, vr: (Math.random() - 0.5) * 0.3, s: 6 + Math.random() * 6, c: cols[i % cols.length] });
+    cancelAnimationFrame(craf);
+    const t0 = performance.now();
+    (function tick(t) {
+      cfx.clearRect(0, 0, W, H);
+      cparts.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.r += p.vr; p.vy += 0.03;
+        cfx.save(); cfx.translate(p.x, p.y); cfx.rotate(p.r);
+        cfx.fillStyle = p.c; cfx.fillRect(-p.s / 2, -p.s / 4, p.s, p.s / 2);
+        cfx.restore();
+      });
+      if (t - t0 < 4000) craf = requestAnimationFrame(tick); else cfx.clearRect(0, 0, W, H);
+    })(t0);
+  }
+
+  // ---------- Buttons & input ----------
+  $('btn-play').addEventListener('click', () => { audioInit(); sfx('tap'); buildRiderGrid(); $('in-name').value = State.name; showScreen('s-rider'); });
+  $('rider-back').addEventListener('click', () => { sfx('tap'); showScreen('s-title'); });
+  $('rider-next').addEventListener('click', () => {
+    audioInit(); sfx('tap');
+    State.name = $('in-name').value.trim() || 'Rider';
+    buildSteedGrid();
+    showScreen('s-steed');
+  });
+  $('steed-back').addEventListener('click', () => { sfx('tap'); saveSteedName(); showScreen('s-rider'); });
+  $('steed-next').addEventListener('click', () => {
+    audioInit(); sfx('tap');
+    const k = State.steed;
+    State.names[k] = $('in-steed').value.trim() || LEVELS[k].defName;
+    State.named[k] = true;
+    openIntro(k);
+  });
+  $('in-intro').addEventListener('input', introText);
+  $('intro-go').addEventListener('click', () => {
+    audioInit(); sfx('tap');
+    const k = State.steed;
+    if (!State.named[k]) {
+      State.names[k] = $('in-intro').value.trim() || LEVELS[k].defName;
+      State.named[k] = true;
+    }
+    startLevel(k);
+  });
+  $('done-next').addEventListener('click', () => {
+    audioInit(); sfx('tap');
+    const o = other(State.steed);
+    if (State.done[o]) showTrophy(); else openIntro(o);
+  });
+  $('done-again').addEventListener('click', () => { audioInit(); sfx('tap'); startLevel(State.steed); });
+  $('fail-retry').addEventListener('click', () => { audioInit(); sfx('tap'); startLevel(State.steed); });
+  $('fail-menu').addEventListener('click', () => { audioInit(); sfx('tap'); buildSteedGrid(); showScreen('s-steed'); });
+  $('trophy-again').addEventListener('click', () => {
+    audioInit(); sfx('tap');
+    State.done = { unicorn: false, horse: false };
+    buildRiderGrid(); $('in-name').value = State.name === 'Rider' ? '' : State.name;
+    showScreen('s-rider');
+  });
+  $('btn-sound').addEventListener('click', () => {
+    State.sound = !State.sound;
+    $('btn-sound').textContent = State.sound ? '🔊' : '🔇';
+    if (State.sound) { audioInit(); sfx('tap'); }
+  });
+
+  cv.addEventListener('pointerdown', e => {
+    if (State.screen !== 'play') return;
+    e.preventDefault();
+    audioInit();
+    jump();
+  }, { passive: false });
+  window.addEventListener('keydown', e => {
+    if (State.screen !== 'play') return;
+    if (e.code === 'Space' || e.code === 'ArrowUp' || e.code === 'KeyW') { e.preventDefault(); audioInit(); jump(); }
+  });
+  window.addEventListener('resize', resize);
+
+  resize();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
