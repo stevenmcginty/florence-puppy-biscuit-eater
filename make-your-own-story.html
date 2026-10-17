@@ -49,11 +49,11 @@
     user-select: none; -webkit-user-select: none;
     overflow: hidden;
   }
+  /* A fixed 420×740 page, scaled by fitFrame() to fill any window at any browser zoom. */
   #frame {
-    position: relative;
-    width: min(100vw, calc(100vh * 420 / 740), 460px);
-    aspect-ratio: 420 / 740;
-    max-height: 100vh;
+    position: fixed; left: 50%; top: 50%;
+    width: 420px; height: 740px;
+    transform: translate(-50%, -50%) scale(var(--k, 1));
     background: var(--grain), linear-gradient(180deg, var(--page) 0%, var(--soft) 100%);
     overflow: hidden;
     box-shadow: 0 20px 60px rgba(0,0,0,0.45);
@@ -372,7 +372,7 @@
   #frame[data-mood="X"] .story-title { font-family: var(--font-body); letter-spacing: -.01em; }
   #frame[data-mood="X"] .page { padding-top: 40px; }
 
-  #confetti { position: absolute; inset: 0; pointer-events: none; z-index: 15; }
+  #confetti { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 15; }
 
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -1045,9 +1045,9 @@
   const cx = cv.getContext('2d');
   let parts = [], raf = 0;
   function sizeCanvas() {
-    const r = frame.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    cv.width = r.width * dpr; cv.height = r.height * dpr;
+    const k = parseFloat(frame.style.getPropertyValue('--k')) || 1;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2) * k;
+    cv.width = frame.clientWidth * dpr; cv.height = frame.clientHeight * dpr;
     cx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
   function stopConfetti() { cancelAnimationFrame(raf); parts = []; cx.clearRect(0, 0, cv.width, cv.height); }
@@ -1107,7 +1107,15 @@
     $('btn-sound').textContent = State.sound ? '🔊' : '🔇';
     if (State.sound) { audioInit(); sfx('tap'); }
   });
-  window.addEventListener('resize', sizeCanvas);
+  // ---------- Fit to screen ----------
+  // Scale the whole page to the window, so a zoomed-out browser or a big laptop screen never leaves it tiny.
+  function fitFrame() {
+    const k = Math.min(window.innerWidth / 420, window.innerHeight / 740);
+    frame.style.setProperty('--k', k);
+    sizeCanvas();
+  }
+  window.addEventListener('resize', fitFrame);
+  fitFrame();
 })();
 </script>
 </body>
